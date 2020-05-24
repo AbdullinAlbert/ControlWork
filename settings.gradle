@@ -1,0 +1,2 @@
+rootProject.name='ControlWork'
+include ':app'

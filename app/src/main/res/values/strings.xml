@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Control Your Work</string>
+    <string name="add_data">Добавить данные</string>
+    <string name="reports">Отчёты</string>
+    <string name="old_data">Устаревшие данные</string>
+    <string name="add_employer">Сотрудник:</string>
+    <string name="hint_for_add_empl">Выбери из списка или добавь нового</string>
+    <string name="add_firm">Фирма:</string>
+    <string name="add_place_of_work">Место работы:</string>
+    <string name="add_type_of_work">Тип работы:</string>
+    <string name="add_date">Дата:</string>
+    <string name="add_result">Результат:</string>
+    <string name="button_add_data">Добавить</string>
+    <string name="hint_for_add_firm">Выбери из списка или добавь новую</string>
+    <string name="hint_for_add_place_of_work">Выбери из списка или добавь новое</string>
+    <string name="hint_for_type_of_work">Выбери из списка или добавь новый</string>
+    <string name="hint_for_needless">Необязательное поле</string>
+    <string name="add_remark">Примечание:</string>
+</resources>
