@@ -9,12 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FillNewData"
-            android:windowSoftInputMode="stateHidden"
-            android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".ListOfEmployers_Activity"
+            android:label="Список сотрудников"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".FillNewData_Activity"
+            android:label="Добавьте результат работы"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

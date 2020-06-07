@@ -2,10 +2,10 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rootscroll"
+    android:id="@+id/AFNDRootScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FillNewData">
+    tools:context=".FillNewData_Activity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
             android:text="@string/add_employer" />
 
         <EditText
-            android:id="@+id/editText2"
+            android:id="@+id/add_empl_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -38,7 +38,7 @@
             android:text="@string/add_firm" />
 
         <EditText
-            android:id="@+id/editText3"
+            android:id="@+id/add_firm_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -56,7 +56,7 @@
             android:text="@string/add_place_of_work" />
 
         <EditText
-            android:id="@+id/editText4"
+            android:id="@+id/add_placeOfWork_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -74,7 +74,7 @@
             android:text="@string/add_type_of_work" />
 
         <EditText
-            android:id="@+id/editText5"
+            android:id="@+id/add_typeOfWork_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -90,10 +90,10 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:text="@string/add_date"
-            android:labelFor="@id/editText6"/>
+            android:labelFor="@id/add_date_editText"/>
 
         <EditText
-            android:id="@+id/editText6"
+            android:id="@+id/add_date_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -108,10 +108,10 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:text="@string/add_result"
-            android:labelFor="@id/editText7"/>
+            android:labelFor="@id/add_result_editText"/>
 
         <EditText
-            android:id="@+id/editText7"
+            android:id="@+id/add_result_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -127,7 +127,7 @@
             android:text="@string/add_remark" />
 
         <EditText
-            android:id="@+id/editText8"
+            android:id="@+id/add_note_editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -136,7 +136,7 @@
             android:importantForAutofill="no" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/add_button"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_gravity="center"
