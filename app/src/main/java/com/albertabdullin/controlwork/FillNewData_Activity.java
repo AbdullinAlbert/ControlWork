@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 
 public class FillNewData_Activity extends AppCompatActivity {
+    static final int PICK_EMPLOYER = 0;
     private View.OnClickListener empClickListner = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -19,7 +21,7 @@ public class FillNewData_Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fill_name);
+        setContentView(R.layout.activity_fill_data);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_list_of_emp);
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
@@ -29,6 +31,11 @@ public class FillNewData_Activity extends AppCompatActivity {
     }
     private void showTableOfEmployers(View view) {
         Intent intent = new Intent(this, ListOfEmplActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, PICK_EMPLOYER);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
