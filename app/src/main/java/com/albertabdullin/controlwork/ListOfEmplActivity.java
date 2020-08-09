@@ -9,17 +9,28 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.Map;
+import java.util.List;
 
-public class ListOfEmplActivity extends AppCompatActivity {
+public class ListOfEmplActivity extends AppCompatActivity implements RecyclerViewObserver {
     private EmployersAdapter employersAdapter;
     private ListOfEmplVM model;
+
+    @Override
+    public void onClick(EntityForDB eDB) {
+        Intent resultIntent = new Intent();
+        resultIntent
+            .putExtra(FillNewData_Activity.ID_FROM_DB, eDB.getID())
+            .putExtra(FillNewData_Activity.ITEM_FROM_DB, eDB.getDescription());
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,16 +42,16 @@ public class ListOfEmplActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         model = new ViewModelProvider(this, new ViewModelFactory(this.getApplication())).get(ListOfEmplVM.class);
         RecyclerView recyclerView = findViewById(R.id.list_of_emp);
-        Observer<Map<Integer, Map<Integer, String>>> observerRV = new Observer<Map<Integer, Map<Integer, String>>>() {
+        Observer<List<EntityForDB>> observerRV = new Observer<List<EntityForDB>>() {
             @Override
-            public void onChanged(Map<Integer, Map<Integer, String>> changedList) {
-                if(model.getHelperListOfEmp().size() == 0) {
-                    model.getHelperListOfEmp().putAll(changedList);
+            public void onChanged(List<EntityForDB> changedList) {
+                if(model.getHelperListOfEntities().size() == 0) {
+                    model.getHelperListOfEntities().addAll(changedList);
                     employersAdapter.notifyDataSetChanged();
-                }else employersAdapter.notifyItemChanged(model.getHelperListOfEmp().size() - 1);
+                }else employersAdapter.notifyItemChanged(model.getHelperListOfEntities().size() - 1);
             }
         };
-        employersAdapter = new EmployersAdapter(model.getHelperListOfEmp());
+        employersAdapter = new EmployersAdapter(model.getHelperListOfEntities(), this);
         model.getLiveDataEmp().observe(this, observerRV);
         recyclerView.setAdapter(employersAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -55,7 +66,4 @@ public class ListOfEmplActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
 }

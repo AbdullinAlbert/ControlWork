@@ -13,44 +13,39 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class ListOfEmplVM extends AndroidViewModel {
-    MutableLiveData<Map<Integer, Map<Integer, String>>>  employers;
-    private Map<Integer, Map<Integer, String>> helperMapOfEmpVM = new TreeMap<>();
+    MutableLiveData<List<EntityForDB>>  entities;
+    private List<EntityForDB> adapterListOfEmpVM = new ArrayList<>();
 
     public ListOfEmplVM(@NonNull Application application) {
         super(application);
     }
-    public LiveData<Map<Integer, Map<Integer, String>>>  getLiveDataEmp() {
-        if(employers == null) {
-            employers = new MutableLiveData<>();
+    public LiveData<List<EntityForDB>>  getLiveDataEmp() {
+        if(entities == null) {
+            entities = new MutableLiveData<>();
             loadEmployers();
         }
-        return employers;
+        return entities;
     }
 
     private void loadEmployers() {
         SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-        Map<Integer, Map<Integer, String>> localHelpMap = new TreeMap<>();
-        int i = 0;
+        List<EntityForDB> localHelperList = new ArrayList<>();
         try {
             SQLiteDatabase db = cwdbHelper.getReadableDatabase();
             Cursor cursor = db.query(CWDBHelper.TABLE_NAME_EMP,
                     new String[]{"_id", CWDBHelper.T_EMP_C_FIO},
                     null, null, null, null, null);
             if(cursor.moveToFirst()) {
-                Map<Integer, String> m = new HashMap<>();
-                m.put(cursor.getInt(0), cursor.getString(1));
-                localHelpMap.put(i++, m);
-            }
-            while(cursor.moveToNext()) {
-                Map<Integer, String> m = new HashMap<>();
-                m.put(cursor.getInt(0), cursor.getString(1));
-                localHelpMap.put(i++, m);
+                do {
+                    EntityForDB eDB = new EntityForDB();
+                    eDB.setId(cursor.getInt(0));
+                    eDB.setDescription(cursor.getString(1));
+                    localHelperList.add(eDB);
+                } while (cursor.moveToNext());
             }
             cursor.close();
             db.close();
@@ -58,11 +53,11 @@ public class ListOfEmplVM extends AndroidViewModel {
             Toast toast = Toast.makeText(getApplication(), "Something wrong with DB", Toast.LENGTH_SHORT);
             toast.show();
         }
-        employers.setValue(localHelpMap);
+        entities.setValue(localHelperList);
     }
 
-    public Map<Integer, Map<Integer, String>> getHelperListOfEmp() {
-        return helperMapOfEmpVM;
+    public List<EntityForDB> getHelperListOfEntities() {
+        return adapterListOfEmpVM;
     }
 
     public void addEmployer(String s) {
@@ -79,9 +74,10 @@ public class ListOfEmplVM extends AndroidViewModel {
             toast.show();
             return;
         }
-        Map<Integer, String> m = new HashMap<>();
-        m.put(idKey, s);
-        helperMapOfEmpVM.put(helperMapOfEmpVM.size(), m);
-        employers.setValue(helperMapOfEmpVM);
+        EntityForDB eDB = new EntityForDB();
+        eDB.setId(idKey);
+        eDB.setDescription(s);
+        adapterListOfEmpVM.add(eDB);
+        entities.setValue(adapterListOfEmpVM);
     }
 }
