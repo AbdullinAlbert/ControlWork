@@ -22,8 +22,9 @@ public class AMControllerForListItems implements ActionMode.Callback {
 
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        menu.getItem(2).setVisible(true);
-        if(tracker.getSelection().size() > 1) menu.getItem(2).setVisible(false);
+        menu.findItem(R.id.action_rename_item).setVisible(true);
+        if(tracker.getSelection().size() > 1)
+            menu.findItem(R.id.action_rename_item).setVisible(false);
         return true;
     }
 
