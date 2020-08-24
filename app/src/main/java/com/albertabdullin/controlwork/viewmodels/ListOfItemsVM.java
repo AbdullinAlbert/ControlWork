@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.SimpleEntityForDB;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
 import java.util.ArrayList;
 import java.util.List;

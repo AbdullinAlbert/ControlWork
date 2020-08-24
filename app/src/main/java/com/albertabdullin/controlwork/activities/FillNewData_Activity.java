@@ -16,13 +16,13 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
 public class FillNewData_Activity extends AppCompatActivity implements ActivityResultCaller {
     private EditText addNewEmpl;
     private int employerId;
     public static final String ITEM_FROM_DB = "get_item_from_db";
-    public static final String ID_FROM_DB = "get_id";
-    public static final String LAUNCH_DEFINITELY_DB = "launch_definitely_db";
+    public static final String LAUNCH_DEFINITELY_DB_TABLE = "launch_definitely_db_table";
 
     ActivityResultLauncher launcerActivityForDB = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
         new ActivityResultCallback<ActivityResult>() {
@@ -30,8 +30,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
             public void onActivityResult(ActivityResult result) {
                 if(result.getResultCode() == Activity.RESULT_OK) {
                     Intent intent = result.getData();
-                    addNewEmpl.setText(intent.getStringExtra(ITEM_FROM_DB));
-                    employerId = intent.getIntExtra(ID_FROM_DB, -1);
+                    SimpleEntityForDB eDB = intent.getParcelableExtra(ITEM_FROM_DB);
+                    addNewEmpl.setText(eDB.getDescription());
+                    employerId = eDB.getID();
                 }
             }
         });
@@ -55,7 +56,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
 
     private void launchActivutyForResult(int i) {
         Intent intent = new Intent(FillNewData_Activity.this, ListOfBDItemsActivity.class);
-        intent.putExtra(LAUNCH_DEFINITELY_DB, i);
+        intent.putExtra(LAUNCH_DEFINITELY_DB_TABLE, i);
         launcerActivityForDB.launch(intent);
     }
 

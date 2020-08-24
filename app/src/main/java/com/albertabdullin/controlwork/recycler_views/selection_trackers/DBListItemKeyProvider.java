@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.selection.ItemKeyProvider;
 
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 
 

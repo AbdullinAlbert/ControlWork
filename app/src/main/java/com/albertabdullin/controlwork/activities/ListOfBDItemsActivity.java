@@ -24,7 +24,7 @@ import com.albertabdullin.controlwork.fragments.AddDataDF;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemKeyProvider;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemLookUP;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.SimpleEntityForDB;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 import com.albertabdullin.controlwork.recycler_views.RecyclerViewObserver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,10 +43,12 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
             super.onSelectionChanged();
             if(selectionTracker.hasSelection() && actionMode == null) {
                 actionMode = startSupportActionMode(new AMControllerForListItems(selectionTracker));
+                adapterForItemsFromDB.setActionMode(actionMode);
                 setSelectedTitle(selectionTracker.getSelection().size());
             }else if(!selectionTracker.hasSelection() && actionMode != null) {
                 actionMode.finish();
                 actionMode = null;
+                adapterForItemsFromDB.setActionMode(null);
             }else setSelectedTitle(selectionTracker.getSelection().size());
         }
 
@@ -58,9 +60,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     @Override
     public void onClick(SimpleEntityForDB eDB) {
         Intent resultIntent = new Intent();
-        resultIntent
-            .putExtra(FillNewData_Activity.ID_FROM_DB, eDB.getID())
-            .putExtra(FillNewData_Activity.ITEM_FROM_DB, eDB.getDescription());
+        resultIntent.putExtra(FillNewData_Activity.ITEM_FROM_DB, eDB);
         setResult(RESULT_OK, resultIntent);
         finish();
     }

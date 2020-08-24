@@ -1,4 +1,4 @@
-package com.albertabdullin.controlwork.recycler_views.selection_trackers;
+package com.albertabdullin.controlwork.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

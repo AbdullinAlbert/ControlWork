@@ -7,12 +7,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.SimpleEntityForDB;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.EntityForDBListItemDetails;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
     private List<SimpleEntityForDB> listOfEntities;
     private RecyclerViewObserver observer;
     private SelectionTracker selectionTracker;
+    private ActionMode actionMode;
 
     public class MyVeiwHolder extends RecyclerView.ViewHolder {
         private TextView description;
@@ -38,7 +40,7 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
             description.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (getBindingAdapterPosition() != RecyclerView.NO_POSITION)
+                    if ((getBindingAdapterPosition() != RecyclerView.NO_POSITION) && actionMode == null)
                         AdapterForItemsFromDB.this.observer.onClick(listOfEntities.get(getBindingAdapterPosition()));
                 }
             });
@@ -69,6 +71,8 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
         listOfEntities = list;
         observer = activity;
     }
+
+    public void setActionMode(ActionMode am) {actionMode = am; }
 
     public void setSelectionTracker(SelectionTracker selectionTracker) { this.selectionTracker = selectionTracker; }
 

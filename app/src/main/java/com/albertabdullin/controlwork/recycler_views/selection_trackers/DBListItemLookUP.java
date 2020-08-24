@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 
 public class DBListItemLookUP extends ItemDetailsLookup<SimpleEntityForDB> {
