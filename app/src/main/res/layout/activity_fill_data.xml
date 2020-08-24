@@ -4,15 +4,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FillNewData_Activity">
+    tools:context=".activities.FillNewData_Activity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_list_of_emp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/controlWorkTheme"/>
+        android:minHeight="?attr/actionBarSize" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -158,8 +157,8 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:text="@string/button_add_data"
-                android:theme="@style/controlWorkTheme"
-                android:stateListAnimator="@null"/>
+                android:stateListAnimator="@null"
+                android:background="@color/colorPrimary"/>
         </LinearLayout>
     </ScrollView>
 

@@ -19,4 +19,13 @@
     <string name="add_remark">Примечание:</string>
     <string name="title_activity_list_of_employers_">ListOfEmployers_Activity</string>
     <string name="hint_firstname_secondname">ФИО сотруднка</string>
+    <string name="add_item">Добавить</string>
+    <string name="rename_item">Переименовать</string>
+    <string name="delete_item">Удалить</string>
+    <string name="hide_item">Скрыть</string>
+    <string name="select_all_items">Выбрать всё</string>
+    <string name="clear_all_items">Очистить</string>
+    <string name="search_item">Описание по умолчанию</string>
+    <string name="page_title">Описание по умолчанию</string>
+    <string name="default_text">default_text</string>
 </resources>

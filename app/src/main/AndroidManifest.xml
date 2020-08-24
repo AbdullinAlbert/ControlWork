@@ -8,18 +8,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".ListOfEmplActivity"
-            android:label="Список сотрудников"
-            android:parentActivityName="com.albertabdullin.controlwork.FillNewData_Activity">
+        android:theme="@style/AppTheme">
+        <activity android:name=".activities.ListOfBDItemsActivity"
+            android:parentActivityName="com.albertabdullin.controlwork.activities.FillNewData_Activity">
         </activity>
         <activity
-            android:name=".FillNewData_Activity"
+            android:name=".activities.FillNewData_Activity"
             android:label="Добавьте результат работы"
-            android:parentActivityName="com.albertabdullin.controlwork.MainActivity"
+            android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
             android:windowSoftInputMode="stateHidden"
             />
-        <activity android:name=".MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    style="?android:attr/buttonBarStyle"
+    >
 
         <EditText
             android:id="@+id/editTextNewData"
@@ -9,30 +11,30 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            android:importantForAutofill="no" />
+            android:importantForAutofill="no"
+            android:hint="@string/default_text"
+            android:backgroundTint="@android:color/black"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:layout_marginTop="32dp"
-            style="?android:attr/buttonBarStyle">
+            android:layout_marginTop="32dp">
 
                 <Button
                     android:id="@+id/cancel_df_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/bgTool"
                     android:text="@string/button_cancel"
-                    style="?android:attr/buttonBarButtonStyle" />
+                    style="?android:attr/buttonBarButtonStyle"
+                     />
 
                 <Button
                     android:id="@+id/add_df_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/bgTool"
                     android:text="@string/button_add_data"
                     style="?android:attr/buttonBarButtonStyle"/>
         </LinearLayout>
