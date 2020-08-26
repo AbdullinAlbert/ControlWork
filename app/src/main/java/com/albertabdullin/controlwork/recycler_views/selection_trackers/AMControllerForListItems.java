@@ -3,15 +3,34 @@ package com.albertabdullin.controlwork.recycler_views.selection_trackers;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.fragments.DeleteDataDF;
+import com.albertabdullin.controlwork.fragments.UpdateDataDF;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
+import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
+import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 
 public class AMControllerForListItems implements ActionMode.Callback {
     private SelectionTracker tracker;
-    public AMControllerForListItems(SelectionTracker tracker) {
+    private AdapterForItemsFromDB adapter;
+    private ListOfItemsVM viewModel;
+    private AppCompatActivity activity;
+
+    public AMControllerForListItems(SelectionTracker tracker, AdapterForItemsFromDB adapter,
+                                    ListOfItemsVM viewModel, AppCompatActivity activity) {
         this.tracker = tracker;
+        this.adapter = adapter;
+        this.viewModel = viewModel;
+        this.activity = activity;
     }
 
     @Override
@@ -29,10 +48,28 @@ public class AMControllerForListItems implements ActionMode.Callback {
     }
 
     @Override
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) { return false; }
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case (R.id.action_select_all_items):
+                List<SimpleEntityForDB> list = adapter.getCopyListOfEntities();
+                for(int i = 0; i < list.size(); i++)
+                    if(!tracker.isSelected(list.get(i))) tracker.select(list.get(i));
+                return true;
+            case (R.id.action_delete_item):
+                DeleteDataDF wdf = new DeleteDataDF(this);
+                wdf.show(activity.getSupportFragmentManager(), "deleteData");
+                return true;
+            case (R.id.action_rename_item):
+                UpdateDataDF udf = new UpdateDataDF(this);
+                udf.show(activity.getSupportFragmentManager(), "updateData");
+                return true;
+            default: return false;
+        }
+    }
 
     @Override
-    public void onDestroyActionMode(ActionMode mode) {
-        tracker.clearSelection();
-    }
+    public void onDestroyActionMode(ActionMode mode) { tracker.clearSelection(); }
+
+    public SelectionTracker getTracker() { return tracker; }
+
 }

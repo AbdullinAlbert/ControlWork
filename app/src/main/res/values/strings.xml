@@ -28,4 +28,5 @@
     <string name="search_item">Описание по умолчанию</string>
     <string name="page_title">Описание по умолчанию</string>
     <string name="default_text">default_text</string>
+    <string name="warning_about_delete">Вы действительно хотите их удалить?</string>
 </resources>

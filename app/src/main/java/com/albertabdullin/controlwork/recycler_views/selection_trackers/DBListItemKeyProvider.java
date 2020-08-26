@@ -18,14 +18,14 @@ public class DBListItemKeyProvider extends ItemKeyProvider<SimpleEntityForDB> {
     @Nullable
     @Override
     public SimpleEntityForDB getKey(int position) {
-        return adapter.getListOfEntities().get(position);
+        return adapter.getCopyListOfEntities().get(position);
     }
 
     @Override
     public int getPosition(@NonNull SimpleEntityForDB key) {
         int i = 0;
-        while((i < adapter.getListOfEntities().size())) {
-            if(adapter.getListOfEntities().get(i).getID() == key.getID()) return i;
+        while((i < adapter.getCopyListOfEntities().size())) {
+            if(adapter.getCopyListOfEntities().get(i).getID() == key.getID()) return i;
             i++;
         }
         return -1;

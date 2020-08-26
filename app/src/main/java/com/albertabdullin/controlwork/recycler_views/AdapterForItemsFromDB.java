@@ -16,6 +16,8 @@ import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.EntityForDBListItemDetails;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyVeiwHolder> {
@@ -99,6 +101,6 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
         return listOfEntities.size();
     }
 
-    public List<SimpleEntityForDB> getListOfEntities() { return listOfEntities; }
+    public List<SimpleEntityForDB> getCopyListOfEntities() { return new ArrayList<SimpleEntityForDB>(listOfEntities); }
 
 }

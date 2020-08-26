@@ -27,6 +27,7 @@ import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 import com.albertabdullin.controlwork.recycler_views.RecyclerViewObserver;
+import com.albertabdullin.controlwork.viewmodels.ViewModelFactory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -42,7 +43,8 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
         public void onSelectionChanged() {
             super.onSelectionChanged();
             if(selectionTracker.hasSelection() && actionMode == null) {
-                actionMode = startSupportActionMode(new AMControllerForListItems(selectionTracker));
+                actionMode = startSupportActionMode(new AMControllerForListItems(selectionTracker, adapterForItemsFromDB, model,
+                        ListOfBDItemsActivity.this));
                 adapterForItemsFromDB.setActionMode(actionMode);
                 setSelectedTitle(selectionTracker.getSelection().size());
             }else if(!selectionTracker.hasSelection() && actionMode != null) {
@@ -74,19 +76,37 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        model = new ViewModelProvider(this, new ListOfItemsVM.ViewModelFactory(this.getApplication())).get(ListOfItemsVM.class);
+        model = new ViewModelProvider(this, new ViewModelFactory(this.getApplication())).get(ListOfItemsVM.class);
         RecyclerView recyclerView = findViewById(R.id.list_of_emp);
         Observer<List<SimpleEntityForDB>> observerRV = new Observer<List<SimpleEntityForDB>>() {
             @Override
             public void onChanged(List<SimpleEntityForDB> changedList) {
-                if(model.getHelperListOfEntities().size() == 0) {
-                    model.getHelperListOfEntities().addAll(changedList);
+                //если пустой список элементов
+                if(model.getAdapterListOfEntitiesVM().size() == 0) {
+                    model.getAdapterListOfEntitiesVM().addAll(changedList);
                     adapterForItemsFromDB.notifyDataSetChanged();
-                }else if(model.getHelperListOfEntities().size() != changedList.size())
-                    adapterForItemsFromDB.notifyItemInserted(model.getHelperListOfEntities().size() - 1);
+                //если добавлены новые элементы в список
+                }else if(model.getAdapterListOfEntitiesVM().size() < changedList.size()) {
+                    for(int i = model.getAdapterListOfEntitiesVM().size(); i < changedList.size(); i++) {
+                        model.getAdapterListOfEntitiesVM().add(changedList.get(i));
+                        adapterForItemsFromDB.notifyItemInserted(model.getAdapterListOfEntitiesVM().size() - 1);
+                    }
+                //если были удалены элементы из списка
+                }else if(model.getAdapterListOfEntitiesVM().size() > changedList.size()) {
+                    List<Integer> deletedPositions = model.getListOfDeletedPositions();
+                    //список позиций удаленных элементов упорядочен
+                    for(int i = 0; i < deletedPositions.size(); i++) {
+                        int p = deletedPositions.get(i)-i;
+                        model.getAdapterListOfEntitiesVM().remove(p);
+                        adapterForItemsFromDB.notifyItemRemoved(p);
+                    }
+                }//если изменили какой-либо из элементов
+                else if(model.getAdapterListOfEntitiesVM().size() == changedList.size()) {
+                    adapterForItemsFromDB.notifyItemChanged(model.getUpdatedItemPosition());
+                }
             }
         };
-        adapterForItemsFromDB = new AdapterForItemsFromDB(model.getHelperListOfEntities(), this);
+        adapterForItemsFromDB = new AdapterForItemsFromDB(model.getAdapterListOfEntitiesVM(), this);
         model.getLiveDataEmp().observe(this, observerRV);
         recyclerView.setAdapter(adapterForItemsFromDB);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -98,9 +118,10 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
             new DBListItemKeyProvider(adapterForItemsFromDB),
             new DBListItemLookUP(recyclerView),
             StorageStrategy.createParcelableStorage(SimpleEntityForDB.class)
-        ).build();
-        adapterForItemsFromDB.setSelectionTracker(selectionTracker);
+            ).build();
+        if(savedInstanceState != null) selectionTracker.onRestoreInstanceState(savedInstanceState);
         selectionTracker.addObserver(selectionObserver);
+        adapterForItemsFromDB.setSelectionTracker(selectionTracker);
         FloatingActionButton fab = findViewById(R.id.floatingActionButton);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
