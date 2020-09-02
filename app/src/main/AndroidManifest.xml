@@ -10,13 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activities.ListOfBDItemsActivity"
-            android:parentActivityName="com.albertabdullin.controlwork.activities.FillNewData_Activity">
-        </activity>
+            android:windowSoftInputMode="stateUnchanged"
+            android:parentActivityName="com.albertabdullin.controlwork.activities.FillNewData_Activity" />
         <activity
             android:name=".activities.FillNewData_Activity"
             android:label="Добавьте результат работы"
             android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
-            android:windowSoftInputMode="stateHidden"
             />
         <activity android:name=".activities.MainActivity">
             <intent-filter>

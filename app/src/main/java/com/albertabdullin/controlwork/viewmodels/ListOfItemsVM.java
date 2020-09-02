@@ -24,6 +24,9 @@ public class ListOfItemsVM extends AndroidViewModel {
     private List<SimpleEntityForDB> adapterListOfEntitiesVM = new ArrayList<>();
     private List<Integer> listOfDeletedPositions = new ArrayList<>();
     private int updatedPosition;
+    private boolean activatedDF = false;
+    private boolean stateMenuItemSearchText = false;
+    private String itemSearchText = "";
 
     public ListOfItemsVM(@NonNull Application application) {
         super(application);
@@ -65,13 +68,41 @@ public class ListOfItemsVM extends AndroidViewModel {
         entities.setValue(localHelperList);
     }
 
-    public List<SimpleEntityForDB> getAdapterListOfEntitiesVM() { return adapterListOfEntitiesVM; }
+    public List<SimpleEntityForDB> getAdapterListOfEntitiesVM() {
+        return adapterListOfEntitiesVM;
+    }
 
-    public List<Integer> getListOfDeletedPositions() { return listOfDeletedPositions; }
+    public List<Integer> getListOfDeletedPositions() {
+        return listOfDeletedPositions;
+    }
 
-    public void setUpdatedItemPosition(int i) { updatedPosition = i; }
+    public void setUpdatedItemPosition(int i) {
+        updatedPosition = i;
+    }
 
-    public int getUpdatedItemPosition() { return updatedPosition; }
+    public int getUpdatedItemPosition() {
+        return updatedPosition;
+    }
+
+    public void setStateMenuItemSearchText(boolean b) {
+        stateMenuItemSearchText = b;
+    }
+
+    public boolean isStateMenuItemSearchTextActive() {
+        return stateMenuItemSearchText;
+    }
+
+    public void setItemSearchText(String s) { itemSearchText = s; }
+
+    public void setActivatedDF(boolean b) {
+        activatedDF = b;
+    }
+
+    public boolean isActivatedDF() {
+        return activatedDF;
+    }
+
+    public String getItemSearchText() { return itemSearchText; }
 
     public void addItem(String s) {
         SQLiteOpenHelper cwdbHelper = null;
@@ -88,8 +119,8 @@ public class ListOfItemsVM extends AndroidViewModel {
             toast.show();
             return;
         } finally {
-            if(db != null) db.close();
-            if(cwdbHelper != null) cwdbHelper.close();
+            if (db != null) db.close();
+            if (cwdbHelper != null) cwdbHelper.close();
         }
         SimpleEntityForDB eDB = new SimpleEntityForDB();
         eDB.setId(idKey);
@@ -102,7 +133,7 @@ public class ListOfItemsVM extends AndroidViewModel {
     private String makeWhereClause(int size) {
         StringBuilder sb = new StringBuilder();
         sb.append("_id in (");
-        for(int i = 0; i < size-1; i ++) sb.append("?, ");
+        for (int i = 0; i < size-1; i ++) sb.append("?, ");
         sb.append("?)");
         return sb.toString();
     }
@@ -111,8 +142,8 @@ public class ListOfItemsVM extends AndroidViewModel {
         int count;
         List<SimpleEntityForDB> helperList = new ArrayList<>(adapterListOfEntitiesVM);
         List<Integer> listOfID = new ArrayList<>();
-        if(listOfDeletedPositions.size() > 0) listOfDeletedPositions.clear();
-        for(int i = 0; i < list.size(); i++) {
+        if (listOfDeletedPositions.size() > 0) listOfDeletedPositions.clear();
+        for (int i = 0; i < list.size(); i++) {
             listOfDeletedPositions.add(adapterListOfEntitiesVM.indexOf(list.get(i)));
             helperList.remove(list.get(i));
             listOfID.add(list.get(i).getID());
@@ -133,7 +164,7 @@ public class ListOfItemsVM extends AndroidViewModel {
             if(db != null) db.close();
             if(cwdbHelper != null) cwdbHelper.close();
         }
-        if(count != 0) entities.setValue(helperList);
+        if (count != 0) entities.setValue(helperList);
         else {
             Toast toast = Toast.makeText(getApplication(), "Data did not deleted", Toast.LENGTH_SHORT);
             toast.show();

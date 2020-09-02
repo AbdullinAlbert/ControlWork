@@ -5,7 +5,8 @@
         android:id="@+id/action_search"
         android:title="@string/search_item"
         android:icon="@drawable/baseline_search_24"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always|collapseActionView"
+        app:actionLayout="@layout/string_of_search"
         />
 
 </menu>

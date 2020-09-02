@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +28,19 @@ public class AddDataDF extends DialogFragment {
     private ListOfItemsVM viewModel;
     private TextView helperTextView;
     private TextView tvAddNewData;
+    static private AddDataDF objectAddDataDf = null;
+
+    View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus && !viewModel.isActivatedDF()) {
+                viewModel.setActivatedDF(true);
+                InputMethodManager inputMananger = (InputMethodManager) getContext()
+                        .getSystemService( getContext().INPUT_METHOD_SERVICE);
+                inputMananger.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        }
+    };
 
     TextWatcher countCharTW = new TextWatcher() {
 
@@ -44,6 +58,12 @@ public class AddDataDF extends DialogFragment {
             helperTextView.setText(s.length() + " / 30");
         }
     };
+
+    public static AddDataDF getSingletoneObjectAddDataDF() {
+        if (objectAddDataDf == null)
+            objectAddDataDf = new AddDataDF();
+        return objectAddDataDf;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,12 +95,16 @@ public class AddDataDF extends DialogFragment {
                     Toast toast = Toast.makeText(getContext(), "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
                     toast.show();
                 }
+                tvAddNewData.setFocusable(false);
+                hideKeyBoard();
                 getDialog().dismiss();
             }
         });
         bCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                tvAddNewData.setFocusable(false);
+                hideKeyBoard();
                 getDialog().dismiss();
             }
         });
@@ -94,6 +118,22 @@ public class AddDataDF extends DialogFragment {
         display.getSize(size);
         window.setLayout((int) (size.x * 0.95), WindowManager.LayoutParams.WRAP_CONTENT);
         window.setGravity(Gravity.CENTER);
+        tvAddNewData.setOnFocusChangeListener(focusChangeListener);
+        tvAddNewData.requestFocus();
         super.onResume();
+    }
+
+    private void hideKeyBoard() {
+        if (viewModel.isActivatedDF() && !tvAddNewData.isFocused()) {
+            viewModel.setActivatedDF(false);
+            InputMethodManager imm = (InputMethodManager)
+                    getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(tvAddNewData.getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

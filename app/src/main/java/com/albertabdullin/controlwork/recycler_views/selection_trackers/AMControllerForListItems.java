@@ -12,24 +12,19 @@ import com.albertabdullin.controlwork.fragments.DeleteDataDF;
 import com.albertabdullin.controlwork.fragments.UpdateDataDF;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
-import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
 public class AMControllerForListItems implements ActionMode.Callback {
-    private SelectionTracker tracker;
+    static private SelectionTracker tracker;
     private AdapterForItemsFromDB adapter;
-    private ListOfItemsVM viewModel;
     private AppCompatActivity activity;
 
     public AMControllerForListItems(SelectionTracker tracker, AdapterForItemsFromDB adapter,
-                                    ListOfItemsVM viewModel, AppCompatActivity activity) {
+                                    AppCompatActivity activity) {
         this.tracker = tracker;
         this.adapter = adapter;
-        this.viewModel = viewModel;
         this.activity = activity;
     }
 
@@ -56,11 +51,11 @@ public class AMControllerForListItems implements ActionMode.Callback {
                     if(!tracker.isSelected(list.get(i))) tracker.select(list.get(i));
                 return true;
             case (R.id.action_delete_item):
-                DeleteDataDF wdf = new DeleteDataDF(this);
+                DeleteDataDF wdf = new DeleteDataDF();
                 wdf.show(activity.getSupportFragmentManager(), "deleteData");
                 return true;
             case (R.id.action_rename_item):
-                UpdateDataDF udf = new UpdateDataDF(this);
+                UpdateDataDF udf = new UpdateDataDF();
                 udf.show(activity.getSupportFragmentManager(), "updateData");
                 return true;
             default: return false;
@@ -70,6 +65,6 @@ public class AMControllerForListItems implements ActionMode.Callback {
     @Override
     public void onDestroyActionMode(ActionMode mode) { tracker.clearSelection(); }
 
-    public SelectionTracker getTracker() { return tracker; }
+    public static SelectionTracker getTracker() { return tracker; }
 
 }

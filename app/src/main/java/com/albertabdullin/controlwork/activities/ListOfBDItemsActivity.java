@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
@@ -14,9 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItems;
@@ -37,20 +42,23 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     private ListOfItemsVM model;
     private SelectionTracker selectionTracker;
     private ActionMode actionMode = null;
+    private FloatingActionButton fab;
 
     private SelectionTracker.SelectionObserver<Long> selectionObserver = new SelectionTracker.SelectionObserver<Long>() {
         @Override
         public void onSelectionChanged() {
             super.onSelectionChanged();
             if(selectionTracker.hasSelection() && actionMode == null) {
-                actionMode = startSupportActionMode(new AMControllerForListItems(selectionTracker, adapterForItemsFromDB, model,
+                actionMode = startSupportActionMode(new AMControllerForListItems(selectionTracker, adapterForItemsFromDB,
                         ListOfBDItemsActivity.this));
                 adapterForItemsFromDB.setActionMode(actionMode);
                 setSelectedTitle(selectionTracker.getSelection().size());
+                fab.hide();
             }else if(!selectionTracker.hasSelection() && actionMode != null) {
                 actionMode.finish();
                 actionMode = null;
                 adapterForItemsFromDB.setActionMode(null);
+                fab.show();
             }else setSelectedTitle(selectionTracker.getSelection().size());
         }
 
@@ -119,14 +127,15 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
             new DBListItemLookUP(recyclerView),
             StorageStrategy.createParcelableStorage(SimpleEntityForDB.class)
             ).build();
-        if(savedInstanceState != null) selectionTracker.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null)
+            selectionTracker.onRestoreInstanceState(savedInstanceState);
         selectionTracker.addObserver(selectionObserver);
         adapterForItemsFromDB.setSelectionTracker(selectionTracker);
-        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+        fab = findViewById(R.id.floatingActionButton);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddDataDF dialogFragment = new AddDataDF();
+                AddDataDF dialogFragment = AddDataDF.getSingletoneObjectAddDataDF();
                 dialogFragment.show(getSupportFragmentManager(), "newData");
             }
         });
@@ -141,6 +150,71 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.stable_appbar_list_items, menu);
+        EditText searchEditText = menu.findItem(R.id.action_search).getActionView()
+                .findViewById(R.id.string_of_search);
+
+        TextWatcher twEditTextSearch = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                model.setItemSearchText(s.toString());
+            }
+        };
+
+        View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
+                    model.setStateMenuItemSearchText(true);
+                    InputMethodManager imm = (InputMethodManager)
+                            getSystemService(ListOfBDItemsActivity.this.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(0, 0);
+
+                }else if (!hasFocus) {
+                    hideKeyBoard((EditText) v);
+                }
+            }
+        };
+        searchEditText.addTextChangedListener(twEditTextSearch);
+        searchEditText.setOnFocusChangeListener(focusChangeListener);
         return true;
     }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (model.isStateMenuItemSearchTextActive()) {
+            menu.performIdentifierAction(R.id.action_search, 0);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case (R.id.action_search) :
+                EditText searchEditText = item.getActionView().findViewById(R.id.string_of_search);
+                searchEditText.setText(model.getItemSearchText());
+                searchEditText.requestFocus();
+                fab.hide();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void hideKeyBoard(EditText editText) {
+        model.setStateMenuItemSearchText(false);
+        model.setItemSearchText("");
+        InputMethodManager imm = (InputMethodManager)
+                getSystemService(ListOfBDItemsActivity.this.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        fab.show();
+    }
+
 }

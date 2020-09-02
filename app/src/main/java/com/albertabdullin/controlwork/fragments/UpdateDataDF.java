@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +32,18 @@ public class UpdateDataDF extends DialogFragment {
     private ListOfItemsVM viewModel;
     private TextView helperTextView;
     private TextView tvUpdateData;
-    private AMControllerForListItems amc;
+
+    View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus && !viewModel.isActivatedDF()) {
+                viewModel.setActivatedDF(true);
+                InputMethodManager inputMananger = (InputMethodManager) getContext()
+                        .getSystemService( getContext().INPUT_METHOD_SERVICE);
+                inputMananger.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        }
+    };
 
     TextWatcher countCharTW = new TextWatcher() {
         @Override
@@ -45,11 +57,6 @@ public class UpdateDataDF extends DialogFragment {
             helperTextView.setText(s.length() + " / 30");
         }
     };
-
-    public UpdateDataDF(AMControllerForListItems amc) {
-        super();
-        this.amc = amc;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,10 +84,12 @@ public class UpdateDataDF extends DialogFragment {
             public void onClick(View v) {
                 String description = tvUpdateData.getText().toString();
                 if(description.length() != 0) {
-                    Iterator<SimpleEntityForDB> iterator = amc.getTracker().getSelection().iterator();
+                    Iterator<SimpleEntityForDB> iterator = AMControllerForListItems.getTracker().getSelection().iterator();
                     SimpleEntityForDB eDB = iterator.next();
                     viewModel.updateItem(eDB, description);
-                    amc.getTracker().clearSelection();
+                    AMControllerForListItems.getTracker().clearSelection();
+                    tvUpdateData.setFocusable(false);
+                    hideKeyBoard();
                     getDialog().dismiss();
                 }
                 else {
@@ -93,6 +102,8 @@ public class UpdateDataDF extends DialogFragment {
         bCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                tvUpdateData.setFocusable(false);
+                hideKeyBoard();
                 getDialog().dismiss();
             }
         });
@@ -106,6 +117,17 @@ public class UpdateDataDF extends DialogFragment {
         display.getSize(size);
         window.setLayout((int) (size.x * 0.95), WindowManager.LayoutParams.WRAP_CONTENT);
         window.setGravity(Gravity.CENTER);
+        tvUpdateData.setOnFocusChangeListener(focusChangeListener);
+        tvUpdateData.requestFocus();
         super.onResume();
+    }
+
+    private void hideKeyBoard() {
+        if (viewModel.isActivatedDF() && !tvUpdateData.isFocused()) {
+            viewModel.setActivatedDF(false);
+            InputMethodManager imm = (InputMethodManager)
+                    getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(tvUpdateData.getWindowToken(), 0);
+        }
     }
 }

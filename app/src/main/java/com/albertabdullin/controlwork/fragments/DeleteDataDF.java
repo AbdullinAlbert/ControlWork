@@ -27,13 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DeleteDataDF extends DialogFragment {
-    private AMControllerForListItems amc;
     private ListOfItemsVM viewModel;
-
-    public DeleteDataDF(AMControllerForListItems amc) {
-        super();
-        this.amc = amc;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,9 +46,9 @@ public class DeleteDataDF extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         TextView tvSelectSize = view.findViewById(R.id.DeleteDFSelectSize);
         TextView tvQuestion = view.findViewById(R.id.DeleteDFQuestion);
-        tvSelectSize.setText("Выбрано записей: " + amc.getTracker().getSelection().size());
-        if(amc.getTracker().getSelection().size() == 1) {
-            Iterator<SimpleEntityForDB> iterator = amc.getTracker().getSelection().iterator();
+        tvSelectSize.setText("Выбрано записей: " + AMControllerForListItems.getTracker().getSelection().size());
+        if(AMControllerForListItems.getTracker().getSelection().size() == 1) {
+            Iterator<SimpleEntityForDB> iterator = AMControllerForListItems.getTracker().getSelection().iterator();
             String description = iterator.next().getDescription();
             tvQuestion.setText("Вы действительно хотите удалить " + description + "?");
         }
@@ -64,11 +58,11 @@ public class DeleteDataDF extends DialogFragment {
 
             @Override
             public void onClick(View v) {
-                Iterator<SimpleEntityForDB> iterator = amc.getTracker().getSelection().iterator();
+                Iterator<SimpleEntityForDB> iterator = AMControllerForListItems.getTracker().getSelection().iterator();
                 List<SimpleEntityForDB> deleteItemsList = new ArrayList<>();
                 while (iterator.hasNext()) deleteItemsList.add(iterator.next());
                 viewModel.deleteItem(deleteItemsList);
-                amc.getTracker().clearSelection();
+                AMControllerForListItems.getTracker().clearSelection();
                 getDialog().dismiss();
             }
         });
