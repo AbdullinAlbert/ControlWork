@@ -95,7 +95,6 @@ public class AddDataDF extends DialogFragment {
                     Toast toast = Toast.makeText(getContext(), "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
                     toast.show();
                 }
-                tvAddNewData.setFocusable(false);
                 hideKeyBoard();
                 getDialog().dismiss();
             }
@@ -103,7 +102,6 @@ public class AddDataDF extends DialogFragment {
         bCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvAddNewData.setFocusable(false);
                 hideKeyBoard();
                 getDialog().dismiss();
             }
@@ -124,12 +122,11 @@ public class AddDataDF extends DialogFragment {
     }
 
     private void hideKeyBoard() {
-        if (viewModel.isActivatedDF() && !tvAddNewData.isFocused()) {
-            viewModel.setActivatedDF(false);
-            InputMethodManager imm = (InputMethodManager)
-                    getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(tvAddNewData.getWindowToken(), 0);
-        }
+        tvAddNewData.setFocusable(false);
+        viewModel.setActivatedDF(false);
+        InputMethodManager imm = (InputMethodManager)
+            getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(tvAddNewData.getWindowToken(), 0);
     }
 
     @Override

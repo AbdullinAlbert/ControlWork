@@ -114,7 +114,8 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
                 }
             }
         };
-        adapterForItemsFromDB = new AdapterForItemsFromDB(model.getAdapterListOfEntitiesVM(), this);
+        adapterForItemsFromDB = new AdapterForItemsFromDB(model.getAdapterListOfEntitiesVM());
+        adapterForItemsFromDB.setRVObserver(this);
         model.getLiveDataEmp().observe(this, observerRV);
         recyclerView.setAdapter(adapterForItemsFromDB);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

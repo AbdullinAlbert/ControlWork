@@ -17,10 +17,9 @@ import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.EntityForDBListItemDetails;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyVeiwHolder> {
+public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyVeiwHolder> implements RecyclerViewObservable{
     private List<SimpleEntityForDB> listOfEntities;
     private RecyclerViewObserver observer;
     private SelectionTracker selectionTracker;
@@ -43,7 +42,7 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
                 @Override
                 public void onClick(View v) {
                     if ((getBindingAdapterPosition() != RecyclerView.NO_POSITION) && actionMode == null)
-                        AdapterForItemsFromDB.this.observer.onClick(listOfEntities.get(getBindingAdapterPosition()));
+                        notifyRVObserver(getBindingAdapterPosition());
                 }
             });
             description.setOnLongClickListener(new View.OnLongClickListener() {
@@ -69,9 +68,16 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
         public TextView getID() {return id; }
     }
 
-    public AdapterForItemsFromDB(List<SimpleEntityForDB> list, RecyclerViewObserver activity) {
+    public AdapterForItemsFromDB(List<SimpleEntityForDB> list) {
         listOfEntities = list;
-        observer = activity;
+    }
+
+    public void setRVObserver(RecyclerViewObserver observer) {
+        this.observer = observer;
+    }
+
+    public void notifyRVObserver(int i) {
+        observer.onClick(listOfEntities.get(i));
     }
 
     public void setActionMode(ActionMode am) {actionMode = am; }

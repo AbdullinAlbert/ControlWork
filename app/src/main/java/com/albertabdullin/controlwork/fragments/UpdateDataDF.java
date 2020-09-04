@@ -88,7 +88,6 @@ public class UpdateDataDF extends DialogFragment {
                     SimpleEntityForDB eDB = iterator.next();
                     viewModel.updateItem(eDB, description);
                     AMControllerForListItems.getTracker().clearSelection();
-                    tvUpdateData.setFocusable(false);
                     hideKeyBoard();
                     getDialog().dismiss();
                 }
@@ -102,7 +101,6 @@ public class UpdateDataDF extends DialogFragment {
         bCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvUpdateData.setFocusable(false);
                 hideKeyBoard();
                 getDialog().dismiss();
             }
@@ -123,11 +121,10 @@ public class UpdateDataDF extends DialogFragment {
     }
 
     private void hideKeyBoard() {
-        if (viewModel.isActivatedDF() && !tvUpdateData.isFocused()) {
-            viewModel.setActivatedDF(false);
-            InputMethodManager imm = (InputMethodManager)
-                    getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(tvUpdateData.getWindowToken(), 0);
-        }
+        tvUpdateData.setFocusable(false);
+        viewModel.setActivatedDF(false);
+        InputMethodManager imm = (InputMethodManager)
+            getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(tvUpdateData.getWindowToken(), 0);
     }
 }
