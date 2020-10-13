@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,15 +14,14 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItems;
@@ -38,11 +38,43 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 
 public class ListOfBDItemsActivity extends AppCompatActivity implements RecyclerViewObserver {
+    public static final int ADD = 0;
+    public static final int DELETE = 1;
+    public static final int UPDATE = 2;
+    public static final int LOAD = 3;
+    public static final int SEARCH_IS_DONE = 4;
+    public static final int OK = 5;
+    public static final int NOT_OK = 6;
     private AdapterForItemsFromDB adapterForItemsFromDB;
-    private ListOfItemsVM model;
+    private static ListOfItemsVM model;
     private SelectionTracker selectionTracker;
     private ActionMode actionMode = null;
     private FloatingActionButton fab;
+
+    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
+        public void handleMessage (Message msg) {
+            switch (msg.what) {
+                case ADD:
+                    model.notifyAboutAddItem();
+                    break;
+                case DELETE:
+                    if (msg.arg1 == OK) model.notifyAboutDeleteItem(true);
+                    else model.notifyAboutDeleteItem(false);
+                    break;
+                case UPDATE:
+                    if (msg.arg1 == OK) model.notifyAboutUpdateItem(true);
+                    else model.notifyAboutUpdateItem(false);
+                    break;
+                case LOAD:
+                    model.notifyAboutLoadItems();
+                    break;
+                case SEARCH_IS_DONE:
+                    model.updateSearchAdapterList();
+                    break;
+            }
+        }
+
+    };
 
     private SelectionTracker.SelectionObserver<Long> selectionObserver = new SelectionTracker.SelectionObserver<Long>() {
         @Override
@@ -94,22 +126,21 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
                     model.getAdapterListOfEntitiesVM().addAll(changedList);
                     adapterForItemsFromDB.notifyDataSetChanged();
                 //если добавлены новые элементы в список
-                }else if(model.getAdapterListOfEntitiesVM().size() < changedList.size()) {
-                    for(int i = model.getAdapterListOfEntitiesVM().size(); i < changedList.size(); i++) {
+                } else if (model.getAdapterListOfEntitiesVM().size() < changedList.size()) {
+                    for (int i = model.getAdapterListOfEntitiesVM().size(); i < changedList.size(); i++) {
                         model.getAdapterListOfEntitiesVM().add(changedList.get(i));
                         adapterForItemsFromDB.notifyItemInserted(model.getAdapterListOfEntitiesVM().size() - 1);
                     }
                 //если были удалены элементы из списка
-                }else if(model.getAdapterListOfEntitiesVM().size() > changedList.size()) {
+                } else if (model.getAdapterListOfEntitiesVM().size() > changedList.size()) {
                     List<Integer> deletedPositions = model.getListOfDeletedPositions();
-                    //список позиций удаленных элементов упорядочен
-                    for(int i = 0; i < deletedPositions.size(); i++) {
-                        int p = deletedPositions.get(i)-i;
+                    for (int i = 0; i < deletedPositions.size(); i++) {
+                        int p = deletedPositions.get(i) - i;
                         model.getAdapterListOfEntitiesVM().remove(p);
                         adapterForItemsFromDB.notifyItemRemoved(p);
                     }
-                }//если изменили какой-либо из элементов
-                else if(model.getAdapterListOfEntitiesVM().size() == changedList.size()) {
+                //если изменили какой-либо из элементов
+                } else if (model.getAdapterListOfEntitiesVM().size() == changedList.size()) {
                     adapterForItemsFromDB.notifyItemChanged(model.getUpdatedItemPosition());
                 }
             }
@@ -136,86 +167,52 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddDataDF dialogFragment = AddDataDF.getSingletoneObjectAddDataDF();
+                AddDataDF dialogFragment = new AddDataDF();
                 dialogFragment.show(getSupportFragmentManager(), "newData");
             }
         });
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         selectionTracker.onSaveInstanceState(outState);
+        model.setBlankCallTrue();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.stable_appbar_list_items, menu);
-        EditText searchEditText = menu.findItem(R.id.action_search).getActionView()
-                .findViewById(R.id.string_of_search);
+        SearchView.OnQueryTextListener queryTextChangeListener = new SearchView.OnQueryTextListener() {
 
-        TextWatcher twEditTextSearch = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public boolean onQueryTextSubmit(String query) {
+                return false;
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                model.setItemSearchText(s.toString());
+            public boolean onQueryTextChange(String newText) {
+                if (newText.equals("")) model.sayToStop();
+                else if (model.isSearchIsActive()) model.sendNewText(newText);
+                else model.startSearch(newText);
+                return true;
             }
         };
 
-        View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+        SearchView.OnCloseListener closeListener = new SearchView.OnCloseListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
-                    model.setStateMenuItemSearchText(true);
-                    InputMethodManager imm = (InputMethodManager)
-                            getSystemService(ListOfBDItemsActivity.this.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(0, 0);
-
-                }else if (!hasFocus) {
-                    hideKeyBoard((EditText) v);
-                }
+            public boolean onClose() {
+                model.stopSearch();
+                return true;
             }
         };
-        searchEditText.addTextChangedListener(twEditTextSearch);
-        searchEditText.setOnFocusChangeListener(focusChangeListener);
+        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setOnQueryTextListener(queryTextChangeListener);
+        searchView.setOnCloseListener(closeListener);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(true);
         return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        if (model.isStateMenuItemSearchTextActive()) {
-            menu.performIdentifierAction(R.id.action_search, 0);
-        }
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case (R.id.action_search) :
-                EditText searchEditText = item.getActionView().findViewById(R.id.string_of_search);
-                searchEditText.setText(model.getItemSearchText());
-                searchEditText.requestFocus();
-                fab.hide();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void hideKeyBoard(EditText editText) {
-        model.setStateMenuItemSearchText(false);
-        model.setItemSearchText("");
-        InputMethodManager imm = (InputMethodManager)
-                getSystemService(ListOfBDItemsActivity.this.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-        fab.show();
     }
 
 }

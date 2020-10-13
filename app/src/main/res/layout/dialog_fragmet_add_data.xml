@@ -14,7 +14,7 @@
             android:importantForAutofill="no"
             android:hint="@string/default_text"
             android:backgroundTint="@android:color/black"
-            android:maxLength="30"/>
+            android:maxLength="30" />
 
         <TextView
             android:id="@+id/AddDataDFHelper_text"

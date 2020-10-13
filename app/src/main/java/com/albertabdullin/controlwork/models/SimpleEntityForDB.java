@@ -7,6 +7,11 @@ public class SimpleEntityForDB implements Parcelable {
     private int id;
     private String description;
 
+    public SimpleEntityForDB(int id, String description) {
+        this.id = id;
+        this.description = description;
+    }
+
     public SimpleEntityForDB() { }
 
     protected SimpleEntityForDB(Parcel in) {

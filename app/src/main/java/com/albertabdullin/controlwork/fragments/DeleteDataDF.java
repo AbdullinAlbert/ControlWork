@@ -59,9 +59,9 @@ public class DeleteDataDF extends DialogFragment {
             @Override
             public void onClick(View v) {
                 Iterator<SimpleEntityForDB> iterator = AMControllerForListItems.getTracker().getSelection().iterator();
-                List<SimpleEntityForDB> deleteItemsList = new ArrayList<>();
-                while (iterator.hasNext()) deleteItemsList.add(iterator.next());
-                viewModel.deleteItem(deleteItemsList);
+                List<SimpleEntityForDB> deletedItemsList = new ArrayList<>();
+                while (iterator.hasNext()) deletedItemsList.add(iterator.next());
+                viewModel.deleteItem(deletedItemsList);
                 AMControllerForListItems.getTracker().clearSelection();
                 getDialog().dismiss();
             }

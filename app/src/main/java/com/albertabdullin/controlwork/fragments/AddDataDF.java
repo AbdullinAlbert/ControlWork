@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.content.DialogInterface;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,10 +26,10 @@ import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 public class AddDataDF extends DialogFragment {
+    public static final String TAG = "DialogFragmnet for add items";
     private ListOfItemsVM viewModel;
     private TextView helperTextView;
     private TextView tvAddNewData;
-    static private AddDataDF objectAddDataDf = null;
 
     View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
         @Override
@@ -58,12 +59,6 @@ public class AddDataDF extends DialogFragment {
             helperTextView.setText(s.length() + " / 30");
         }
     };
-
-    public static AddDataDF getSingletoneObjectAddDataDF() {
-        if (objectAddDataDf == null)
-            objectAddDataDf = new AddDataDF();
-        return objectAddDataDf;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,14 +118,18 @@ public class AddDataDF extends DialogFragment {
 
     private void hideKeyBoard() {
         tvAddNewData.setFocusable(false);
+        tvAddNewData.clearFocus();
         viewModel.setActivatedDF(false);
-        InputMethodManager imm = (InputMethodManager)
-            getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(tvAddNewData.getWindowToken(), 0);
+        if (tvAddNewData != null) {
+            InputMethodManager imm = (InputMethodManager)
+                    getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(tvAddNewData.getWindowToken(), 0);
+        }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        hideKeyBoard();
+        super.onDismiss(dialog);
     }
 }
