@@ -41,6 +41,8 @@ public class ListOfItemsVM extends AndroidViewModel {
     private boolean activatedDF = false;
     private boolean isBlankCall = true;
     private SearchItemsThread searchItemsThread;
+    private String itemSearchText;
+    private boolean stateMenuItemSearchText = false;
 
     private class AddItemsThread extends Thread {
         private String item;
@@ -344,6 +346,17 @@ public class ListOfItemsVM extends AndroidViewModel {
         return activatedDF;
     }
 
+    public void setItemSearchText(String s) { itemSearchText = s; }
+
+    public String getItemSearchText() { return itemSearchText; }
+
+    public boolean isStateMenuItemSearchTextActive() {
+        return stateMenuItemSearchText;
+    }
+
+    public void setStateMenuItemSearchText(boolean b) {
+        stateMenuItemSearchText = b;
+    }
 
     public void addItem(String s) {
         AddItemsThread addItemsThread = new AddItemsThread(s);
@@ -406,7 +419,7 @@ public class ListOfItemsVM extends AndroidViewModel {
         isBlankCall = true;
     }
 
-    public void sayToStop() {
+    public void sayToStopSearch() {
         if (isBlankCall) isBlankCall = false;
         else {
             searchItemsThread.stopSearch();
@@ -416,9 +429,10 @@ public class ListOfItemsVM extends AndroidViewModel {
         }
     }
 
-    public void stopSearch() {
+    public void closeSearchThread() {
         if (searchItemsThread != null) searchItemsThread.closeThread();
-         isBlankCall = true;
+        searchItemsThread = null;
+        isBlankCall = true;
     }
 
     public void updateSearchAdapterList() {

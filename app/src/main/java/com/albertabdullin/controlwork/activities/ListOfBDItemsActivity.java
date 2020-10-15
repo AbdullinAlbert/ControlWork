@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -14,16 +13,21 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.customView.SearchEditText;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItems;
 import com.albertabdullin.controlwork.fragments.AddDataDF;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemKeyProvider;
@@ -104,6 +108,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
         Intent resultIntent = new Intent();
         resultIntent.putExtra(FillNewData_Activity.ITEM_FROM_DB, eDB);
         setResult(RESULT_OK, resultIntent);
+        model.closeSearchThread();
         finish();
     }
 
@@ -133,14 +138,20 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
                     }
                 //если были удалены элементы из списка
                 } else if (model.getAdapterListOfEntitiesVM().size() > changedList.size()) {
-                    List<Integer> deletedPositions = model.getListOfDeletedPositions();
-                    for (int i = 0; i < deletedPositions.size(); i++) {
-                        int p = deletedPositions.get(i) - i;
-                        model.getAdapterListOfEntitiesVM().remove(p);
-                        adapterForItemsFromDB.notifyItemRemoved(p);
+                    if ((double)changedList.size() / (double) model.getAdapterListOfEntitiesVM().size() > 0.6) {
+                        List<Integer> deletedPositions = model.getListOfDeletedPositions();
+                        for (int i = 0; i < deletedPositions.size(); i++) {
+                            int p = deletedPositions.get(i) - i;
+                            model.getAdapterListOfEntitiesVM().remove(p);
+                            adapterForItemsFromDB.notifyItemRemoved(p);
+                        }
+                    } else {
+                        model.getAdapterListOfEntitiesVM().retainAll(changedList);
+                        adapterForItemsFromDB.notifyDataSetChanged();
                     }
-                //если изменили какой-либо из элементов
-                } else if (model.getAdapterListOfEntitiesVM().size() == changedList.size()) {
+
+                } //если изменили какой-либо из элементов
+                else if (model.getAdapterListOfEntitiesVM().size() == changedList.size()) {
                     adapterForItemsFromDB.notifyItemChanged(model.getUpdatedItemPosition());
                 }
             }
@@ -183,36 +194,90 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.stable_appbar_list_items, menu);
-        SearchView.OnQueryTextListener queryTextChangeListener = new SearchView.OnQueryTextListener() {
-
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        TextWatcher textWatcher = new TextWatcher() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText.equals("")) model.sayToStop();
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String newText = s.toString();
+                model.setItemSearchText(newText);
+                if (newText.equals("")) model.sayToStopSearch();
                 else if (model.isSearchIsActive()) model.sendNewText(newText);
                 else model.startSearch(newText);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        };
+        View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
+                    model.setStateMenuItemSearchText(true);
+                    InputMethodManager imm = (InputMethodManager)
+                            getSystemService(INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(0, 0);
+
+                }else if (!hasFocus) {
+                    hideKeyBoard((EditText) v);
+                }
+            }
+        };
+        EditText searchEditText = ((SearchEditText)menuItem.getActionView()).getTextView();
+        searchEditText.addTextChangedListener(textWatcher);
+        searchEditText.setOnFocusChangeListener(focusChangeListener);
+        MenuItem.OnActionExpandListener actionExpandListener = new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                model.setStateMenuItemSearchText(true);
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                model.closeSearchThread();
+                model.setStateMenuItemSearchText(false);
+                fab.show();
                 return true;
             }
         };
 
-        SearchView.OnCloseListener closeListener = new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                model.stopSearch();
-                return true;
-            }
-        };
-        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setOnQueryTextListener(queryTextChangeListener);
-        searchView.setOnCloseListener(closeListener);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(true);
+        menuItem.setOnActionExpandListener(actionExpandListener);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (model.isStateMenuItemSearchTextActive()) {
+            menu.performIdentifierAction(R.id.action_search, 0);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_search) {
+            EditText searchEditText = ((SearchEditText)item.getActionView()).getTextView();
+            searchEditText.setText(model.getItemSearchText());
+            searchEditText.requestFocus();
+            fab.hide();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void hideKeyBoard(EditText editText) {
+        model.setStateMenuItemSearchText(false);
+        model.setItemSearchText("");
+        InputMethodManager imm = (InputMethodManager)
+                getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        fab.show();
     }
 
 }
