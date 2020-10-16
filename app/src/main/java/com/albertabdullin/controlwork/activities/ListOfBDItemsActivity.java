@@ -205,7 +205,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String newText = s.toString();
                 model.setItemSearchText(newText);
-                if (newText.equals("")) model.sayToStopSearch();
+                if (newText.equals("")) model.sayToStopSearch(before);
                 else if (model.isSearchIsActive()) model.sendNewText(newText);
                 else model.startSearch(newText);
             }
@@ -241,6 +241,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
+                model.sayToStopSearch(-1);
                 model.closeSearchThread();
                 model.setStateMenuItemSearchText(false);
                 fab.show();

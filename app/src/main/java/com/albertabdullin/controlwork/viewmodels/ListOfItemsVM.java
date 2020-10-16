@@ -299,6 +299,7 @@ public class ListOfItemsVM extends AndroidViewModel {
                     msg = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.SEARCH_IS_DONE, 0, 0);
                     ListOfBDItemsActivity.mHandler.sendMessage(msg);
                 } else {
+                    if (!store.isEmpty()) store.clear();
                     isStopSearch.set(false);
                     findedItemsList.clear();
                 }
@@ -419,9 +420,9 @@ public class ListOfItemsVM extends AndroidViewModel {
         isBlankCall = true;
     }
 
-    public void sayToStopSearch() {
-        if (isBlankCall) isBlankCall = false;
-        else {
+    public void sayToStopSearch(int before) {
+        if ((isBlankCall) && (before == 0)) isBlankCall = false;
+        else if (searchItemsThread != null) {
             searchItemsThread.stopSearch();
             if (cacheForAdapterList.size() == adapterListOfEntitiesVM.size()) return;
             adapterListOfEntitiesVM.clear();
