@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.VoiceInteractor;
 import android.content.DialogInterface;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 public class AddDataDF extends DialogFragment {
@@ -76,7 +78,20 @@ public class AddDataDF extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         tvAddNewData = view.findViewById(R.id.editTextNewData);
-        tvAddNewData.setHint(R.string.hint_firstname_secondname);
+        switch (viewModel.getNumberOfNeededTable()) {
+            case FillNewData_Activity.TABLE_OF_EMPLOYERS:
+                tvAddNewData.setHint(R.string.hint_firstname_secondname);
+                break;
+            case FillNewData_Activity.TABLE_OF_FIRMS:
+                tvAddNewData.setHint(R.string.hint_frim);
+            break;
+            case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
+                tvAddNewData.setHint(R.string.hint_type_of_work);
+                break;
+            case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
+                tvAddNewData.setHint(R.string.hint_place_of_work);
+                break;
+        }
         tvAddNewData.addTextChangedListener(countCharTW);
         helperTextView = view.findViewById(R.id.AddDataDFHelper_text);
         Button bAdd = view.findViewById(R.id.add_df_button);

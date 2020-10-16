@@ -19,6 +19,9 @@
     <string name="add_remark">Примечание:</string>
     <string name="title_activity_list_of_employers_">ListOfEmployers_Activity</string>
     <string name="hint_firstname_secondname">ФИО сотруднка</string>
+    <string name="hint_frim">Название фирмы</string>
+    <string name="hint_type_of_work">Тип работы</string>
+    <string name="hint_place_of_work">Место работы</string>
     <string name="add_item">Добавить</string>
     <string name="rename_item">Переименовать</string>
     <string name="delete_item">Удалить</string>

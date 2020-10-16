@@ -18,6 +18,7 @@
         android:importantForAutofill="no"
         android:maxLength="30"
         android:cursorVisible="true"
+        android:textCursorDrawable="@null"
         />
 
     <ImageView

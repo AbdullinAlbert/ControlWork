@@ -15,6 +15,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
@@ -43,6 +44,9 @@ public class ListOfItemsVM extends AndroidViewModel {
     private SearchItemsThread searchItemsThread;
     private String itemSearchText;
     private boolean stateMenuItemSearchText = false;
+    private String currentNameOfTable;
+    private String currentNameOfColumn;
+    private int numberOfNeededTable;
 
     private class AddItemsThread extends Thread {
         private String item;
@@ -58,8 +62,8 @@ public class ListOfItemsVM extends AndroidViewModel {
                 cwdbHelper = new CWDBHelper(getApplication());
                 db = cwdbHelper.getWritableDatabase();
                 ContentValues cv = new ContentValues();
-                cv.put(CWDBHelper.T_EMP_C_FIO, this.item);
-                idKey = (int) db.insert(CWDBHelper.TABLE_NAME_EMP, null, cv);
+                cv.put(currentNameOfColumn, this.item);
+                idKey = (int) db.insert(currentNameOfTable, null, cv);
             } catch (SQLiteException e) {
                 Toast toast = Toast.makeText(getApplication(), "DB can't write data", Toast.LENGTH_SHORT);
                 toast.show();
@@ -116,7 +120,7 @@ public class ListOfItemsVM extends AndroidViewModel {
             try {
                 cwdbHelper = new CWDBHelper(getApplication());
                 db = cwdbHelper.getWritableDatabase();
-                count = db.delete(CWDBHelper.TABLE_NAME_EMP, whereClause, arguments);
+                count = db.delete(currentNameOfTable, whereClause, arguments);
             }catch (SQLiteException e) {
                 Toast toast = Toast.makeText(getApplication(), "Something went wrong: DB can't delete data", Toast.LENGTH_SHORT);
                 toast.show();
@@ -157,12 +161,11 @@ public class ListOfItemsVM extends AndroidViewModel {
                 cwdbHelper = new CWDBHelper(getApplication());
                 db = cwdbHelper.getWritableDatabase();
                 ContentValues cv = new ContentValues();
-                cv.put(CWDBHelper.T_EMP_C_FIO, newDescription);
-                idKey = db.update(CWDBHelper.TABLE_NAME_EMP,
+                cv.put(currentNameOfColumn, newDescription);
+                idKey = db.update(currentNameOfTable,
                         cv,
                         "_id = ?",
                         new String[] { Integer.toString(eDB.getID()) });
-                Log.d("UpdateThread", Integer.toString(idKey));
             } catch (SQLiteException e) {
                 Toast toast = Toast.makeText(getApplication(), "DB can't change data", Toast.LENGTH_SHORT);
                 toast.show();
@@ -178,7 +181,8 @@ public class ListOfItemsVM extends AndroidViewModel {
     }
 
     private class LoadItemsThread extends Thread {
-        Message message;
+        public static final String LOAD_ITEMS_TAG = "LoadItemsThread";
+        private Message message;
         @Override
         public void run() {
             SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
@@ -187,8 +191,8 @@ public class ListOfItemsVM extends AndroidViewModel {
             Cursor cursor = null;
             try {
                 db = cwdbHelper.getReadableDatabase();
-                cursor = db.query(CWDBHelper.TABLE_NAME_EMP,
-                        new String[]{"_id", CWDBHelper.T_EMP_C_FIO},
+                cursor = db.query(currentNameOfTable,
+                        new String[]{"_id", currentNameOfColumn},
                         null, null, null, null, null);
                 if(cursor.moveToFirst()) {
                     do {
@@ -199,8 +203,7 @@ public class ListOfItemsVM extends AndroidViewModel {
                     } while (cursor.moveToNext());
                 }
             } catch (SQLiteException e) {
-                Toast toast = Toast.makeText(getApplication(), "Something wrong with DB", Toast.LENGTH_SHORT);
-                toast.show();
+                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + currentNameOfTable);
             } finally {
                 cwdbHelper.close();
                 if(cursor != null) cursor.close();
@@ -248,7 +251,6 @@ public class ListOfItemsVM extends AndroidViewModel {
         }
 
         private void searchInFullList() {
-            Log.d(TAG_SEARCH_TREAD, "метод searchInFullList");
             int i = 0;
             findedItemsList.clear();
             while (i < cacheForAdapterList.size()) {
@@ -305,12 +307,33 @@ public class ListOfItemsVM extends AndroidViewModel {
                 }
                 if (!hPattern.contains(pattern)) hPattern = pattern;
             }
-            Log.d(TAG_SEARCH_TREAD, "вышел из потока");
         }
     }
 
     public ListOfItemsVM(@NonNull Application application) {
         super(application);
+    }
+
+    public void setCurrentDBTable(int i) {
+        numberOfNeededTable = i;
+        switch (numberOfNeededTable) {
+            case FillNewData_Activity.TABLE_OF_EMPLOYERS:
+                currentNameOfTable = CWDBHelper.TABLE_NAME_EMP;
+                currentNameOfColumn = CWDBHelper.T_EMP_C_FIO;
+                break;
+            case FillNewData_Activity.TABLE_OF_FIRMS:
+                currentNameOfTable = CWDBHelper.TABLE_NAME_FIRM;
+                currentNameOfColumn = CWDBHelper.T_FIRM_C_DESCRIPTION;
+                break;
+            case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
+                currentNameOfTable = CWDBHelper.TABLE_NAME_TYPE_OF_WORK;
+                currentNameOfColumn =CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION;
+                break;
+            case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
+                currentNameOfTable = CWDBHelper.TABLE_NAME_PLACE_OF_WORK;
+                currentNameOfColumn =CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION;
+                break;
+        }
     }
 
     public LiveData<List<SimpleEntityForDB>> getLiveDataEmp() {
@@ -325,6 +348,10 @@ public class ListOfItemsVM extends AndroidViewModel {
     public void notifyAboutLoadItems() {
         entities.setValue(hListForWorkWithDB);
         hListForWorkWithDB = null;
+    }
+
+    public int getNumberOfNeededTable() {
+        return numberOfNeededTable;
     }
 
     public List<SimpleEntityForDB> getAdapterListOfEntitiesVM() {

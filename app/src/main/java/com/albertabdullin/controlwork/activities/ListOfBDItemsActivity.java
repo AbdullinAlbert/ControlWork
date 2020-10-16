@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.customView.SearchEditText;
@@ -107,6 +108,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     public void onClick(SimpleEntityForDB eDB) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(FillNewData_Activity.ITEM_FROM_DB, eDB);
+        resultIntent.putExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, model.getNumberOfNeededTable());
         setResult(RESULT_OK, resultIntent);
         model.closeSearchThread();
         finish();
@@ -115,13 +117,35 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_of_employers);
+        setContentView(R.layout.activity_list_of_items);
+        model = new ViewModelProvider(this, new ViewModelFactory(this.getApplication())).get(ListOfItemsVM.class);
         Toolbar toolbar = findViewById(R.id.toolbar_list_of_emp);
-        toolbar.setTitle("Список сотрудников");
+        switch (getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1)) {
+            case FillNewData_Activity.TABLE_OF_EMPLOYERS:
+                toolbar.setTitle("Список сотрудников");
+                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_EMPLOYERS);
+                break;
+            case FillNewData_Activity.TABLE_OF_FIRMS:
+                toolbar.setTitle("Список фирм");
+                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_FIRMS);
+                break;
+            case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
+                toolbar.setTitle("Список типов работы");
+                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_TYPES_OF_WORK);
+                break;
+            case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
+                toolbar.setTitle("Список мест работы");
+                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_PLACES_OF_WORK);
+                break;
+            default:
+                Toast toast = Toast.makeText(getApplication(), "App works incorrect", Toast.LENGTH_SHORT);
+                toast.show();
+                finish();
+        }
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        model = new ViewModelProvider(this, new ViewModelFactory(this.getApplication())).get(ListOfItemsVM.class);
+        ab.setHomeButtonEnabled(true);
         RecyclerView recyclerView = findViewById(R.id.list_of_emp);
         Observer<List<SimpleEntityForDB>> observerRV = new Observer<List<SimpleEntityForDB>>() {
             @Override
@@ -263,11 +287,18 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_search) {
-            EditText searchEditText = ((SearchEditText)item.getActionView()).getTextView();
-            searchEditText.setText(model.getItemSearchText());
-            searchEditText.requestFocus();
-            fab.hide();
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                EditText searchEditText = ((SearchEditText)item.getActionView()).getTextView();
+                searchEditText.setText(model.getItemSearchText());
+                searchEditText.requestFocus();
+                fab.hide();
+                break;
+            case android.R.id.home:
+                Intent resultIntent = new Intent();
+                setResult(RESULT_CANCELED, resultIntent);
+                finish();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

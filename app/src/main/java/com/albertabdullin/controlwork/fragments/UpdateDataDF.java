@@ -22,6 +22,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItems;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
@@ -74,7 +75,20 @@ public class UpdateDataDF extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         tvUpdateData = view.findViewById(R.id.UpdateDataDFText);
-        tvUpdateData.setHint(R.string.hint_firstname_secondname);
+        switch (viewModel.getNumberOfNeededTable()) {
+            case FillNewData_Activity.TABLE_OF_EMPLOYERS:
+                tvUpdateData.setHint(R.string.hint_firstname_secondname);
+                break;
+            case FillNewData_Activity.TABLE_OF_FIRMS:
+                tvUpdateData.setHint(R.string.hint_frim);
+                break;
+            case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
+                tvUpdateData.setHint(R.string.hint_type_of_work);
+                break;
+            case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
+                tvUpdateData.setHint(R.string.hint_place_of_work);
+                break;
+        }
         tvUpdateData.addTextChangedListener(countCharTW);
         helperTextView = view.findViewById(R.id.UpdateDataDFHelper_text);
         Button bAdd = view.findViewById(R.id.UpdateDataDAddButton);
