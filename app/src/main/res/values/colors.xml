@@ -4,5 +4,6 @@
     <color name="colorPrimaryDark">#aeaeae</color>
     <color name="colorAccent">#e0e0e0</color>
     <color name="checkImage">#19E821</color>
-    <color name="pressedItem"></color>
+    <color name="standardBlack">#000000</color>
+    <color name="highliteBorder">#D50404</color>
 </resources>

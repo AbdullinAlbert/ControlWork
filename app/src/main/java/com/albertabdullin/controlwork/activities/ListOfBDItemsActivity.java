@@ -37,7 +37,7 @@ import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 import com.albertabdullin.controlwork.recycler_views.RecyclerViewObserver;
-import com.albertabdullin.controlwork.viewmodels.ViewModelFactory;
+import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryListItems;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -56,7 +56,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     private ActionMode actionMode = null;
     private FloatingActionButton fab;
 
-    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
+    public static Handler handler = new Handler(Looper.getMainLooper()) {
         public void handleMessage (Message msg) {
             switch (msg.what) {
                 case ADD:
@@ -118,7 +118,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_items);
-        model = new ViewModelProvider(this, new ViewModelFactory(this.getApplication())).get(ListOfItemsVM.class);
+        model = new ViewModelProvider(this, new ViewModelFactoryListItems(this.getApplication())).get(ListOfItemsVM.class);
         Toolbar toolbar = findViewById(R.id.toolbar_list_of_emp);
         switch (getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1)) {
             case FillNewData_Activity.TABLE_OF_EMPLOYERS:
@@ -145,7 +145,6 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        ab.setHomeButtonEnabled(true);
         RecyclerView recyclerView = findViewById(R.id.list_of_emp);
         Observer<List<SimpleEntityForDB>> observerRV = new Observer<List<SimpleEntityForDB>>() {
             @Override

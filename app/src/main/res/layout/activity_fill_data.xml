@@ -35,11 +35,19 @@
                 android:id="@+id/add_empl_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:hint="@string/hint_for_add_empl"
                 android:importantForAutofill="no"
                 android:inputType="textPersonName"
-                android:focusable="false" />
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack"/>
+
+            <TextView
+                android:id="@+id/incorrectEmployerFocus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Некорректные данные"
+                android:textSize="8dp"
+                android:textColor="@color/highliteBorder" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -53,11 +61,18 @@
                 android:id="@+id/add_firm_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:hint="@string/hint_for_add_firm"
                 android:inputType="textPersonName"
                 android:importantForAutofill="no"
-                android:focusable="false" />
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack"/>
+            <TextView
+                android:id="@+id/incorrectFirmFocus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Некорректные данные"
+                android:textSize="8dp"
+                android:textColor="@color/highliteBorder" />
 
             <TextView
                 android:id="@+id/textView5"
@@ -71,11 +86,19 @@
                 android:id="@+id/add_placeOfWork_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:hint="@string/hint_for_add_place_of_work"
                 android:inputType="textPersonName"
                 android:importantForAutofill="no"
-                android:focusable="false" />
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/incorrectPoWFocus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Некорректные данные"
+                android:textSize="8dp"
+                android:textColor="@color/highliteBorder" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -89,11 +112,19 @@
                 android:id="@+id/add_typeOfWork_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:hint="@string/hint_for_type_of_work"
                 android:inputType="textPersonName"
                 android:importantForAutofill="no"
-                android:focusable="false" />
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/incorrectToWFocus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Некорректные данные"
+                android:textSize="8dp"
+                android:textColor="@color/highliteBorder" />
 
             <TextView
                 android:id="@+id/textView7"
@@ -108,10 +139,10 @@
                 android:id="@+id/add_date_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:inputType="date"
                 android:importantForAutofill="no"
-                android:focusable="false" />
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
 
             <TextView
                 android:id="@+id/textView8"
@@ -126,9 +157,18 @@
                 android:id="@+id/add_result_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
+                android:maxLength="32"
                 android:importantForAutofill="no"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/incorrectResultValueFocus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Некорректные данные"
+                android:textSize="8dp"
+                android:textColor="@color/highliteBorder" />
 
             <TextView
                 android:id="@+id/textView9"
@@ -142,25 +182,25 @@
                 android:id="@+id/add_note_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:hint="@string/hint_for_needless"
                 android:inputType="textPersonName"
-                android:importantForAutofill="no" />
+                android:importantForAutofill="no"
+                android:maxLength="30"
+                android:backgroundTint="@color/standardBlack" />
 
             <Button
                 android:id="@+id/add_button"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
+                android:layout_marginTop="8dp"
                 android:layout_marginLeft="25dp"
                 android:layout_marginRight="25dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="12dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="@color/colorPrimary"
                 android:text="@string/button_add_data"
-                android:focusableInTouchMode="false"
-                android:stateListAnimator="@null"
-                android:background="@color/colorPrimary"/>
+                style="?android:attr/borderlessButtonStyle"/>
         </LinearLayout>
     </ScrollView>
-
 </LinearLayout>

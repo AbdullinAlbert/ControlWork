@@ -75,7 +75,7 @@ public class ListOfItemsVM extends AndroidViewModel {
             SimpleEntityForDB eDB = new SimpleEntityForDB(idKey, this.item);
             hListForWorkWithDB = new ArrayList<>(getAdapterListOfEntitiesVM());
             hListForWorkWithDB.add(eDB);
-            ListOfBDItemsActivity.mHandler.sendEmptyMessage(ListOfBDItemsActivity.ADD);
+            ListOfBDItemsActivity.handler.sendEmptyMessage(ListOfBDItemsActivity.ADD);
         }
     }
 
@@ -130,10 +130,10 @@ public class ListOfItemsVM extends AndroidViewModel {
                 if(cwdbHelper != null) cwdbHelper.close();
             }
             if (count != 0) {
-                message = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.OK, 0);
+                message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.OK, 0);
                 listOfDeletedPositions.sort(comparator);
-            } else message = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.NOT_OK, 0);
-            ListOfBDItemsActivity.mHandler.sendMessage(message);
+            } else message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.NOT_OK, 0);
+            ListOfBDItemsActivity.handler.sendMessage(message);
         }
     }
 
@@ -174,17 +174,17 @@ public class ListOfItemsVM extends AndroidViewModel {
                 if(db != null) db.close();
                 if(cwdbHelper != null) cwdbHelper.close();
             }
-            if(idKey != 0) message = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.OK, 0);
-            else message = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.NOT_OK, 0);
-            ListOfBDItemsActivity.mHandler.sendMessage(message);
+            if(idKey != 0) message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.OK, 0);
+            else message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.NOT_OK, 0);
+            ListOfBDItemsActivity.handler.sendMessage(message);
         }
     }
 
     private class LoadItemsThread extends Thread {
         public static final String LOAD_ITEMS_TAG = "LoadItemsThread";
-        private Message message;
         @Override
         public void run() {
+            Message message;
             SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
             hListForWorkWithDB = new ArrayList<>();
             SQLiteDatabase db = null;
@@ -209,8 +209,8 @@ public class ListOfItemsVM extends AndroidViewModel {
                 if(cursor != null) cursor.close();
                 if(db != null) db.close();
             }
-            message = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.LOAD);
-            ListOfBDItemsActivity.mHandler.sendMessage(message);
+            message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.LOAD);
+            ListOfBDItemsActivity.handler.sendMessage(message);
         }
     }
 
@@ -298,8 +298,8 @@ public class ListOfItemsVM extends AndroidViewModel {
                 if (!hPattern.equals("") && pattern.contains(hPattern)) searchInFilteredList();
                 else searchInFullList();
                 if (!isStopSearch.get()) {
-                    msg = ListOfBDItemsActivity.mHandler.obtainMessage(ListOfBDItemsActivity.SEARCH_IS_DONE, 0, 0);
-                    ListOfBDItemsActivity.mHandler.sendMessage(msg);
+                    msg = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.SEARCH_IS_DONE, 0, 0);
+                    ListOfBDItemsActivity.handler.sendMessage(msg);
                 } else {
                     if (!store.isEmpty()) store.clear();
                     isStopSearch.set(false);
