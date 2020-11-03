@@ -336,7 +336,7 @@ public class ListOfItemsVM extends AndroidViewModel {
         }
     }
 
-    public LiveData<List<SimpleEntityForDB>> getLiveDataEmp() {
+    public LiveData<List<SimpleEntityForDB>> getLiveData() {
         if(entities == null) {
             entities = new MutableLiveData<>();
             LoadItemsThread loadItemsThread = new LoadItemsThread();

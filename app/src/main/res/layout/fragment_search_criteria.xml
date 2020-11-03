@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_search_criteria"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusableInTouchMode="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/add_employer" />
+
+            <EditText
+                android:id="@+id/select_empl_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_search_criteria"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:focusable="false" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_firm" />
+
+            <EditText
+                android:id="@+id/select_firm_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_search_criteria"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack"/>
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_place_of_work" />
+
+            <EditText
+                android:id="@+id/select_placeOfWork_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_search_criteria"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_type_of_work" />
+
+            <EditText
+                android:id="@+id/select_typeOfWork_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_search_criteria"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_date"
+                android:labelFor="@id/add_date_editText"/>
+
+            <EditText
+                android:id="@+id/select_date_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_search_criteria"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_result"
+                android:labelFor="@id/add_result_editText"/>
+
+            <EditText
+                android:id="@+id/select_result_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="32"
+                android:hint="@string/hint_for_search_criteria"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_remark" />
+
+            <EditText
+                android:id="@+id/select_note_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_search_criteria"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:maxLength="30"
+                android:backgroundTint="@color/standardBlack" />
+
+            <Button
+                android:id="@+id/search_button"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginBottom="12dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="@color/colorPrimary"
+                android:text="@string/search_item"
+                style="?android:attr/borderlessButtonStyle"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

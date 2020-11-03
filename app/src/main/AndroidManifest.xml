@@ -18,6 +18,11 @@
             android:label="Добавьте результат работы"
             android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
             />
+        <activity
+            android:name=".activities.EditDeleteDataActivity"
+            android:label="Критерии поиска"
+            android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
+            />
         <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

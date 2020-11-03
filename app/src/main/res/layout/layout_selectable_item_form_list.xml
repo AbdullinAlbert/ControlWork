@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/textview_to_select_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp" />
+
+    <TextView
+        android:id="@+id/item_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        app:layout_anchor="@id/textview_to_select_item"
+        app:layout_anchorGravity="bottom"
+        android:paddingBottom="8dp"/>
+
+    <CheckBox
+        android:id="@+id/checkBox_for_select"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/textview_to_select_item"
+        app:layout_anchorGravity="end|center"
+        android:layout_marginEnd="8dp"
+        android:buttonTint="@color/checkImage"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
