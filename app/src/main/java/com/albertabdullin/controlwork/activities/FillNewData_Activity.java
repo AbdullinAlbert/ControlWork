@@ -31,10 +31,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.fragments.CalendarDF;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.AddNewDataVM;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryAddNewData;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
 import java.util.Calendar;
 
@@ -45,7 +46,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     private EditText addTypeOfWork;
     private EditText date;
     private EditText resultValue;
-    private Button button;
+    private Button addButton;
     private EditText note;
     private static AddNewDataVM model;
     public static final String ITEM_FROM_DB = "get_item_from_db";
@@ -95,6 +96,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
             public void onActivityResult(ActivityResult result) {
                 if(result.getResultCode() == Activity.RESULT_OK) {
                     Intent intent = result.getData();
+                    assert intent != null;
                     SimpleEntityForDB eDB = intent.getParcelableExtra(ITEM_FROM_DB);
                     switch (intent.getIntExtra(LAUNCH_DEFINITELY_DB_TABLE, -1)) {
                         case TABLE_OF_EMPLOYERS:
@@ -104,6 +106,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                                 TextView tv = findViewById(R.id.incorrectEmployerFocus);
                                 tv.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
                             }
+                            assert eDB != null;
                             addEmpl.setText(eDB.getDescription());
                             model.setEmployerId(eDB.getID());
                             break;
@@ -114,6 +117,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                                 TextView tv = findViewById(R.id.incorrectFirmFocus);
                                 tv.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
                             }
+                            assert eDB != null;
                             addFirm.setText(eDB.getDescription());
                             model.setFirmId(eDB.getID());
                             break;
@@ -124,6 +128,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                                 TextView tv = findViewById(R.id.incorrectToWFocus);
                                 tv.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
                             }
+                            assert eDB != null;
                             addTypeOfWork.setText(eDB.getDescription());
                             model.setTowId(eDB.getID());
                             break;
@@ -134,6 +139,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                                 TextView tv = findViewById(R.id.incorrectPoWFocus);
                                 tv.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
                             }
+                            assert eDB != null;
                             addPlaceOfWork.setText(eDB.getDescription());
                             model.setPowId(eDB.getID());
                             break;
@@ -145,8 +151,19 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     View.OnClickListener pickDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            CalendarDF calendarDF = new CalendarDF(Calendar.getInstance());
-            calendarDF.show(getSupportFragmentManager(), "calendar");
+            MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+            MaterialDatePicker<Long> materialDatePicker = builder.build();
+            materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
+                @Override
+                public void onPositiveButtonClick(Long selection) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(selection);
+                    String date = convertLongToStringDate(calendar);
+                    FillNewData_Activity.this.date.setText(date);
+                    model.setDateForSql(selection);
+                }
+            });
+            materialDatePicker.show(getSupportFragmentManager(), "date_picker");
         }
     };
 
@@ -154,13 +171,13 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         @Override
         public void onClick(View v) {
             model.startToCheckCorrectData();
-            button.setText("Проверка корректности данных");
-            button.setClickable(false);
-            button.setForeground(null);
+            addButton.setText("Проверка корректности данных");
+            addButton.setClickable(false);
+            addButton.setForeground(null);
         }
     };
 
-    TextWatcher tw = new TextWatcher() {
+    TextWatcher twResultValue = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
@@ -174,10 +191,109 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                 tv.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
                 model.setCorrectResultValueDataTrue();
             }
+            model.setResultValueString(s.toString());
         }
 
         @Override
         public void afterTextChanged(Editable s) {
+        }
+    };
+
+    TextWatcher twNote = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            model.setNote(s.toString());
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    Observer<Integer> observerIncorrectET = new Observer<Integer>() {
+        @Override
+        public void onChanged(Integer i) {
+            EditText editText;
+            switch (i) {
+                case AddNewDataVM.INCORRECT_EMPLOYEE_ET:
+                    editText = addEmpl;
+                    break;
+                case AddNewDataVM.INCORRECT_FIRM_ET:
+                    editText = addFirm;
+                    break;
+                case AddNewDataVM.INCORRECT_TYPE_ET:
+                    editText = addTypeOfWork;
+                    break;
+                case AddNewDataVM.INCORRECT_PLACE_ET:
+                    editText = addPlaceOfWork;
+                    break;
+                case AddNewDataVM.INCORRECT_RES_VALUE_ET:
+                    editText = resultValue;
+                    break;
+                default:
+                    throw new RuntimeException("Опечатка в константах некорректно заполненных полей");
+            }
+            editText.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
+            editText.setTextColor(getResources().getColor(R.color.highliteBorder, null));
+        }
+    };
+
+    Observer<Integer> observerIncorrectTV = new Observer<Integer>() {
+        @Override
+        public void onChanged(Integer i) {
+            TextView tv;
+            switch (i) {
+                case AddNewDataVM.INCORRECT_EMPLOYEE_ET:
+                    tv = findViewById(R.id.incorrectEmployerFocus);
+                    break;
+                case AddNewDataVM.INCORRECT_FIRM_ET:
+                    tv = findViewById(R.id.incorrectFirmFocus);
+                    break;
+                case AddNewDataVM.INCORRECT_TYPE_ET:
+                    tv = findViewById(R.id.incorrectToWFocus);
+                    break;
+                case AddNewDataVM.INCORRECT_PLACE_ET:
+                    tv = findViewById(R.id.select_placeOfWork_editText);
+                    break;
+                case AddNewDataVM.INCORRECT_RES_VALUE_ET:
+                    tv = findViewById(R.id.incorrectResultValueFocus);
+                    break;
+                default:
+                    throw new RuntimeException("Опечатка в константах некорректно заполненных полей");
+            }
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.setMarginStart(12);
+            tv.setLayoutParams(lp);
+        }
+    };
+
+    Observer<Boolean> observerAddButtonForPrepare = new Observer<Boolean>() {
+        @Override
+        public void onChanged(Boolean b) {
+            addButton.setClickable(true);
+            addButton.setText("Добавить");
+            int[] attr = new int[] {android.R.attr.selectableItemBackground};
+            TypedArray typedArray = obtainStyledAttributes(attr);
+            Drawable drawableAttr = typedArray.getDrawable(0);
+            typedArray.recycle();
+            addButton.setForeground(drawableAttr);
+            if (b) {
+                resultValue.setText("");
+                note.setText("");
+            }
+        }
+    };
+
+    Observer<String> observerAddButtonChangeText = new Observer<String>() {
+        @Override
+        public void onChanged(String s) {
+            addButton.setText(s);
         }
     };
 
@@ -188,9 +304,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         Toolbar toolbar = findViewById(R.id.toolbar_list_of_emp);
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
+        if (ab != null) ab.setDisplayHomeAsUpEnabled(true);
+        else throw new RuntimeException("Support ActionBar равен Null");
         model = new ViewModelProvider(this, new ViewModelFactoryAddNewData(this.getApplication())).get(AddNewDataVM.class);
-        model.setContext(this);
         TextView tvEmp = findViewById(R.id.incorrectEmployerFocus);
         tvEmp.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
         TextView tvFirm = findViewById(R.id.incorrectFirmFocus);
@@ -260,13 +376,18 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         date = findViewById(R.id.add_date_editText);
         date.setOnClickListener(pickDate);
         resultValue = findViewById(R.id.add_result_editText);
-        resultValue.addTextChangedListener(tw);
+        resultValue.addTextChangedListener(twResultValue);
         note = findViewById(R.id.add_note_editText);
-        button = findViewById(R.id.add_button);
-        button.setOnClickListener(addDataListener);
+        note.addTextChangedListener(twNote);
+        addButton = findViewById(R.id.add_button);
+        addButton.setOnClickListener(addDataListener);
+        model.getWarningEmployerETLD().observe(this, observerIncorrectET);
+        model.getWarningEmployerTVLD().observe(this, observerIncorrectTV);
+        model.getPrepareAddButton().observe(this, observerAddButtonForPrepare);
+        model.getChangeTextAddButton().observe(this, observerAddButtonChangeText);
         if (model.isFirstLaunch()) {
-            date.setText(model.convertDateToString(Calendar.getInstance()));
-            model.setDateForSql(date.getText().toString());
+            date.setText(convertLongToStringDate(Calendar.getInstance()));
+            model.setDateForSql(Calendar.getInstance().getTimeInMillis());
             model.startGetEmployerThread();
             model.startGetFirmThread();
             model.startGetToWThread();
@@ -281,73 +402,17 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         launcherActivityForDB.launch(intent);
     }
 
-    public EditText getDate() {
-        return date;
-    }
-
-    public void changeEmployerEditTextAttributes() {
-        addEmpl.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
-        addEmpl.setTextColor(getResources().getColor(R.color.highliteBorder, null));
-        TextView tv = findViewById(R.id.incorrectEmployerFocus);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginStart(12);
-        tv.setLayoutParams(lp);
-    }
-
-    public void changeFirmEditTextAttributes() {
-        addFirm.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
-        addFirm.setTextColor(getResources().getColor(R.color.highliteBorder, null));
-        TextView tv = findViewById(R.id.incorrectFirmFocus);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginStart(12);
-        tv.setLayoutParams(lp);
-    }
-
-    public void changeToWEditTextAttributes() {
-        addTypeOfWork.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
-        addTypeOfWork.setTextColor(getResources().getColor(R.color.highliteBorder, null));
-        TextView tv = findViewById(R.id.incorrectToWFocus);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginStart(12);
-        tv.setLayoutParams(lp);
-    }
-
-    public void changePoWEditTextAttributes() {
-        addPlaceOfWork.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
-        addPlaceOfWork.setTextColor(getResources().getColor(R.color.highliteBorder, null));
-        TextView tv = findViewById(R.id.incorrectPoWFocus);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginStart(12);
-        tv.setLayoutParams(lp);
-    }
-
-    public void changeResultEditTextAttributes() {
-        resultValue.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
-        resultValue.setTextColor(getResources().getColor(R.color.highliteBorder, null));
-        TextView tv = findViewById(R.id.incorrectResultValueFocus);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginStart(12);
-        tv.setLayoutParams(lp);
-    }
-
-    public EditText getResultValue() { return resultValue; }
-
-    public EditText getNote() { return note; }
-
-    public Button getAddButton() { return button; }
-
-    public void prepareActivity(boolean b) {
-        button.setClickable(true);
-        button.setText("Добавить");
-        int[] attr = new int[] {android.R.attr.selectableItemBackground};
-        TypedArray typedArray = obtainStyledAttributes(attr);
-        Drawable drawableAttr = typedArray.getDrawable(0);
-        typedArray.recycle();
-        button.setForeground(drawableAttr);
-        if (b) {
-            resultValue.setText("");
-            note.setText("");
-        }
+    private String convertLongToStringDate(Calendar c) {
+        int dayOfMonth, month = 1;
+        dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+        month += c.get(Calendar.MONTH);
+        StringBuilder sb = new StringBuilder();
+        if (dayOfMonth < 10) sb.append("0");
+        sb.append(dayOfMonth).append(".");
+        if (month < 10) sb.append("0");
+        sb.append(month).append(".");
+        sb.append(c.get(Calendar.YEAR));
+        return sb.toString();
     }
 
 }

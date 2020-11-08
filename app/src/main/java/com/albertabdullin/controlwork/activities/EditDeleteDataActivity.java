@@ -19,13 +19,13 @@ import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryEditDeleteData;
 public class EditDeleteDataActivity extends AppCompatActivity {
     private static EditDeleteDataVM model;
 
-    public static final int LIST_OF_EMPLOYEES_IS_READY = 0;
+    public static final int LIST_OF_ENTITIES_IS_READY = 0;
 
     public static Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
-                case LIST_OF_EMPLOYEES_IS_READY:
+                case LIST_OF_ENTITIES_IS_READY:
                     model.notifyAboutLoadedItems();
                     break;
             }

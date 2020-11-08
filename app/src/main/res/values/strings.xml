@@ -17,6 +17,7 @@
     <string name="hint_for_type_of_work">Выбери из списка или добавь новый</string>
     <string name="hint_for_needless">Необязательное поле</string>
     <string name="hint_for_search_criteria">Пустое поле - нет критериев поиска</string>
+    <string name="additionally_hint_for_search_criteria">Нет прочих критериев </string>
     <string name="add_remark">Примечание:</string>
     <string name="title_activity_list_of_employers_">ListOfEmployers_Activity</string>
     <string name="hint_firstname_secondname">ФИО сотруднка</string>

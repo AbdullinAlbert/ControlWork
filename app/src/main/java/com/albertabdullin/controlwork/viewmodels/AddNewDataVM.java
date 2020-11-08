@@ -2,7 +2,6 @@ package com.albertabdullin.controlwork.viewmodels;
 
 import android.app.Application;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -10,7 +9,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,7 +19,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 
-import java.util.Calendar;
 import java.util.concurrent.CountDownLatch;
 
 public class AddNewDataVM extends AndroidViewModel {
@@ -29,6 +26,10 @@ public class AddNewDataVM extends AndroidViewModel {
     private MutableLiveData<String> firmEditTextLD;
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
+    private MutableLiveData<Integer> warningEditTextLD;
+    private MutableLiveData<Integer> warningTextViewLD;
+    private MutableLiveData<Boolean> prepareAddButtonLD;
+    private MutableLiveData<String> changeTextAddButtonLD;
     private boolean correctEmployerData;
     private String employerString;
     private int employerId = -1;
@@ -42,35 +43,33 @@ public class AddNewDataVM extends AndroidViewModel {
     private String towString;
     private int towId = -1;
     private boolean correctResultValueData;
-    private String dateForSql;
-    private Float resultValue;
+    private Long dateForSql;
+    private Float resultValueFloat;
+    private String resultValueString = "";
     private boolean firstLaunch = true;
-    private FillNewData_Activity context;
-
+    private String note = "";
+    public static final int INCORRECT_EMPLOYEE_ET = 0;
+    public static final int INCORRECT_FIRM_ET = 1;
+    public static final int INCORRECT_TYPE_ET = 2;
+    public static final int INCORRECT_PLACE_ET = 3;
+    public static final int INCORRECT_RES_VALUE_ET = 4;
     private class getFirstEmployerThread extends Thread {
         public static final String LOAD_ITEMS_TAG = "FirstEmployerThread";
         @Override
         public void run() {
             boolean ok = true;
             Message message;
-            SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-            SQLiteDatabase db = null;
-            Cursor cursor = null;
-            try {
-                db = cwdbHelper.getReadableDatabase();
-                cursor = db.query(CWDBHelper.TABLE_NAME_EMP,
-                        new String[]{"_id", CWDBHelper.T_EMP_C_FIO},
-                        "_id = ?", new String[] {"1"}, null, null, null);
-                if(cursor.moveToFirst()) {
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getReadableDatabase(); Cursor cursor = db.query(CWDBHelper.TABLE_NAME_EMP,
+                    new String[]{"_id", CWDBHelper.T_EMP_C_FIO},
+                    "_id = ?",
+                    new String[]{"1"}, null, null, null)) {
+                if (cursor.moveToFirst()) {
                     setEmployerId(cursor.getInt(0));
                     employerString = cursor.getString(1);
                 } else ok = false;
             } catch (SQLiteException e) {
                 Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_EMP);
-            } finally {
-                cwdbHelper.close();
-                if(cursor != null) cursor.close();
-                if(db != null) db.close();
             }
             if (ok) {
                 message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_EMPLOYER_MESSAGE);
@@ -85,24 +84,18 @@ public class AddNewDataVM extends AndroidViewModel {
         public void run() {
             boolean ok = true;
             Message message;
-            SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-            SQLiteDatabase db = null;
-            Cursor cursor = null;
-            try {
-                db = cwdbHelper.getReadableDatabase();
-                cursor = db.query(CWDBHelper.TABLE_NAME_FIRM,
-                        new String[]{"_id", CWDBHelper.T_FIRM_C_DESCRIPTION},
-                        "_id = ?", new String[] {"1"}, null, null, null);
-                if(cursor.moveToFirst()) {
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
+                 Cursor cursor = db.query(CWDBHelper.TABLE_NAME_FIRM,
+                    new String[]{"_id", CWDBHelper.T_FIRM_C_DESCRIPTION},
+                    "_id = ?",
+                    new String[]{"1"}, null, null, null)) {
+                if (cursor.moveToFirst()) {
                     setFirmId(cursor.getInt(0));
                     firmString = cursor.getString(1);
                 } else ok = false;
             } catch (SQLiteException e) {
                 Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_FIRM);
-            } finally {
-                cwdbHelper.close();
-                if(cursor != null) cursor.close();
-                if(db != null) db.close();
             }
             if (ok) {
                 message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_FIRM_MESSAGE);
@@ -117,24 +110,18 @@ public class AddNewDataVM extends AndroidViewModel {
         public void run() {
             boolean ok = true;
             Message message;
-            SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-            SQLiteDatabase db = null;
-            Cursor cursor = null;
-            try {
-                db = cwdbHelper.getReadableDatabase();
-                cursor = db.query(CWDBHelper.TABLE_NAME_PLACE_OF_WORK,
-                        new String[]{"_id", CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION},
-                        "_id = ?", new String[] {"1"}, null, null, null);
-                if(cursor.moveToFirst()) {
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
+                 Cursor cursor = db.query(CWDBHelper.TABLE_NAME_PLACE_OF_WORK,
+                    new String[]{"_id", CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION},
+                    "_id = ?",
+                    new String[]{"1"}, null, null, null)) {
+                if (cursor.moveToFirst()) {
                     setPowId(cursor.getInt(0));
                     powString = cursor.getString(1);
                 } else ok = false;
             } catch (SQLiteException e) {
                 Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_PLACE_OF_WORK);
-            } finally {
-                cwdbHelper.close();
-                if(cursor != null) cursor.close();
-                if(db != null) db.close();
             }
             if (ok) {
                 message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_POW_MESSAGE);
@@ -149,24 +136,18 @@ public class AddNewDataVM extends AndroidViewModel {
         public void run() {
             boolean ok = true;
             Message message;
-            SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-            SQLiteDatabase db = null;
-            Cursor cursor = null;
-            try {
-                db = cwdbHelper.getReadableDatabase();
-                cursor = db.query(CWDBHelper.TABLE_NAME_TYPE_OF_WORK,
-                        new String[]{"_id", CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION},
-                        "_id = ?", new String[] {"1"}, null, null, null);
-                if(cursor.moveToFirst()) {
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
+                 Cursor cursor = db.query(CWDBHelper.TABLE_NAME_TYPE_OF_WORK,
+                    new String[]{"_id", CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION},
+                    "_id = ?",
+                    new String[]{"1"}, null, null, null)) {
+                if (cursor.moveToFirst()) {
                     setTowId(cursor.getInt(0));
                     towString = cursor.getString(1);
                 } else ok = false;
             } catch (SQLiteException e) {
                 Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_TYPE_OF_WORK);
-            } finally {
-                cwdbHelper.close();
-                if(cursor != null) cursor.close();
-                if(db != null) db.close();
             }
             if (ok) {
                 message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_TOW_MESSAGE);
@@ -180,36 +161,20 @@ public class AddNewDataVM extends AndroidViewModel {
         @Override
         public void run() {
             Message msg;
-            SQLiteOpenHelper cwdbHelper = null;
-            SQLiteDatabase db = null;
-            Cursor cursor = null;
-            int dateInSeconds = 0;
-            boolean isOk = true;
             long resultOfInsert = -1;
-            try {
-                cwdbHelper = new CWDBHelper(getApplication());
-                db = cwdbHelper.getReadableDatabase();
-                cursor = db.rawQuery("SELECT strftime('%s'," + dateForSql + ")", null);
-                if (cursor.moveToFirst()) dateInSeconds = cursor.getInt(0);
-                else isOk = false;
-                if (isOk) {
-                    ContentValues cv = new ContentValues();
-                    cv.put(CWDBHelper.T_RESULT_C_ID_EMPLOYER, employerId);
-                    cv.put(CWDBHelper.T_RESULT_C_ID_FIRM, firmId);
-                    cv.put(CWDBHelper.T_RESULT_C_ID_POW, powId);
-                    cv.put(CWDBHelper.T_RESULT_C_ID_TOW, towId);
-                    cv.put(CWDBHelper.T_RESULT_C_DATE, dateInSeconds);
-                    cv.put(CWDBHelper.T_RESULT_C_VALUE, resultValue);
-                    cv.put(CWDBHelper.T_RESULT_C_NOTE, context.getNote().getText().toString());
-                    db = cwdbHelper.getWritableDatabase();
-                    resultOfInsert = db.insert(CWDBHelper.TABLE_NAME_RESULT, null, cv);
-                }
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
+                ContentValues cv = new ContentValues();
+                cv.put(CWDBHelper.T_RESULT_C_ID_EMPLOYER, employerId);
+                cv.put(CWDBHelper.T_RESULT_C_ID_FIRM, firmId);
+                cv.put(CWDBHelper.T_RESULT_C_ID_POW, powId);
+                cv.put(CWDBHelper.T_RESULT_C_ID_TOW, towId);
+                cv.put(CWDBHelper.T_RESULT_C_DATE, dateForSql);
+                cv.put(CWDBHelper.T_RESULT_C_VALUE, resultValueFloat);
+                cv.put(CWDBHelper.T_RESULT_C_NOTE, note);
+                resultOfInsert = db.insert(CWDBHelper.TABLE_NAME_RESULT, null, cv);
             } catch (SQLiteException e) {
-                Log.e(ADD_DATA_THREAD, "ошибка при попытке конвертировании даты");
-            } finally {
-                if (db != null) db.close();
-                if (cwdbHelper != null) cwdbHelper.close();
-                if (cursor != null) cursor.close();
+                Log.e(ADD_DATA_THREAD, "не получилось добавить данные");
             }
             if (resultOfInsert != -1) msg = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.ADD_DATA_TO_BD, 1, 0);
             else msg = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.ADD_DATA_TO_BD, 0, 0);
@@ -223,21 +188,15 @@ public class AddNewDataVM extends AndroidViewModel {
         private boolean isItemExist(String tableName, int id) {
             String TAG = "Check item for exist";
             boolean ok = false;
-            SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-            SQLiteDatabase db = null;
-            Cursor cursor = null;
-            try {
-                db = cwdbHelper.getReadableDatabase();
-                cursor = db.query(tableName,
-                        new String[]{"_id"},
-                        "_id = ?", new String[] {Integer.toString(id)}, null, null, null);
-                if(cursor.moveToFirst()) ok = true;
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
+                 Cursor cursor = db.query(tableName,
+                    new String[]{"_id"},
+                    "_id = ?",
+                    new String[]{Integer.toString(id)}, null, null, null)) {
+                if (cursor.moveToFirst()) ok = true;
             } catch (SQLiteException e) {
                 Log.e(TAG, "не получилось прочесть данные из таблицы " + tableName);
-            } finally {
-                cwdbHelper.close();
-                if(cursor != null) cursor.close();
-                if(db != null) db.close();
             }
             return ok;
         }
@@ -286,7 +245,7 @@ public class AddNewDataVM extends AndroidViewModel {
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_PLACE_OF_WORK, powId);
             t4.start();
             try {
-                resultValue = Float.parseFloat(context.getResultValue().getText().toString());
+                resultValueFloat = Float.parseFloat(resultValueString);
                 correctResultValueData = true;
             } catch (NumberFormatException e) {
                 Log.e("CheckCorrectDataHeadThread", "не удалость сделать преобразование данных в тип float");
@@ -304,10 +263,6 @@ public class AddNewDataVM extends AndroidViewModel {
 
     public AddNewDataVM(@NonNull Application application) {
         super(application);
-    }
-
-    public void setContext(FillNewData_Activity context) {
-        this.context = context;
     }
 
     public LiveData<String> getLiveDataEmployerText() {
@@ -328,6 +283,26 @@ public class AddNewDataVM extends AndroidViewModel {
     public LiveData<String> getLiveDataToWText() {
         if (typeOfWorkEditTextLD == null) typeOfWorkEditTextLD = new MutableLiveData<>();
         return typeOfWorkEditTextLD;
+    }
+
+    public LiveData<Integer> getWarningEmployerETLD() {
+        if (warningEditTextLD == null) warningEditTextLD = new MutableLiveData<>();
+        return warningEditTextLD;
+    }
+
+    public LiveData<Integer> getWarningEmployerTVLD() {
+        if (warningTextViewLD == null) warningTextViewLD = new MutableLiveData<>();
+        return warningTextViewLD;
+    }
+
+    public LiveData<Boolean> getPrepareAddButton() {
+        if (prepareAddButtonLD == null) prepareAddButtonLD = new MutableLiveData<>();
+        return prepareAddButtonLD;
+    }
+
+    public LiveData<String> getChangeTextAddButton() {
+        if (changeTextAddButtonLD == null) changeTextAddButtonLD = new MutableLiveData<>();
+        return changeTextAddButtonLD;
     }
 
     public void startGetEmployerThread() {
@@ -378,17 +353,9 @@ public class AddNewDataVM extends AndroidViewModel {
 
     public void setTowId(int i) { towId = i; }
 
-    public String convertDateToString(Calendar calendar) {
-        String dayOfMonthStr, monthStr, yearStr;
-        int month;
-        if (calendar.get(Calendar.DAY_OF_MONTH) < 10) dayOfMonthStr = "0" + calendar.get(Calendar.DAY_OF_MONTH);
-        else dayOfMonthStr = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-        month = calendar.get(Calendar.MONTH) + 1;
-        if (month < 10) monthStr = "0" + (month);
-        else monthStr = Integer.toString(month);
-        yearStr = Integer.toString(calendar.get(Calendar.YEAR));
-        return dayOfMonthStr + "." + monthStr + "." + yearStr;
-    }
+    public void setNote(String s) { note = s; }
+
+    public void setResultValueString(String s) { resultValueString = s; }
 
     public boolean isFirstLaunch() { return firstLaunch; }
 
@@ -396,11 +363,8 @@ public class AddNewDataVM extends AndroidViewModel {
         firstLaunch = false;
     }
 
-    public void setDateForSql(String s) {
-        String day = s.substring(0, 2);
-        String month = s.substring(3, 5);
-        String year = s.substring(6);
-        dateForSql = year + "-" + month + "-" + day;
+    public void setDateForSql(Long l) {
+        dateForSql = l / 1000L;
     }
 
     public boolean isCorrectEmployerData() {
@@ -436,16 +400,31 @@ public class AddNewDataVM extends AndroidViewModel {
     public void readResultOfCheck() {
         if (correctEmployerData && correctFirmData && correctToWData
                 && correctPoWData && correctResultValueData) {
-            context.getAddButton().setText("Идёт процесс добавления данных");
+            changeTextAddButtonLD.setValue("Идёт процесс добавления данных");
             addResultData();
         }
         else {
-            if (!correctEmployerData) context.changeEmployerEditTextAttributes();
-            if (!correctFirmData) context.changeFirmEditTextAttributes();
-            if (!correctToWData) context.changeToWEditTextAttributes();
-            if (!correctPoWData) context.changePoWEditTextAttributes();
-            if (!correctResultValueData) context.changeResultEditTextAttributes();
-            context.prepareActivity(false);
+            if (!correctEmployerData) {
+                warningEditTextLD.setValue(INCORRECT_EMPLOYEE_ET);
+                warningTextViewLD.setValue(INCORRECT_EMPLOYEE_ET);
+            }
+            if (!correctFirmData) {
+                warningEditTextLD.setValue(INCORRECT_FIRM_ET);
+                warningTextViewLD.setValue(INCORRECT_FIRM_ET);
+            }
+            if (!correctToWData) {
+                warningEditTextLD.setValue(INCORRECT_TYPE_ET);
+                warningTextViewLD.setValue(INCORRECT_TYPE_ET);
+            }
+            if (!correctPoWData) {
+                warningEditTextLD.setValue(INCORRECT_PLACE_ET);
+                warningTextViewLD.setValue(INCORRECT_PLACE_ET);
+            }
+            if (!correctResultValueData) {
+                warningEditTextLD.setValue(INCORRECT_RES_VALUE_ET);
+                warningTextViewLD.setValue(INCORRECT_RES_VALUE_ET);
+            }
+            prepareAddButtonLD.setValue(false);
             Toast toast = Toast.makeText(getApplication(), "Ошибка. Проверь корректность вводимых данных", Toast.LENGTH_SHORT);
             toast.show();
         }
@@ -458,7 +437,7 @@ public class AddNewDataVM extends AndroidViewModel {
     }
 
     public void notifyAboutCompleteOperation(boolean res) {
-        context.prepareActivity(true);
+        prepareAddButtonLD.setValue(true);
         String s;
         if (res) s = "Данные успешно добавлены";
         else s = "Не получилось добавить данные. Сообщи об этом разработчику";

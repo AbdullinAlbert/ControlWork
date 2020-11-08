@@ -113,21 +113,15 @@ public class ListOfItemsVM extends AndroidViewModel {
                 hListForWorkWithDB.remove(list.get(i));
                 listOfID.add(list.get(i).getID());
             }
-            String[] arguments = listOfID.toString().replaceAll("\\[|\\]", "").split(", ");
+            String[] arguments = listOfID.toString().replaceAll("[\\[\\]]", "").split(", ");
             String whereClause = makeWhereClause(listOfID.size());
-            SQLiteOpenHelper cwdbHelper = null;
-            SQLiteDatabase db = null;
-            try {
-                cwdbHelper = new CWDBHelper(getApplication());
-                db = cwdbHelper.getWritableDatabase();
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
                 count = db.delete(currentNameOfTable, whereClause, arguments);
-            }catch (SQLiteException e) {
+            } catch (SQLiteException e) {
                 Toast toast = Toast.makeText(getApplication(), "Something went wrong: DB can't delete data", Toast.LENGTH_SHORT);
                 toast.show();
                 return;
-            } finally {
-                if(db != null) db.close();
-                if(cwdbHelper != null) cwdbHelper.close();
             }
             if (count != 0) {
                 message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.OK, 0);
@@ -155,24 +149,18 @@ public class ListOfItemsVM extends AndroidViewModel {
             Message message;
             int idKey;
             setUpdatedItemPosition(adapterListOfEntitiesVM.indexOf(eDB));
-            SQLiteOpenHelper cwdbHelper = null;
-            SQLiteDatabase db = null;
-            try {
-                cwdbHelper = new CWDBHelper(getApplication());
-                db = cwdbHelper.getWritableDatabase();
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
                 ContentValues cv = new ContentValues();
                 cv.put(currentNameOfColumn, newDescription);
                 idKey = db.update(currentNameOfTable,
                         cv,
                         "_id = ?",
-                        new String[] { Integer.toString(eDB.getID()) });
+                        new String[]{Integer.toString(eDB.getID())});
             } catch (SQLiteException e) {
                 Toast toast = Toast.makeText(getApplication(), "DB can't change data", Toast.LENGTH_SHORT);
                 toast.show();
                 return;
-            } finally {
-                if(db != null) db.close();
-                if(cwdbHelper != null) cwdbHelper.close();
             }
             if(idKey != 0) message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.OK, 0);
             else message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.NOT_OK, 0);
@@ -208,6 +196,15 @@ public class ListOfItemsVM extends AndroidViewModel {
                 cwdbHelper.close();
                 if(cursor != null) cursor.close();
                 if(db != null) db.close();
+            }
+            if (isEntitiesNull()) {
+                do {
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (isEntitiesNull());
             }
             message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.LOAD);
             ListOfBDItemsActivity.handler.sendMessage(message);
@@ -345,7 +342,11 @@ public class ListOfItemsVM extends AndroidViewModel {
         return entities;
     }
 
-    public void notifyAboutLoadItems() {
+    public synchronized boolean isEntitiesNull() {
+        return entities == null;
+    }
+
+    public synchronized void notifyAboutLoadItems() {
         entities.setValue(hListForWorkWithDB);
         hListForWorkWithDB = null;
     }

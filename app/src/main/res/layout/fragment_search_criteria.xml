@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_search_criteria"
@@ -37,7 +37,8 @@
                 android:hint="@string/hint_for_search_criteria"
                 android:importantForAutofill="no"
                 android:inputType="textPersonName"
-                android:focusable="false" />
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -102,14 +103,7 @@
                 android:text="@string/add_date"
                 android:labelFor="@id/add_date_editText"/>
 
-            <EditText
-                android:id="@+id/select_date_editText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint_for_search_criteria"
-                android:importantForAutofill="no"
-                android:focusable="false"
-                android:backgroundTint="@color/standardBlack" />
+            <include layout="@layout/layout_exactly_criteria_to_compare_values" />
 
             <TextView
                 android:id="@+id/textView8"

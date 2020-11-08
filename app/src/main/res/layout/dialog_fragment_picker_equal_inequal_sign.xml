@@ -11,6 +11,8 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        app:subtitle="Критерии для выборки дат"
+        app:subtitleTextColor="@color/standardBlack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,7 +24,7 @@
         app:layout_constraintBottom_toTopOf="@+id/agree_button_for_selected_items"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_for_select_items_toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/title_for_select_items_toolbar"/>
 
     <Button
         android:id="@+id/cancel_select_items_for_search"
@@ -50,16 +52,5 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
-
-    <ImageView
-        android:id="@+id/button_for_clear_selected_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/title_for_select_items_toolbar"
-        app:layout_constraintEnd_toEndOf="@+id/title_for_select_items_toolbar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/baseline_clear_black_24"
-        android:contentDescription="@string/clear_all_items" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

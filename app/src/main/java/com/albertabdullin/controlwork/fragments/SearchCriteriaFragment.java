@@ -15,9 +15,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.google.android.material.datepicker.MaterialDatePicker;
 
 
-public class SearchCriteriaFragment extends Fragment {
+public class SearchCriteriaFragment extends Fragment implements DFPickerObserver{
     public static final int SELECT_EMPLOYEES = 0;
     public static final int SELECT_FIRMS = 1;
     public static final int SELECT_TYPES = 2;
@@ -58,6 +59,15 @@ public class SearchCriteriaFragment extends Fragment {
         public void onClick(View v) {
             PickerItemsDF pickerItemsDF = new PickerItemsDF(SELECT_PLACES);
             pickerItemsDF.show(getActivity().getSupportFragmentManager(), "newData");
+        }
+    };
+
+    View.OnClickListener callPickerDateDF = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MaterialDatePicker.Builder builder = MaterialDatePicker.Builder.dateRangePicker();
+            MaterialDatePicker materialDatePicker = builder.build();
+            materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");
         }
     };
 
@@ -126,6 +136,24 @@ public class SearchCriteriaFragment extends Fragment {
             }
         };
         model.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
+        final EditText selectedDate = view.findViewById(R.id.editText_for_equality_inequality_sign);
+        selectedDate.setOnClickListener(callPickerDateDF);
+        PickerSignsDF pickerSignsDF = (PickerSignsDF) getActivity().getSupportFragmentManager().findFragmentByTag("callPickerDateDF");
+        if (pickerSignsDF != null)
+            pickerSignsDF.setDFSignPickerObserver(this);
     }
 
+    @Override
+    public void changeLayoutForCertainCriteria(int id_of_df) {
+        switch (id_of_df) {
+            case PickerSignsDF.FULL_SET_SIGNS:
+                break;
+            case PickerSignsDF.MORE_OR_EQUAL_SET_SIGNS:
+                break;
+            case PickerSignsDF.LESS_OR_EQUAL_SET_SIGNS:
+                break;
+           case PickerSignsDF.OTHER_SET_SIGNS:
+                break;
+        }
+    }
 }

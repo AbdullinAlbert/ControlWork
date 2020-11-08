@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -59,8 +60,28 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
 
     @Override
     public void onBindViewHolder(@NonNull final MyVeiwHolder holder, final int position) {
-        holder.getDescription().setText(mListOfEntities.get(position).getDescription());
-        holder.getID().setText("id: " + mListOfEntities.get(position).getID());
+        TextView description = holder.getDescription();
+        TextView id = holder.getID();
+        description.setText(mListOfEntities.get(position).getDescription());
+        id.setText("id: " + mListOfEntities.get(position).getID());
+        description.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckBox cb = holder.getCheckBox();
+                cb.toggle();
+                if (cb.isChecked()) mVM.addSelectedItem(mSelectedTable, position);
+                else mVM.removeSelectedItem(mSelectedTable, position);
+            }
+        });
+        id.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckBox cb = holder.getCheckBox();
+                cb.toggle();
+                if (cb.isChecked()) mVM.addSelectedItem(mSelectedTable, position);
+                else mVM.removeSelectedItem(mSelectedTable, position);
+            }
+        });
         holder.getCheckBox().setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -70,12 +91,12 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
                 else mVM.removeSelectedItem(mSelectedTable, position);
             }
         });
-        if (mVM.getTransientListOfSelectedItems().contains(mListOfEntities.get(position)))
+        if (mVM.getTransientListOfSelectedItems(mSelectedTable).contains(mListOfEntities.get(position)))
             holder.getCheckBox().setChecked(true);
         Observer<Boolean> observerForCheckBoxes = new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if (mVM.getTransientListOfSelectedItems().isEmpty())
+                if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty())
                     holder.getCheckBox().setChecked(aBoolean);
             }
         };

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.66" />
+
+    <EditText
+        android:id="@+id/first_equal_sign_editText"
+        android:layout_width="37dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:text=""
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:focusable="false"
+        android:importantForAutofill="no"
+        android:backgroundTint="@color/standardBlack"
+        android:hint="@string/additionally_hint_for_search_criteria" />
+
+    <EditText
+        android:id="@+id/editText_for_first_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="datetime|date"
+        android:text=""
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintStart_toEndOf="@+id/first_equal_sign_editText"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:focusable="false"
+        android:importantForAutofill="no"
+        android:backgroundTint="@color/standardBlack"
+        android:hint="@string/hint_for_search_criteria"/>
+
+    <EditText
+        android:id="@+id/editText_for_second_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/standardBlack"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="@string/hint_for_search_criteria"
+        android:importantForAutofill="no"
+        android:inputType="datetime|date"
+        android:text=""
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/second_equal_sign_editText"
+        app:layout_constraintStart_toEndOf="@+id/editText_for_first_date"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/second_equal_sign_editText"
+        android:layout_width="37dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/standardBlack"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="@string/additionally_hint_for_search_criteria"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"
+        android:text=""
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/third_equal_sign_editText"
+        android:layout_width="37dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:focusable="false"
+        android:ems="10"
+        android:text=""
+        app:layout_constraintStart_toStartOf="@+id/guideline3"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:importantForAutofill="no"
+        android:backgroundTint="@color/standardBlack"
+        android:hint="@string/additionally_hint_for_search_criteria" />
+
+    <EditText
+        android:id="@+id/editText_for_third_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="datetime|date"
+        android:text=""
+        android:focusable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/third_equal_sign_editText"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:importantForAutofill="no"
+        android:backgroundTint="@color/standardBlack"
+        android:hint="@string/hint_for_search_criteria" />
+
+    <EditText
+        android:id="@+id/editText_for_equality_inequality_sign"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/standardBlack"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="@string/hint_for_search_criteria"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="@+id/editText_for_third_date"
+        app:layout_constraintStart_toStartOf="@+id/first_equal_sign_editText"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

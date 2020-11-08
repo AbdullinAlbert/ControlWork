@@ -92,7 +92,7 @@ public class PickerItemsDF extends DialogFragment {
                 adapter = null;
         }
         final ImageView clearButton = view.findViewById(R.id.button_for_clear_selected_cb);
-        if (model.getTransientListOfSelectedItems().isEmpty()) clearButton.setVisibility(View.INVISIBLE);
+        if (model.getTransientListOfSelectedItems(selectedTable).isEmpty()) clearButton.setVisibility(View.INVISIBLE);
         else clearButton.setVisibility(View.VISIBLE);
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,9 +104,9 @@ public class PickerItemsDF extends DialogFragment {
         Observer<Integer> observerClearButton = new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                if (!model.getTransientListOfSelectedItems().isEmpty() && integer == View.VISIBLE)
+                if (!model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.VISIBLE)
                     clearButton.setVisibility(View.VISIBLE);
-                else if (model.getTransientListOfSelectedItems().isEmpty() && integer == View.INVISIBLE)
+                else if (model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.INVISIBLE)
                     clearButton.setVisibility(View.INVISIBLE);
 
             }
