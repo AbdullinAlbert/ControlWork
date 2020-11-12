@@ -14,39 +14,46 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
+import com.albertabdullin.controlwork.models.SortedEqualSignsList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
 public class EditDeleteDataVM extends AndroidViewModel {
-    private List<SimpleEntityForDB> hListForWorkWithDB = new ArrayList<>();
-    private List<SimpleEntityForDB> adapterListOfEmployees = new ArrayList<>();
-    private List<SimpleEntityForDB> listOfSelectedEmployees = new ArrayList<>();
-    private List<SimpleEntityForDB> transientListOfSelectedEmployees = new ArrayList<>();
-    private List<SimpleEntityForDB> adapterListOfFirms = new ArrayList<>();
-    private List<SimpleEntityForDB> listOfSelectedFirms = new ArrayList<>();
-    private List<SimpleEntityForDB> transientListOfSelectedFirms = new ArrayList<>();
-    private List<SimpleEntityForDB> adapterListOfTOW = new ArrayList<>();
-    private List<SimpleEntityForDB> listOfSelectedTOW = new ArrayList<>();
-    private List<SimpleEntityForDB> transientListOfSelectedTOW = new ArrayList<>();
-    private List<SimpleEntityForDB> adapterListOfPOW = new ArrayList<>();
-    private List<SimpleEntityForDB> listOfSelectedPOW = new ArrayList<>();
-    private List<SimpleEntityForDB> transientListOfSelectedPOW = new ArrayList<>();
-    private MutableLiveData<List<SimpleEntityForDB>> entitiesLD;
+    private List<SimpleEntityForDB> hListForWorkWithDB;
+    private List<SimpleEntityForDB> adapterListOfEmployees;
+    private List<SimpleEntityForDB> listOfSelectedEmployees;
+    private List<SimpleEntityForDB> transientListOfSelectedEmployees;
+    private List<SimpleEntityForDB> adapterListOfFirms;
+    private List<SimpleEntityForDB> listOfSelectedFirms;
+    private List<SimpleEntityForDB> transientListOfSelectedFirms;
+    private List<SimpleEntityForDB> adapterListOfTOW;
+    private List<SimpleEntityForDB> listOfSelectedTOW;
+    private List<SimpleEntityForDB> transientListOfSelectedTOW;
+    private List<SimpleEntityForDB> adapterListOfPOW;
+    private List<SimpleEntityForDB> listOfSelectedPOW;
+    private List<SimpleEntityForDB> transientListOfSelectedPOW;
+    private SortedEqualSignsList availableOrderedEqualSignsList;
+    private SortedEqualSignsList selectedEqualSignsList;
+    private MutableLiveData<Integer> entitiesLD;
     private MutableLiveData<String> employeesEditTextLD;
     private MutableLiveData<String> firmsEditTextLD;
     private MutableLiveData<String> typesOfWorkEditTextLD;
     private MutableLiveData<String> placesOfWorkEditTextLD;
     private MutableLiveData<Boolean> selectedCheckBoxesLD;
     private MutableLiveData<Integer> visibilityOfClearButtonLD;
-    private MutableLiveData<Integer> selectedEqualSignLD;
-    private boolean isClearButtonInvisible = true;
-    private int selectedEqualSign = -1;
+    private MutableLiveData<Integer> selectedEqualSignRadioButtonLD;
+    private boolean visibilityOfClearButton = false;
+    private String selectedEqualSign;
+    private int countOfAddedCriteriaForDate = 0;
+    private int mSelectedTable;
 
     public EditDeleteDataVM(@NonNull Application application) {
         super(application);
@@ -64,7 +71,7 @@ public class EditDeleteDataVM extends AndroidViewModel {
 
         @Override
         public void run() {
-            hListForWorkWithDB.clear();
+            if (hListForWorkWithDB == null) hListForWorkWithDB = new ArrayList<>();
             Message msg;
             CWDBHelper cwdbHelper = new CWDBHelper(getApplication());
             try (SQLiteDatabase db = cwdbHelper.getReadableDatabase(); Cursor cursor = db.query(mCurrentNameOfTable,
@@ -98,7 +105,7 @@ public class EditDeleteDataVM extends AndroidViewModel {
         return entitiesLD == null;
     }
 
-    public synchronized LiveData<List<SimpleEntityForDB>> getEntitiesLiveData() {
+    public synchronized LiveData<Integer> getEntitiesLiveData() {
         if (entitiesLD == null) entitiesLD = new MutableLiveData<>();
         return entitiesLD;
     }
@@ -135,15 +142,16 @@ public class EditDeleteDataVM extends AndroidViewModel {
     }
 
     public LiveData<Integer> getSelectedEqualSignLD() {
-        if(selectedEqualSignLD == null) selectedEqualSignLD = new MutableLiveData<>();
-        return selectedEqualSignLD;
+        if(selectedEqualSignRadioButtonLD == null) selectedEqualSignRadioButtonLD = new MutableLiveData<>();
+        return selectedEqualSignRadioButtonLD;
     }
 
     public void showFullListOfItems(int selectedTable) {
         List<SimpleEntityForDB> hList;
         String tableName;
         String columnName;
-        switch (selectedTable) {
+        mSelectedTable = selectedTable;
+        switch (mSelectedTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
                 hList = adapterListOfEmployees;
                 tableName = CWDBHelper.TABLE_NAME_EMP;
@@ -171,36 +179,51 @@ public class EditDeleteDataVM extends AndroidViewModel {
             SelectItemsTread selectItemsTread = new SelectItemsTread(tableName, columnName);
             selectItemsTread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
             selectItemsTread.start();
-        } else entitiesLD.setValue(hList);
+        } else entitiesLD.setValue(mSelectedTable);
     }
 
     public List<SimpleEntityForDB> getAdapterListOfEntities(int selectableTable) {
         switch (selectableTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
+                if (adapterListOfEmployees == null) adapterListOfEmployees = new ArrayList<>();
                 return adapterListOfEmployees;
             case SearchCriteriaFragment.SELECT_FIRMS:
+                if (adapterListOfFirms == null) adapterListOfFirms = new ArrayList<>();
                 return adapterListOfFirms;
             case SearchCriteriaFragment.SELECT_TYPES:
+                if (adapterListOfTOW == null) adapterListOfTOW = new ArrayList<>();
                 return adapterListOfTOW;
             case SearchCriteriaFragment.SELECT_PLACES:
+                if (adapterListOfPOW == null) adapterListOfPOW = new ArrayList<>();
                 return adapterListOfPOW;
-            default: return null;
+            default: throw new RuntimeException("ошибка в константах: getAdapterListOfEntities(int selectableTable)");
         }
     }
 
     public List<SimpleEntityForDB> getTransientListOfSelectedItems(int selectableTable) {
+        List<SimpleEntityForDB> hTransientList;
         switch (selectableTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
-                return transientListOfSelectedEmployees;
+                if (transientListOfSelectedEmployees == null) transientListOfSelectedEmployees = new ArrayList<>();
+                hTransientList = transientListOfSelectedEmployees;
+                break;
             case SearchCriteriaFragment.SELECT_FIRMS:
-                return transientListOfSelectedFirms;
+                if (transientListOfSelectedFirms == null) transientListOfSelectedFirms = new ArrayList<>();
+                hTransientList = transientListOfSelectedFirms;
+                break;
             case SearchCriteriaFragment.SELECT_TYPES:
-                return transientListOfSelectedTOW;
+                if (transientListOfSelectedTOW == null) transientListOfSelectedTOW = new ArrayList<>();
+                hTransientList = transientListOfSelectedTOW;
+                break;
             case SearchCriteriaFragment.SELECT_PLACES:
-                return transientListOfSelectedPOW;
+                if (transientListOfSelectedPOW == null) transientListOfSelectedPOW = new ArrayList<>();
+                hTransientList = transientListOfSelectedPOW;
+                break;
             default:
                 throw new RuntimeException("ошибка в константах: getTransientListOfSelectedItems(int selectableTable)");
         }
+        visibilityOfClearButton = !hTransientList.isEmpty();
+        return hTransientList;
     }
 
     public void commitSelectedList(int selectableTable) {
@@ -210,21 +233,25 @@ public class EditDeleteDataVM extends AndroidViewModel {
         MutableLiveData<String> helperLD;
         switch (selectableTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
+                if (listOfSelectedEmployees == null) listOfSelectedEmployees = new ArrayList<>();
                 permanentListOfSelectedItems = listOfSelectedEmployees;
                 transientListOfSelectedItems = transientListOfSelectedEmployees;
                 helperLD = employeesEditTextLD;
                 break;
             case SearchCriteriaFragment.SELECT_FIRMS:
+                if (listOfSelectedFirms == null) listOfSelectedFirms = new ArrayList<>();
                 permanentListOfSelectedItems = listOfSelectedFirms;
                 transientListOfSelectedItems = transientListOfSelectedFirms;
                 helperLD = firmsEditTextLD;
                 break;
             case SearchCriteriaFragment.SELECT_TYPES:
+                if (listOfSelectedTOW == null) listOfSelectedTOW = new ArrayList<>();
                 permanentListOfSelectedItems = listOfSelectedTOW;
                 transientListOfSelectedItems = transientListOfSelectedTOW;
                 helperLD = typesOfWorkEditTextLD;
                 break;
             case SearchCriteriaFragment.SELECT_PLACES:
+                if (listOfSelectedPOW == null) listOfSelectedPOW = new ArrayList<>();
                 permanentListOfSelectedItems = listOfSelectedPOW;
                 transientListOfSelectedItems = transientListOfSelectedPOW;
                 helperLD = placesOfWorkEditTextLD;
@@ -233,18 +260,35 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 throw new RuntimeException("опечатка в константах: commitSelectedList(int selectableTable)");
         }
         permanentListOfSelectedItems.clear();
-        permanentListOfSelectedItems.addAll(transientListOfSelectedItems);
         if (!transientListOfSelectedItems.isEmpty()) {
+            permanentListOfSelectedItems.addAll(transientListOfSelectedItems);
             for (int i = 0; i < transientListOfSelectedItems.size() - 1; i++) {
                 sb.append(transientListOfSelectedItems.get(i).getDescription()).append(", ");
             }
             sb.append(transientListOfSelectedItems.get(transientListOfSelectedItems.size() - 1).getDescription());
         }
         helperLD.setValue(sb.toString());
+
     }
 
     public void notifyAboutLoadedItems() {
-        entitiesLD.setValue(hListForWorkWithDB);
+        switch (mSelectedTable) {
+            case SearchCriteriaFragment.SELECT_EMPLOYEES:
+                adapterListOfEmployees.addAll(hListForWorkWithDB);
+                break;
+            case SearchCriteriaFragment.SELECT_FIRMS:
+                adapterListOfFirms.addAll(hListForWorkWithDB);
+                break;
+            case SearchCriteriaFragment.SELECT_TYPES:
+                adapterListOfTOW.addAll(hListForWorkWithDB);
+                break;
+            case SearchCriteriaFragment.SELECT_PLACES:
+                adapterListOfPOW.addAll(hListForWorkWithDB);
+                break;
+            default: throw new RuntimeException("опечатка в константах. Метод notifyAboutLoadedItems()");
+        }
+        entitiesLD.setValue(mSelectedTable);
+        hListForWorkWithDB.clear();
     }
 
     public void addSelectedItem(int selectedTable, int selectedItem) {
@@ -271,8 +315,8 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 throw new RuntimeException("опечатка в константах: addSelectedItem(int selectedTable, int selectedItem)");
         }
         transientListOfItems.add(fullListOfItems.get(selectedItem));
-        if (isClearButtonInvisible) {
-            isClearButtonInvisible = false;
+        if (isClearButtonInvisible()) {
+            visibilityOfClearButton = true;
             visibilityOfClearButtonLD.setValue(View.VISIBLE);
         }
     }
@@ -304,7 +348,7 @@ public class EditDeleteDataVM extends AndroidViewModel {
         transientListOfItems.remove(eDB);
         if (transientListOfItems.isEmpty()) {
             visibilityOfClearButtonLD.setValue(View.INVISIBLE);
-            isClearButtonInvisible = true;
+            visibilityOfClearButton = false;
         }
     }
 
@@ -328,14 +372,66 @@ public class EditDeleteDataVM extends AndroidViewModel {
         }
         transientListOfItems.clear();
         selectedCheckBoxesLD.setValue(false);
-        isClearButtonInvisible = true;
+        visibilityOfClearButton = false;
+        visibilityOfClearButtonLD.setValue(View.INVISIBLE);
     }
 
-    public void setSelectedEqualSign(int i) {
-        selectedEqualSign = i;
-        selectedEqualSignLD.setValue(i);
+    private boolean isClearButtonInvisible() { return visibilityOfClearButton == false; }
+
+    public void selectAllCheckBoxes(int selectedTable) {
+        switch (selectedTable) {
+            case SearchCriteriaFragment.SELECT_EMPLOYEES:
+                transientListOfSelectedEmployees.clear();
+                transientListOfSelectedEmployees.addAll(adapterListOfEmployees);
+                break;
+            case SearchCriteriaFragment.SELECT_FIRMS:
+                transientListOfSelectedFirms.clear();
+                transientListOfSelectedFirms.addAll(adapterListOfFirms);
+                break;
+            case SearchCriteriaFragment.SELECT_TYPES:
+                transientListOfSelectedTOW.clear();
+                transientListOfSelectedTOW.addAll(adapterListOfTOW);
+                break;
+            case SearchCriteriaFragment.SELECT_PLACES:
+                transientListOfSelectedPOW.clear();
+                transientListOfSelectedPOW.addAll(adapterListOfPOW);
+                break;
+            default:
+                throw new RuntimeException("опечатка в константах: clearSelectedCheckBoxes(int selectedTable)");
+        }
+        selectedCheckBoxesLD.setValue(true);
+        visibilityOfClearButton = true;
+        visibilityOfClearButtonLD.setValue(View.VISIBLE);
     }
 
-    public int getSelectedEqualSign() { return selectedEqualSign; }
+    public SortedEqualSignsList getAvailableOrderedEqualSignsList() {
+        if (availableOrderedEqualSignsList == null) {
+            String[] arraysOfSigns = getApplication().getResources().getStringArray(R.array.full_equal_inequal_signs_array);
+            availableOrderedEqualSignsList = new SortedEqualSignsList(Arrays.asList(arraysOfSigns));
+        }
+        return availableOrderedEqualSignsList;
+    }
+
+    public void setSelectedEqualSign(String selectedSign, int position) {
+        selectedEqualSign = selectedSign;
+        selectedEqualSignRadioButtonLD.setValue(position);
+    }
+
+    public String getSelectedEqualSign() {
+        return selectedEqualSign;
+    }
+
+    public int getCountOfAddedCriteriaForDate() { return countOfAddedCriteriaForDate; }
+
+    public void incrementCountOfAddedCriteriaForDate() { countOfAddedCriteriaForDate++; }
+
+    private void addSignToSelectedSignList() {
+        if (selectedEqualSignsList == null) selectedEqualSignsList = new SortedEqualSignsList();
+        selectedEqualSignsList.add(availableOrderedEqualSignsList.remove(selectedEqualSign));
+    }
+
+    public void notifyAboutTapAddButton() {
+        addSignToSelectedSignList();
+    }
 
 }

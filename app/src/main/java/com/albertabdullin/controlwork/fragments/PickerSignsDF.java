@@ -25,26 +25,20 @@ import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
 
 public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
-    public static final int FULL_SET_SIGNS = 0;
-    public static final int MORE_OR_EQUAL_SET_SIGNS = 1;
-    public static final int LESS_OR_EQUAL_SET_SIGNS = 2;
-    public static final int OTHER_SET_SIGNS = 3;
-    public static final String TAG_FOR_SELECTED_SET_SIGNS = "tag for selected set signs";
     private EditDeleteDataVM model;
-    private DFPickerObserver dfPickerObserver;
-    private int selectedSetOfSigns;
+    private DFPickerObserver mDfPickerObserver;
+    private String selectedSign;
 
     public PickerSignsDF() {}
 
-    public PickerSignsDF(int selectedSetOfSigns) {
-        this.selectedSetOfSigns = selectedSetOfSigns;
+    public PickerSignsDF(String selectedSign) {
+        this.selectedSign = selectedSign;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
-        if (savedInstanceState != null) selectedSetOfSigns = savedInstanceState.getInt(TAG_FOR_SELECTED_SET_SIGNS);
     }
 
     @Nullable
@@ -56,7 +50,9 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final AdapterForPickIneqaulEqualSign adapter = new AdapterForPickIneqaulEqualSign(model, requireActivity(), this);
+        final AdapterForPickIneqaulEqualSign adapter;
+        if (selectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, this);
+        else adapter = new AdapterForPickIneqaulEqualSign(model, this, selectedSign);
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(requireActivity()));
@@ -66,8 +62,6 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                model.setSelectedEqualSign(-1);
-                notifyAboutSelection();
                 Dialog dialog = getDialog();
                 if (dialog != null) dialog.dismiss();
 
@@ -77,15 +71,12 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
         agreeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getDialog().dismiss();
+                Dialog dialog = getDialog();
+                if (dialog != null) dialog.dismiss();
+                model.notifyAboutTapAddButton();
+                notifyAboutSelection();
             }
         });
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(TAG_FOR_SELECTED_SET_SIGNS, selectedSetOfSigns);
     }
 
     @Override
@@ -99,17 +90,13 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
         super.onResume();
     }
 
-    public int getSelectedSetOfSigns() {
-        return selectedSetOfSigns;
-    }
-
     @Override
     public void setDFSignPickerObserver(DFPickerObserver dfPickerObserver) {
-        this.dfPickerObserver = dfPickerObserver;
+        mDfPickerObserver = dfPickerObserver;
     }
 
     @Override
     public void notifyAboutSelection() {
-        dfPickerObserver.changeLayoutForCertainCriteria(selectedSetOfSigns);
+        mDfPickerObserver.changeLayoutForCertainCriteria(model.getSelectedEqualSign());
     }
 }

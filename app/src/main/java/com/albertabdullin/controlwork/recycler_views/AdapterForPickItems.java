@@ -96,7 +96,10 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         Observer<Boolean> observerForCheckBoxes = new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty())
+                if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty() && aBoolean == false)
+                    holder.getCheckBox().setChecked(aBoolean);
+                if (mVM.getTransientListOfSelectedItems(mSelectedTable).size() == mListOfEntities.size()
+                        && aBoolean == true)
                     holder.getCheckBox().setChecked(aBoolean);
             }
         };

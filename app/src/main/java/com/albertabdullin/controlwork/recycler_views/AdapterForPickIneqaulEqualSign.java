@@ -13,12 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.fragments.PickerSignsDF;
+import com.albertabdullin.controlwork.models.SortedEqualSignsList;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
 
 public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<AdapterForPickIneqaulEqualSign.MyVeiwHolder> {
 private EditDeleteDataVM mVM;
-private String[] mSigns;
+private SortedEqualSignsList mSigns;
 private PickerSignsDF mLifeCycleOwner;
 
 public static class MyVeiwHolder extends RecyclerView.ViewHolder {
@@ -36,26 +37,16 @@ public static class MyVeiwHolder extends RecyclerView.ViewHolder {
     public RadioButton getRadioButton() { return radioButton; }
 }
 
-    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, Context context, PickerSignsDF lifeCycleOwner) {
+    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, PickerSignsDF lifeCycleOwner) {
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
-        switch (mLifeCycleOwner.getSelectedSetOfSigns()) {
-            case PickerSignsDF.FULL_SET_SIGNS:
-                mSigns = context.getResources().getStringArray(R.array.full_equal_inequal_signs_array);
-                break;
-            case PickerSignsDF.MORE_OR_EQUAL_SET_SIGNS:
-                mSigns = context.getResources().getStringArray(R.array.more_or_equal_signs_array);
-                break;
-            case PickerSignsDF.LESS_OR_EQUAL_SET_SIGNS:
-                mSigns = context.getResources().getStringArray(R.array.less_or_equal_signs_array);
-                break;
-            case PickerSignsDF.OTHER_SET_SIGNS:
-                mSigns = context.getResources().getStringArray(R.array.other_signs_array);
-                break;
-            default:
-                throw new RuntimeException("опечатка констант в конструкторе AdapterForPickIneqaulEqualSign");
-        }
+        mSigns = mVM.getAvailableOrderedEqualSignsList();
+    }
 
+    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, PickerSignsDF lifeCycleOwner, String selectedSign) {
+        mVM = model;
+        mLifeCycleOwner = lifeCycleOwner;
+        mSigns = mVM.getAvailableOrderedEqualSignsList();
     }
 
     @NonNull
@@ -69,13 +60,13 @@ public static class MyVeiwHolder extends RecyclerView.ViewHolder {
     @Override
     public void onBindViewHolder(@NonNull final AdapterForPickIneqaulEqualSign.MyVeiwHolder holder, final int position) {
         TextView description = holder.getDescription();
-        description.setText(mSigns[position]);
+        description.setText(mSigns.get(position).getSign());
         description.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RadioButton rb = holder.getRadioButton();
                 rb.toggle();
-                if (rb.isChecked()) mVM.setSelectedEqualSign(position);
+                if (rb.isChecked()) mVM.setSelectedEqualSign(mSigns.get(position).getSign(), position);
             }
         });
         final RadioButton rb = holder.getRadioButton();
@@ -83,7 +74,7 @@ public static class MyVeiwHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View v) {
                 RadioButton rb = (RadioButton) v;
-                if (rb.isChecked()) mVM.setSelectedEqualSign(position);
+                if (rb.isChecked()) mVM.setSelectedEqualSign(mSigns.get(position).getSign(), position);
             }
         });
         Observer<Integer> rbObserver = new Observer<Integer>() {
@@ -97,6 +88,6 @@ public static class MyVeiwHolder extends RecyclerView.ViewHolder {
 
     @Override
     public int getItemCount() {
-        return mSigns.length;
+        return mSigns.size();
     }
 }

@@ -2,26 +2,11 @@
 <resources>
     <string-array name="full_equal_inequal_signs_array">
         <item>Нет критериев поиска</item>
-        <item>,</item>
+        <item>&#10878;</item>
+        <item>&#10877;</item>
         <item>=</item>
-        <item>&gt;=</item>
-        <item>&gt;</item>
-        <item>&lt;=</item>
-        <item>&lt;</item>
-    </string-array>
-    <string-array name="more_or_equal_signs_array">
-        <item>Нет критериев поиска</item>
-        <item>&gt;=</item>
-        <item>&gt;</item>
-    </string-array>
-    <string-array name="less_or_equal_signs_array">
-        <item>Нет критериев поиска</item>
-        <item>&lt;=</item>
-        <item>&lt;</item>
-    </string-array>
-    <string-array name="other_signs_array">
-        <item>Нет критериев поиска</item>
-        <item>,</item>
-        <item>=</item>
+        <item>&#8800;</item>
+        <item>&#10878; &#10877;</item>
+        <item>&#10877; &#10878;</item>
     </string-array>
 </resources>

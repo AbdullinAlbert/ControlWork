@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
 
@@ -24,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForPickItems;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
@@ -50,7 +50,8 @@ public class PickerItemsDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(getActivity()).get(EditDeleteDataVM.class);
+        model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        if (savedInstanceState != null) selectedTable = savedInstanceState.getInt(SAVED_TITLE_OF_TABLE);
         list = model.getAdapterListOfEntities(selectedTable);
     }
 
@@ -66,7 +67,6 @@ public class PickerItemsDF extends DialogFragment {
         Toolbar toolbar = view.findViewById(R.id.title_for_select_items_toolbar);
         String title = "";
         final AdapterForPickItems adapter;
-        if (savedInstanceState != null) selectedTable = savedInstanceState.getInt(SAVED_TITLE_OF_TABLE);
         switch (selectedTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
                 title = EMPLOEEYS_TITLE;
@@ -92,34 +92,49 @@ public class PickerItemsDF extends DialogFragment {
                 adapter = null;
         }
         final ImageView clearButton = view.findViewById(R.id.button_for_clear_selected_cb);
-        if (model.getTransientListOfSelectedItems(selectedTable).isEmpty()) clearButton.setVisibility(View.INVISIBLE);
-        else clearButton.setVisibility(View.VISIBLE);
+        final ImageView selectAllButton = view.findViewById(R.id.button_for_select_all_cb);
+        if (model.getTransientListOfSelectedItems(selectedTable).isEmpty()) {
+            clearButton.setVisibility(View.INVISIBLE);
+            selectAllButton.setVisibility(View.VISIBLE);
+        } else {
+            clearButton.setVisibility(View.VISIBLE);
+            selectAllButton.setVisibility(View.INVISIBLE);
+        }
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 model.clearSelectedCheckBoxes(selectedTable);
-                clearButton.setVisibility(View.INVISIBLE);
             }
         });
         Observer<Integer> observerClearButton = new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                if (!model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.VISIBLE)
+                if (!model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.VISIBLE) {
                     clearButton.setVisibility(View.VISIBLE);
-                else if (model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.INVISIBLE)
+                    selectAllButton.setVisibility(View.INVISIBLE);
+                } else if (model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.INVISIBLE) {
                     clearButton.setVisibility(View.INVISIBLE);
-
+                    selectAllButton.setVisibility(View.VISIBLE);
+                }
             }
         };
+        selectAllButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                model.selectAllCheckBoxes(selectedTable);
+            }
+        });
         model.getVisibilityOfClearButtonLD().observe(getViewLifecycleOwner(), observerClearButton);
         toolbar.setTitle(title);
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
-        Observer<List<SimpleEntityForDB>> rvObserver = new Observer<List<SimpleEntityForDB>>() {
+        Observer<Integer> rvObserver = new Observer<Integer>() {
             @Override
-            public void onChanged(List<SimpleEntityForDB> simpleEntityForDBS) {
-                if (list.size() == 0) list.addAll(simpleEntityForDBS);
-                adapter.notifyDataSetChanged();
+            public void onChanged(Integer integer) {
+                if (selectedTable == integer) {
+                    assert adapter != null;
+                    adapter.notifyDataSetChanged();
+                }
             }
         };
         model.getEntitiesLiveData().observe(this, rvObserver);
@@ -130,7 +145,8 @@ public class PickerItemsDF extends DialogFragment {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getDialog().dismiss();
+                Dialog dialog = getDialog();
+                if (dialog != null) dialog.dismiss();
 
             }
         });
@@ -139,7 +155,8 @@ public class PickerItemsDF extends DialogFragment {
             @Override
             public void onClick(View v) {
                 model.commitSelectedList(selectedTable);
-                getDialog().dismiss();
+                Dialog dialog = getDialog();
+                if (dialog != null) dialog.dismiss();
             }
         });
     }

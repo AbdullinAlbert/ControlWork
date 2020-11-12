@@ -103,7 +103,23 @@
                 android:text="@string/add_date"
                 android:labelFor="@id/add_date_editText"/>
 
-            <include layout="@layout/layout_exactly_criteria_to_compare_values" />
+            <EditText
+                android:id="@+id/select_data_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="32"
+                android:hint="@string/hint_for_search_criteria"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:backgroundTint="@color/standardBlack"
+                android:focusable="false" />
+
+            <include
+                android:id="@+id/first_editText_for_date_criteria"
+                layout="@layout/layout_exactly_criteria_to_compare_values"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="invisible" />
 
             <TextView
                 android:id="@+id/textView8"
