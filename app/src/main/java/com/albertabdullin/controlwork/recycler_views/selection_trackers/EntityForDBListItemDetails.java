@@ -20,4 +20,5 @@ public class EntityForDBListItemDetails extends ItemDetailsLookup.ItemDetails<Si
     @Nullable
     @Override
     public SimpleEntityForDB getSelectionKey() { return entity; }
+
 }

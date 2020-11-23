@@ -24,21 +24,40 @@ import com.albertabdullin.controlwork.recycler_views.AdapterForPickIneqaulEqualS
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
 
-public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
+public class PickerSignsDF extends DialogFragment implements DFPickerObservable {
     private EditDeleteDataVM model;
     private DFPickerObserver mDfPickerObserver;
-    private String selectedSign;
+    private String fromSelectedSign;
+    private int positionOnSelectedAction;
+    private int selectedAction;
+    private boolean selectedItem;
+    private static final String SELECTED_SIGN_TAG = "selected sign";
+    private static final String SELECTED_POSITION_TAG = "selected position";
+    public static final int ADD_ITEM = 0;
+    public static final int CHANGE_ITEM = 1;
+    public static final int DELETE_ITEM = 2;
 
-    public PickerSignsDF() {}
+    public PickerSignsDF() {  }
 
-    public PickerSignsDF(String selectedSign) {
-        this.selectedSign = selectedSign;
+    public PickerSignsDF(DFPickerObserver dfPickerObserver) {
+        mDfPickerObserver = dfPickerObserver;
+    }
+
+    public PickerSignsDF(String selectedSign, int position, DFPickerObserver dfPickerObserver) {
+        this.fromSelectedSign = selectedSign;
+        mDfPickerObserver = dfPickerObserver;
+        positionOnSelectedAction = position;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        if (mDfPickerObserver == null) mDfPickerObserver = (SearchCriteriaFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("edit_delete_fragment");
+        if (savedInstanceState != null) {
+            fromSelectedSign = savedInstanceState.getString(SELECTED_SIGN_TAG);
+            positionOnSelectedAction = savedInstanceState.getInt(SELECTED_POSITION_TAG);
+        }
     }
 
     @Nullable
@@ -51,8 +70,8 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final AdapterForPickIneqaulEqualSign adapter;
-        if (selectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, this);
-        else adapter = new AdapterForPickIneqaulEqualSign(model, this, selectedSign);
+        if (fromSelectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), this);
+        else adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), fromSelectedSign, this);
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(requireActivity()));
@@ -62,21 +81,33 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                model.clearSelectedEqualSign();
                 Dialog dialog = getDialog();
                 if (dialog != null) dialog.dismiss();
-
             }
         });
         Button agreeButton = view.findViewById(R.id.agree_button_for_selected_items);
         agreeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog dialog = getDialog();
-                if (dialog != null) dialog.dismiss();
-                model.notifyAboutTapAddButton();
-                notifyAboutSelection();
+                if (haveSelectedItem()) {
+                    model.clearSelectedEqualSign();
+                    Dialog dialog = getDialog();
+                    if (dialog != null) dialog.dismiss();
+                    if (fromSelectedSign == null) selectedAction = ADD_ITEM;
+                    else selectedAction = "Удалить критерий".equals(model.getSelectedEqualSign()) ? DELETE_ITEM : CHANGE_ITEM;
+                    model.notifyAboutTapAddButton(selectedAction, positionOnSelectedAction);
+                    notifyAboutSelection();
+                }
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(SELECTED_SIGN_TAG, fromSelectedSign);
+        outState.putInt(SELECTED_POSITION_TAG, positionOnSelectedAction);
     }
 
     @Override
@@ -85,18 +116,34 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable{
         Point size = new Point();
         Display display = window.getWindowManager().getDefaultDisplay();
         display.getSize(size);
-        window.setLayout((int) (size.x * 0.7), (int) (size.y * 0.6));
+        window.setLayout((int) (size.x * 0.7), (int) (size.y * 0.5));
         window.setGravity(Gravity.CENTER);
         super.onResume();
     }
 
     @Override
-    public void setDFSignPickerObserver(DFPickerObserver dfPickerObserver) {
-        mDfPickerObserver = dfPickerObserver;
+    public void notifyAboutSelection() {
+        switch (selectedAction) {
+            case ADD_ITEM:
+                mDfPickerObserver.addViewToLayoutForCertainCriteria(model.getSelectedEqualSign(), model.getPositionOfAddedCriteriaForDate());
+                break;
+            case CHANGE_ITEM:
+                mDfPickerObserver.changeLayoutForCertainCriteria(positionOnSelectedAction);
+                break;
+            case DELETE_ITEM:
+                mDfPickerObserver.deleteViewFormLayoutForCertainCriteria(positionOnSelectedAction);
+                break;
+            default:
+                throw new RuntimeException("опечатка в константах поля selectedAction - " + selectedAction);
+        }
+
     }
 
-    @Override
-    public void notifyAboutSelection() {
-        mDfPickerObserver.changeLayoutForCertainCriteria(model.getSelectedEqualSign());
+    public boolean haveSelectedItem() {
+        return selectedItem;
+    }
+
+    public void setSelectedItem() {
+        selectedItem = true;
     }
 }

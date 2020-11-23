@@ -16,13 +16,13 @@ import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 import java.util.List;
 
 
-public class AMControllerForListItems implements ActionMode.Callback {
-    static private SelectionTracker tracker;
+public class AMControllerForListItemsFromDB implements ActionMode.Callback {
+    private SelectionTracker tracker;
     private AdapterForItemsFromDB adapter;
     private AppCompatActivity activity;
 
-    public AMControllerForListItems(SelectionTracker tracker, AdapterForItemsFromDB adapter,
-                                    AppCompatActivity activity) {
+    public AMControllerForListItemsFromDB(SelectionTracker tracker, AdapterForItemsFromDB adapter,
+                                          AppCompatActivity activity) {
         this.tracker = tracker;
         this.adapter = adapter;
         this.activity = activity;
@@ -63,8 +63,8 @@ public class AMControllerForListItems implements ActionMode.Callback {
     }
 
     @Override
-    public void onDestroyActionMode(ActionMode mode) { tracker.clearSelection(); }
-
-    public static SelectionTracker getTracker() { return tracker; }
+    public void onDestroyActionMode(ActionMode mode) {
+         tracker.clearSelection();
+    }
 
 }

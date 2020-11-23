@@ -88,7 +88,7 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
     @Override
     public MyVeiwHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_of_recyclerview, parent, false);
+                .inflate(R.layout.layout_of_item_from_db_for_rv, parent, false);
         return new MyVeiwHolder(view);
     }
 

@@ -21,20 +21,28 @@ import androidx.recyclerview.selection.SelectionTracker;
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
+import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class DeleteDataDF extends DialogFragment {
-    private ListOfItemsVM viewModel;
+public class DeleteSearchCriteriaDF extends DialogFragment {
+    private EditDeleteDataVM viewModel;
+    private String mSign;
+    private static final String KEY_OF_SIGN = "key of sign";
 
+    public DeleteSearchCriteriaDF() {}
+
+    public DeleteSearchCriteriaDF(String sign) {
+        mSign = sign;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(ListOfItemsVM.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        if (savedInstanceState != null) mSign = savedInstanceState.getString(KEY_OF_SIGN);
     }
 
     @Nullable
@@ -48,11 +56,11 @@ public class DeleteDataDF extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         TextView tvSelectSize = view.findViewById(R.id.DeleteDFSelectSize);
         TextView tvQuestion = view.findViewById(R.id.DeleteDFQuestion);
-        final SelectionTracker tracker = ((ListOfBDItemsActivity) requireActivity()).getSelectionTracker();
-        tvSelectSize.setText("Выбрано записей: " + tracker.getSelection().size());
-        if(tracker.getSelection().size() == 1) {
-            Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
-            String description = iterator.next().getDescription();
+        int count = viewModel.getListOfSelectedPositionForDelete(mSign).size();
+        tvSelectSize.setText("Выбрано записей: " + count);
+        if(count == 1) {
+            int pos = viewModel.getListOfSelectedPositionForDelete(mSign).get(0);
+            String description = viewModel.getAdapterListOfCurrentSignForDate(mSign).get(pos);
             tvQuestion.setText("Вы действительно хотите удалить " + description + "?");
         }
         Button bYES = view.findViewById(R.id.DeleteDFButtonYES);
@@ -61,11 +69,7 @@ public class DeleteDataDF extends DialogFragment {
 
             @Override
             public void onClick(View v) {
-                Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
-                List<SimpleEntityForDB> deletedItemsList = new ArrayList<>();
-                while (iterator.hasNext()) deletedItemsList.add(iterator.next());
-                viewModel.deleteItem(deletedItemsList);
-                tracker.clearSelection();
+                viewModel.deleteSearchCriteriaValueForDate(mSign);
                 getDialog().dismiss();
             }
         });
@@ -73,6 +77,12 @@ public class DeleteDataDF extends DialogFragment {
             @Override
             public void onClick(View v) { getDialog().dismiss(); }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_OF_SIGN, mSign);
     }
 
     @Override

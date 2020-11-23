@@ -29,6 +29,7 @@
     <string name="rename_item">Переименовать</string>
     <string name="delete_item">Удалить</string>
     <string name="hide_item">Скрыть</string>
+    <string name="ok_button">OK</string>
     <string name="select_all_items">Выбрать всё</string>
     <string name="clear_all_items">Очистить</string>
     <string name="search_item">Поиск</string>

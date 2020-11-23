@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.customView.SearchEditText;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItems;
+import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
 import com.albertabdullin.controlwork.fragments.AddDataDF;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemKeyProvider;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemLookUP;
@@ -84,9 +84,8 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
     private SelectionTracker.SelectionObserver<Long> selectionObserver = new SelectionTracker.SelectionObserver<Long>() {
         @Override
         public void onSelectionChanged() {
-            super.onSelectionChanged();
             if(selectionTracker.hasSelection() && actionMode == null) {
-                actionMode = startSupportActionMode(new AMControllerForListItems(selectionTracker, adapterForItemsFromDB,
+                actionMode = startSupportActionMode(new AMControllerForListItemsFromDB(selectionTracker, adapterForItemsFromDB,
                         ListOfBDItemsActivity.this));
                 adapterForItemsFromDB.setActionMode(actionMode);
                 setSelectedTitle(selectionTracker.getSelection().size());
@@ -309,6 +308,10 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
                 getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         fab.show();
+    }
+
+    public SelectionTracker getSelectionTracker() {
+        return selectionTracker;
     }
 
 }

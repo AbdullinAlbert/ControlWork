@@ -20,11 +20,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.FillNewData_Activity;
+import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItems;
+import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 import java.util.Iterator;
@@ -93,15 +95,16 @@ public class UpdateDataDF extends DialogFragment {
         helperTextView = view.findViewById(R.id.UpdateDataDFHelper_text);
         Button bAdd = view.findViewById(R.id.UpdateDataDAddButton);
         Button bCancel = view.findViewById(R.id.UpdateDataDFCancelButton);
+        final SelectionTracker tracker = ((ListOfBDItemsActivity) requireActivity()).getSelectionTracker();
         bAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String description = tvUpdateData.getText().toString();
                 if(description.length() != 0) {
-                    Iterator<SimpleEntityForDB> iterator = AMControllerForListItems.getTracker().getSelection().iterator();
+                    Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
                     SimpleEntityForDB eDB = iterator.next();
                     viewModel.updateItem(eDB, description);
-                    AMControllerForListItems.getTracker().clearSelection();
+                    tracker.clearSelection();
                     hideKeyBoard();
                     getDialog().dismiss();
                 }

@@ -111,10 +111,14 @@ public class PickerItemsDF extends DialogFragment {
             public void onChanged(Integer integer) {
                 if (!model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.VISIBLE) {
                     clearButton.setVisibility(View.VISIBLE);
+                    clearButton.setClickable(true);
                     selectAllButton.setVisibility(View.INVISIBLE);
+                    selectAllButton.setClickable(false);
                 } else if (model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.INVISIBLE) {
                     clearButton.setVisibility(View.INVISIBLE);
+                    clearButton.setClickable(false);
                     selectAllButton.setVisibility(View.VISIBLE);
+                    selectAllButton.setClickable(true);
                 }
             }
         };
@@ -138,8 +142,10 @@ public class PickerItemsDF extends DialogFragment {
             }
         };
         model.getEntitiesLiveData().observe(this, rvObserver);
-        rv.setLayoutManager(new LinearLayoutManager(requireActivity()));
-        DividerItemDecoration divider = new DividerItemDecoration(rv.getContext(), DividerItemDecoration.VERTICAL);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(requireActivity());
+        rv.setLayoutManager(mLayoutManager);
+        DividerItemDecoration divider = new DividerItemDecoration
+                (new android.view.ContextThemeWrapper(requireActivity(), R.style.AppTheme), mLayoutManager.getOrientation());
         rv.addItemDecoration(divider);
         Button cancelButton = view.findViewById(R.id.cancel_select_items_for_search);
         cancelButton.setOnClickListener(new View.OnClickListener() {

@@ -20,9 +20,9 @@ public class DBListItemLookUP extends ItemDetailsLookup<SimpleEntityForDB> {
     @Override
     public ItemDetails<SimpleEntityForDB> getItemDetails(@NonNull MotionEvent e) {
         View view =  rv.findChildViewUnder(e.getX(), e.getY());
-        if(view != null) {
+        if (view != null) {
             RecyclerView.ViewHolder vh = rv.getChildViewHolder(view);
-            if(vh instanceof AdapterForItemsFromDB.MyVeiwHolder) return ((AdapterForItemsFromDB.MyVeiwHolder) vh).getItemDetails();
+            if (vh instanceof AdapterForItemsFromDB.MyVeiwHolder) return ((AdapterForItemsFromDB.MyVeiwHolder) vh).getItemDetails();
         }
         return null;
     }

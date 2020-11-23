@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,11 +34,14 @@ public class EditDeleteDataActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_edit_delete_data);
+        setContentView(R.layout.activity_edit_delete_data);
         model = new ViewModelProvider(this, new ViewModelFactoryEditDeleteData(this.getApplication())).get(EditDeleteDataVM.class);
-        SearchCriteriaFragment searchCriteriaFragment = new SearchCriteriaFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.container_for_edit_delete_fragment, searchCriteriaFragment);
+        SearchCriteriaFragment searchCriteriaFragment = (SearchCriteriaFragment) getSupportFragmentManager().findFragmentByTag("edit_delete_fragment");
+        if (searchCriteriaFragment == null) {
+            searchCriteriaFragment = new SearchCriteriaFragment();
+            transaction.add(R.id.container_for_edit_delete_fragment, searchCriteriaFragment, "edit_delete_fragment");
+        } else transaction.replace(R.id.container_for_edit_delete_fragment, searchCriteriaFragment, "edit_delete_fragment");
         transaction.commit();
     }
 

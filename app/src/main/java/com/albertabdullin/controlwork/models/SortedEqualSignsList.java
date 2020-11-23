@@ -6,14 +6,14 @@ import java.util.List;
 public class SortedEqualSignsList {
     private List<OrderedSign> list;
 
-    public SortedEqualSignsList() {
-        list = new ArrayList<>();
-    }
+    private static List<OrderedSign> constantList = null;
 
     public SortedEqualSignsList(List<String> l) {
         list = new ArrayList<>();
+        constantList = new ArrayList<>();
         for (int i = 0; i < l.size(); i++) {
             list.add(new OrderedSign(i, l.get(i)));
+            constantList.add(new OrderedSign(i, l.get(i)));
         }
     }
 
@@ -28,6 +28,14 @@ public class SortedEqualSignsList {
             }
         }
         if (b) list.add(orderedSign);
+    }
+
+    public static int getID(String sign) {
+        int i = 0;
+        if (constantList == null) throw new RuntimeException("Вызов SortedEqualSignsList с пустым списком");
+        else while (!sign.equals(constantList.get(i).getSign()) && i < constantList.size()) i++;
+        if (i == constantList.size()) throw new RuntimeException("Ошибка в выборе переменной");
+        return i;
     }
 
     public OrderedSign remove(String sign) {

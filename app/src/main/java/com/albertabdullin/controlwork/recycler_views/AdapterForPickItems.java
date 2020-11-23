@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -54,7 +53,7 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
     @Override
     public MyVeiwHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.layout_selectable_item_form_list, parent, false);
+                .inflate(R.layout.layout_selectable_item_for_list_for_rv, parent, false);
         return new MyVeiwHolder(view);
     }
 
