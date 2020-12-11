@@ -6,15 +6,13 @@ import java.util.List;
 public class SortedEqualSignsList {
     private List<OrderedSign> list;
 
-    private static List<OrderedSign> constantList = null;
+    private static List<OrderedSign> staticList = null;
 
     public SortedEqualSignsList(List<String> l) {
         list = new ArrayList<>();
-        constantList = new ArrayList<>();
-        for (int i = 0; i < l.size(); i++) {
+        for (int i = 0; i < l.size(); i++)
             list.add(new OrderedSign(i, l.get(i)));
-            constantList.add(new OrderedSign(i, l.get(i)));
-        }
+        if (staticList == null) staticList = new ArrayList<>(list);
     }
 
     public void add(OrderedSign orderedSign) {
@@ -32,9 +30,9 @@ public class SortedEqualSignsList {
 
     public static int getID(String sign) {
         int i = 0;
-        if (constantList == null) throw new RuntimeException("Вызов SortedEqualSignsList с пустым списком");
-        else while (!sign.equals(constantList.get(i).getSign()) && i < constantList.size()) i++;
-        if (i == constantList.size()) throw new RuntimeException("Ошибка в выборе переменной");
+        if (staticList == null) throw new RuntimeException("Вызов SortedEqualSignsList с пустым списком");
+        else while (!sign.equals(staticList.get(i).getSign()) && i < staticList.size()) i++;
+        if (i == staticList.size()) throw new RuntimeException("Ошибка в выборе переменной");
         return i;
     }
 

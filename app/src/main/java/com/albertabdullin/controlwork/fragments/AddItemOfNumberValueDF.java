@@ -1,6 +1,5 @@
 package com.albertabdullin.controlwork.fragments;
 
-import android.app.VoiceInteractor;
 import android.content.DialogInterface;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -15,6 +14,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,27 +25,31 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.FillNewData_Activity;
+import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
-public class AddDataDF extends DialogFragment {
+public class AddItemOfNumberValueDF extends DialogFragment {
     public static final String TAG = "DialogFragmnet for add items";
-    private ListOfItemsVM viewModel;
-    private TextView helperTextView;
-    private TextView tvAddNewData;
+    private EditDeleteDataVM viewModel;
+    private EditText etAddNewData;
+    private String mSign;
+    private Integer mCurrentPosition;
+    private static final String KEY_OF_SIGN = "key of sign";
+    private static final String KEY_OF_CURRENT_POSITION = "key of current position";
 
-    View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+    private View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus && !viewModel.isActivatedDF()) {
+            if (hasFocus && viewModel.isNotActivatedDF()) {
                 viewModel.setActivatedDF(true);
-                InputMethodManager inputMananger = (InputMethodManager) getContext()
+                InputMethodManager inputManager = (InputMethodManager) getContext()
                         .getSystemService(getContext().INPUT_METHOD_SERVICE);
-                inputMananger.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
             }
         }
     };
 
-    TextWatcher countCharTW = new TextWatcher() {
+    private TextWatcher textWatcher = new TextWatcher() {
 
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -53,69 +57,79 @@ public class AddDataDF extends DialogFragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+            viewModel.setSelectedSignAndStringViewOfNumber(mSign, s.toString());
         }
 
         @Override
         public void afterTextChanged(Editable s) {
-            helperTextView.setText(s.length() + " / 30");
         }
     };
+
+    public AddItemOfNumberValueDF(String sign, Integer currentPosition) {
+        mSign = sign;
+        mCurrentPosition = currentPosition;
+    }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(ListOfItemsVM.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        if (savedInstanceState != null) {
+            mSign = savedInstanceState.getString(KEY_OF_SIGN);
+            mCurrentPosition = savedInstanceState.getInt(KEY_OF_CURRENT_POSITION);
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_fragmet_add_data, container);
+        return inflater.inflate(R.layout.dialog_fragmet_add_item_of_number_value, container);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        tvAddNewData = view.findViewById(R.id.editTextNewData);
-        switch (viewModel.getNumberOfNeededTable()) {
-            case FillNewData_Activity.TABLE_OF_EMPLOYERS:
-                tvAddNewData.setHint(R.string.hint_firstname_secondname);
-                break;
-            case FillNewData_Activity.TABLE_OF_FIRMS:
-                tvAddNewData.setHint(R.string.hint_frim);
-            break;
-            case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
-                tvAddNewData.setHint(R.string.hint_type_of_work);
-                break;
-            case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
-                tvAddNewData.setHint(R.string.hint_place_of_work);
-                break;
-        }
-        tvAddNewData.addTextChangedListener(countCharTW);
-        helperTextView = view.findViewById(R.id.AddDataDFHelper_text);
+        etAddNewData = view.findViewById(R.id.editTextNewData);
+        etAddNewData.addTextChangedListener(textWatcher);
         Button bAdd = view.findViewById(R.id.add_df_button);
         Button bCancel = view.findViewById(R.id.cancel_df_button);
         bAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String description = tvAddNewData.getText().toString();
-                if(description.length() != 0) viewModel.addItem(description);
+                String description = etAddNewData.getText().toString();
+                if(description.length() != 0) {
+                    if (mCurrentPosition == null) {
+                        viewModel.addItemToNumberList(mSign, description, null);
+                        viewModel.addSearchCriteriaForNumber(
+                                viewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign), Float.parseFloat(description), null);
+                    } else {
+                        viewModel.changeItemToOneNumberList(mSign, mCurrentPosition, description, null);
+                        viewModel.changeSearchCriteriaValueForNumber(mSign, mCurrentPosition * 2, Float.parseFloat(description),null);
+                    }
+                }
                 else {
                     Toast toast = Toast.makeText(getContext(), "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
                     toast.show();
                 }
                 hideKeyBoard();
-                getDialog().dismiss();
+                requireDialog().dismiss();
             }
         });
         bCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 hideKeyBoard();
-                getDialog().dismiss();
+                requireDialog().dismiss();
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_OF_SIGN, mSign);
+        outState.putInt(KEY_OF_CURRENT_POSITION, mCurrentPosition);
     }
 
     @Override
@@ -126,19 +140,19 @@ public class AddDataDF extends DialogFragment {
         display.getSize(size);
         window.setLayout((int) (size.x * 0.95), WindowManager.LayoutParams.WRAP_CONTENT);
         window.setGravity(Gravity.CENTER);
-        tvAddNewData.setOnFocusChangeListener(focusChangeListener);
-        tvAddNewData.requestFocus();
+        etAddNewData.setOnFocusChangeListener(focusChangeListener);
+        etAddNewData.requestFocus();
         super.onResume();
     }
 
     private void hideKeyBoard() {
-        tvAddNewData.setFocusable(false);
-        tvAddNewData.clearFocus();
+        etAddNewData.setFocusable(false);
+        etAddNewData.clearFocus();
         viewModel.setActivatedDF(false);
-        if (tvAddNewData != null) {
+        if (etAddNewData != null) {
             InputMethodManager imm = (InputMethodManager)
                     getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(tvAddNewData.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(etAddNewData.getWindowToken(), 0);
         }
     }
 
@@ -147,4 +161,5 @@ public class AddDataDF extends DialogFragment {
         hideKeyBoard();
         super.onDismiss(dialog);
     }
+
 }

@@ -28,25 +28,29 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     private EditDeleteDataVM model;
     private DFPickerObserver mDfPickerObserver;
     private String fromSelectedSign;
+    private int selectedTypeOfValue;
     private int positionOnSelectedAction;
     private int selectedAction;
     private boolean selectedItem;
     private static final String SELECTED_SIGN_TAG = "selected sign";
     private static final String SELECTED_POSITION_TAG = "selected position";
+    private static final String SELECTED_TYPE_OF_VALUE = "selected type of value";
     public static final int ADD_ITEM = 0;
     public static final int CHANGE_ITEM = 1;
     public static final int DELETE_ITEM = 2;
 
     public PickerSignsDF() {  }
 
-    public PickerSignsDF(DFPickerObserver dfPickerObserver) {
+    public PickerSignsDF(DFPickerObserver dfPickerObserver, int selectedTypeOfValue) {
         mDfPickerObserver = dfPickerObserver;
+        this.selectedTypeOfValue = selectedTypeOfValue;
     }
 
-    public PickerSignsDF(String selectedSign, int position, DFPickerObserver dfPickerObserver) {
+    public PickerSignsDF(String selectedSign, int position, DFPickerObserver dfPickerObserver, int selectedTypeOfValue) {
         this.fromSelectedSign = selectedSign;
         mDfPickerObserver = dfPickerObserver;
         positionOnSelectedAction = position;
+        this.selectedTypeOfValue = selectedTypeOfValue;
     }
 
     @Override
@@ -57,6 +61,7 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
         if (savedInstanceState != null) {
             fromSelectedSign = savedInstanceState.getString(SELECTED_SIGN_TAG);
             positionOnSelectedAction = savedInstanceState.getInt(SELECTED_POSITION_TAG);
+            selectedTypeOfValue = savedInstanceState.getInt(SELECTED_TYPE_OF_VALUE);
         }
     }
 
@@ -70,8 +75,8 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final AdapterForPickIneqaulEqualSign adapter;
-        if (fromSelectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), this);
-        else adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), fromSelectedSign, this);
+        if (fromSelectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), selectedTypeOfValue, this);
+        else adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), selectedTypeOfValue, fromSelectedSign, this);
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(requireActivity()));
@@ -95,8 +100,8 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
                     Dialog dialog = getDialog();
                     if (dialog != null) dialog.dismiss();
                     if (fromSelectedSign == null) selectedAction = ADD_ITEM;
-                    else selectedAction = "Удалить критерий".equals(model.getSelectedEqualSign()) ? DELETE_ITEM : CHANGE_ITEM;
-                    model.notifyAboutTapAddButton(selectedAction, positionOnSelectedAction);
+                    else selectedAction = "Удалить критерий".equals(model.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue)) ? DELETE_ITEM : CHANGE_ITEM;
+                    model.notifyAboutTapAddButton(selectedTypeOfValue, selectedAction, positionOnSelectedAction);
                     notifyAboutSelection();
                 }
             }
@@ -108,6 +113,7 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
         super.onSaveInstanceState(outState);
         outState.putString(SELECTED_SIGN_TAG, fromSelectedSign);
         outState.putInt(SELECTED_POSITION_TAG, positionOnSelectedAction);
+        outState.putInt(SELECTED_TYPE_OF_VALUE, selectedTypeOfValue);
     }
 
     @Override
@@ -125,18 +131,19 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     public void notifyAboutSelection() {
         switch (selectedAction) {
             case ADD_ITEM:
-                mDfPickerObserver.addViewToLayoutForCertainCriteria(model.getSelectedEqualSign(), model.getPositionOfAddedCriteriaForDate());
+                mDfPickerObserver.addViewToLayoutForCertainSearchCriteria(selectedTypeOfValue,
+                        model.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue),
+                        model.getPositionOfAddedCriteriaForSelectedTypeOfValue(selectedTypeOfValue));
                 break;
             case CHANGE_ITEM:
-                mDfPickerObserver.changeLayoutForCertainCriteria(positionOnSelectedAction);
+                mDfPickerObserver.changeLayoutForCertainSearchCriteria(selectedTypeOfValue, positionOnSelectedAction);
                 break;
             case DELETE_ITEM:
-                mDfPickerObserver.deleteViewFormLayoutForCertainCriteria(positionOnSelectedAction);
+                mDfPickerObserver.deleteViewFormLayoutForCertainSearchCriteria(selectedTypeOfValue, positionOnSelectedAction);
                 break;
             default:
                 throw new RuntimeException("опечатка в константах поля selectedAction - " + selectedAction);
-        }
-
+            }
     }
 
     public boolean haveSelectedItem() {

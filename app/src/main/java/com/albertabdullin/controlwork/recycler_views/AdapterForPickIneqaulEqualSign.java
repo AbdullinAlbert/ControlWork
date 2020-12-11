@@ -22,6 +22,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
     private SortedEqualSignsList mSigns;
     private LifecycleOwner mLifeCycleOwner;
     private PickerSignsDF mPickerSignsDF;
+    private int mSelectedTypeOfValue;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView description;
@@ -38,18 +39,20 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
     public RadioButton getRadioButton() { return radioButton; }
 }
 
-    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, PickerSignsDF pickerSignsDF) {
+    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, PickerSignsDF pickerSignsDF) {
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
-        mSigns = mVM.getAvailableOrderedEqualSignsList();
+        mSigns = mVM.getAvailableOrderedEqualSignsListForDate(selectedTypeOfValue);
         mPickerSignsDF = pickerSignsDF;
+        mSelectedTypeOfValue =selectedTypeOfValue;
     }
 
-    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, String selectedSign, PickerSignsDF pickerSignsDF) {
+    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, String selectedSign, PickerSignsDF pickerSignsDF) {
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
-        mSigns = model.getAvailableOrderedEqualSignsList(selectedSign);
+        mSigns = model.getAvailableOrderedEqualSignsList(selectedTypeOfValue, selectedSign);
         mPickerSignsDF = pickerSignsDF;
+        mSelectedTypeOfValue = selectedTypeOfValue;
     }
 
     @NonNull
@@ -70,7 +73,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
                 RadioButton rb = holder.getRadioButton();
                 rb.toggle();
                 if (!mPickerSignsDF.haveSelectedItem()) mPickerSignsDF.setSelectedItem();
-                if (rb.isChecked()) mVM.setSelectedEqualSign(mSigns.get(position).getSign(), position);
+                if (rb.isChecked()) mVM.setSelectedEqualSign(mSelectedTypeOfValue, mSigns.get(position).getSign(), position);
             }
         });
         final RadioButton rb = holder.getRadioButton();
@@ -79,7 +82,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
             public void onClick(View v) {
                 RadioButton rb = (RadioButton) v;
                 if (!mPickerSignsDF.haveSelectedItem()) mPickerSignsDF.setSelectedItem();
-                if (rb.isChecked()) mVM.setSelectedEqualSign(mSigns.get(position).getSign(), position);
+                if (rb.isChecked()) mVM.setSelectedEqualSign(mSelectedTypeOfValue, mSigns.get(position).getSign(), position);
             }
         });
         Observer<Integer> rbObserver = new Observer<Integer>() {

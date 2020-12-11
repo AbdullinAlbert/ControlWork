@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editText_filled_date"
+        android:id="@+id/editText_filled_value"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
