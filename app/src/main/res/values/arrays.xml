@@ -20,4 +20,8 @@
     <string-array name="no_signs_array">
         <item>Удалить критерий</item>
     </string-array>
+    <string-array name="full_array_for_notes">
+        <item>=</item>
+        <item>&#8800;</item>
+    </string-array>
 </resources>
