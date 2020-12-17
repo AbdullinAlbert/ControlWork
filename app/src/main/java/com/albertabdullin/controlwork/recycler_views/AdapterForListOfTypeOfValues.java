@@ -12,7 +12,9 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.fragments.AddItemOfNoteValueDF;
 import com.albertabdullin.controlwork.fragments.AddItemOfNumberValueDF;
+import com.albertabdullin.controlwork.fragments.AddItemOfPairOfNumbersValueDF;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -89,9 +91,9 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                                 public void onPositiveButtonClick(Pair<Long, Long> selection) {
                                     Calendar calendar = Calendar.getInstance();
                                     calendar.setTimeInMillis(selection.first);
-                                    String beginOfRangeDate = SearchCriteriaFragment.convertLongToStringDate(calendar);
+                                    String beginOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                     calendar.setTimeInMillis(selection.second);
-                                    String endOfRangeDate = SearchCriteriaFragment.convertLongToStringDate(calendar);
+                                    String endOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                     mModel.changeItemToOneDateList(mSign, holder.getCurrentPosition(), beginOfRangeDate, endOfRangeDate);
                                     mModel.changeSearchCriteriaValueForDate(mSign, holder.getCurrentPosition() * 2, selection.first, selection.second);
                                 }
@@ -110,7 +112,7 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                             public void onPositiveButtonClick(Long selection) {
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTimeInMillis(selection);
-                                String date = SearchCriteriaFragment.convertLongToStringDate(calendar);
+                                String date = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                 mModel.changeItemToOneDateList(mSign, holder.getCurrentPosition(), date, null);
                                 mModel.changeSearchCriteriaValueForDate(mSign, holder.getCurrentPosition(), selection, null);
                             }
@@ -124,6 +126,9 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                     tv.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            AddItemOfPairOfNumbersValueDF addItemOfPairOfNumbersValueDF =
+                                    new AddItemOfPairOfNumbersValueDF(mSign, holder.getCurrentPosition());
+                            addItemOfPairOfNumbersValueDF.show(mFragmentActivity.getSupportFragmentManager(), "add note value");
                         }
                     });
                 else tv.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +136,15 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                     public void onClick(View v) {
                         AddItemOfNumberValueDF addItemOfNumberValueDF = new AddItemOfNumberValueDF(mSign, holder.getCurrentPosition());
                         addItemOfNumberValueDF.show(mFragmentActivity.getSupportFragmentManager(), "add number value");
+                    }
+                });
+                break;
+            case (SearchCriteriaFragment.NOTES_VALUE):
+                tv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AddItemOfNoteValueDF addItemOfNoteValueDF = new AddItemOfNoteValueDF(mSign, holder.getCurrentPosition());
+                        addItemOfNoteValueDF.show(mFragmentActivity.getSupportFragmentManager(), "add note value");
                     }
                 });
                 break;
@@ -151,18 +165,20 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                 if (cb.isChecked()) {
                     if (mSelectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE)
                         mModel.addSelectedItemToListOfDeletedDate(mSign, holder.getCurrentPosition());
-                    else mModel.addSelectedItemToListOfDeletedNumber(mSign, holder.getCurrentPosition());
+                    else if (mSelectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) mModel.addSelectedItemToListOfDeletedNumber(mSign, holder.getCurrentPosition());
+                    else mModel.addSelectedItemToListOfDeletedNote(mSign, holder.getCurrentPosition());
                 }
                 else {
                     if (mSelectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE)
                         mModel.removeSelectedItemFromListOfDeletedDate(mSign, holder.getCurrentPosition());
-                    else mModel.removeSelectedItemFromListOfDeletedNumber(mSign, holder.getCurrentPosition());
+                    else mModel.removeSelectedItemFromListOfDeletedNote(mSign, holder.getCurrentPosition());
                 }
             }
         });
         holder.getCheckBox().setChecked(
                 mSelectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE ? mModel.isCheckedSelectableItemFromListOfDeletedDatePosition(mSign, position)
-                : mModel.isCheckedSelectableItemFromListOfDeletedNumberPosition(mSign, position));
+                : mSelectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE ? mModel.isCheckedSelectableItemFromListOfDeletedNumberPosition(mSign, position)
+                : mModel.isCheckedSelectableItemFromListOfDeletedNotePosition(mSign, position));
     }
 
     @Override

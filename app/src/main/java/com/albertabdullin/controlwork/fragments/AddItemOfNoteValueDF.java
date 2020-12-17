@@ -15,7 +15,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,11 +23,9 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
-import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
-public class AddItemOfNumberValueDF extends DialogFragment {
+public class AddItemOfNoteValueDF extends DialogFragment {
     private EditDeleteDataVM viewModel;
     private EditText etAddNewData;
     private String mSign;
@@ -56,7 +53,7 @@ public class AddItemOfNumberValueDF extends DialogFragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            viewModel.setSelectedSignAndStringViewOfNumber(mSign, s.toString());
+            viewModel.setSelectedSignAndStringViewOfNote(mSign, s.toString());
         }
 
         @Override
@@ -64,9 +61,9 @@ public class AddItemOfNumberValueDF extends DialogFragment {
         }
     };
 
-    public AddItemOfNumberValueDF() {}
+    public AddItemOfNoteValueDF() {}
 
-    public AddItemOfNumberValueDF(String sign, Integer currentPosition) {
+    public AddItemOfNoteValueDF(String sign, Integer currentPosition) {
         mSign = sign;
         mCurrentPosition = currentPosition;
     }
@@ -85,7 +82,7 @@ public class AddItemOfNumberValueDF extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_fragmet_add_item_of_number_value, container);
+        return inflater.inflate(R.layout.dialog_fragmet_add_item_of_note_value, container);
     }
 
     @Override
@@ -93,7 +90,7 @@ public class AddItemOfNumberValueDF extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         etAddNewData = view.findViewById(R.id.editTextNewData);
         etAddNewData.addTextChangedListener(textWatcher);
-        if (mCurrentPosition != null) etAddNewData.setText(viewModel.getValueOfNumber(mSign, mCurrentPosition));
+        if (mCurrentPosition != null) etAddNewData.setText(viewModel.getValueOfNote(mSign, mCurrentPosition));
         Button bAdd = view.findViewById(R.id.add_df_button);
         Button bCancel = view.findViewById(R.id.cancel_df_button);
         bAdd.setOnClickListener(new View.OnClickListener() {
@@ -102,12 +99,12 @@ public class AddItemOfNumberValueDF extends DialogFragment {
                 String description = etAddNewData.getText().toString();
                 if(description.length() != 0) {
                     if (mCurrentPosition == null) {
-                        viewModel.addItemToNumberList(mSign, description, null);
-                        viewModel.addSearchCriteriaForNumber(
-                                viewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign), Float.parseFloat(description), null);
+                        viewModel.addItemToNoteList(mSign, description);
+                        viewModel.addSearchCriteriaForNote(
+                                viewModel.getPositionOfSign(SearchCriteriaFragment.NOTES_VALUE, mSign), description);
                     } else {
-                        viewModel.changeItemToOneNumberList(mSign, mCurrentPosition, description, null);
-                        viewModel.changeSearchCriteriaValueForNumber(mSign, mCurrentPosition * 2, Float.parseFloat(description),null);
+                        viewModel.changeItemToNoteList(mSign, mCurrentPosition, description);
+                        viewModel.changeSearchCriteriaValueForNote(mSign, mCurrentPosition, description);
                     }
                 }
                 else {

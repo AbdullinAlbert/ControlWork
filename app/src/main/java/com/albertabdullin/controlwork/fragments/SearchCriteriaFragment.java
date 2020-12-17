@@ -35,16 +35,20 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
 
     public static final int NUMBERS_VALUE = 4;
     public static final int DATES_VALUE = 5;
+    public static final int NOTES_VALUE = 6;
 
-    private EditText selectedDate;
-    private EditText selectedNumber;
-    private Button addCriteriaForDate;
-    private Button addCriteriaForNumber;
+    private EditText selectedDateEditText;
+    private EditText selectedNumberEditText;
+    private EditText selectedNoteEditText;
+    private Button addCriteriaForDateButton;
+    private Button addCriteriaForNumberButton;
+    private Button addCriteriaForNoteButton;
     private static EditDeleteDataVM model;
     private ViewGroup innerLinearLayout;
 
     private View[] viewsForDates;
     private View[] viewsForNumbers;
+    private View[] viewsForNotes;
 
     View.OnClickListener callPickerEmployersDF = new View.OnClickListener() {
 
@@ -94,6 +98,14 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         @Override
         public void onClick(View v) {
             PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, NUMBERS_VALUE);
+            pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickSign");
+        }
+    };
+
+    View.OnClickListener callPickerSignForNoteDF = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, NOTES_VALUE);
             pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickSign");
         }
     };
@@ -162,14 +174,24 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             }
         };
         model.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
-        selectedDate = view.findViewById(R.id.select_data_editText);
-        selectedDate.setOnClickListener(callPickerSignForDateDF);
+        selectedDateEditText = view.findViewById(R.id.add_criteria_for_data_editText);
+        selectedDateEditText.setOnClickListener(callPickerSignForDateDF);
         if (model.getCountOfAddedCriteriaForDate() != 0) {
             for (int i = 0; i < model.getCountOfAddedCriteriaForDate(); i++)
                 addViewToLayoutForCertainSearchCriteria(DATES_VALUE, model.getSelectedEqualSignFromList(DATES_VALUE, i), i);
         }
-        selectedNumber = view.findViewById(R.id.select_result_editText);
-        selectedNumber.setOnClickListener(callPickerSignForNumberDF);
+        selectedNumberEditText = view.findViewById(R.id.add_criteria_for_result_editText);
+        selectedNumberEditText.setOnClickListener(callPickerSignForNumberDF);
+        if (model.getCountOfAddedCriteriaForNumber() != 0) {
+            for (int i = 0; i < model.getCountOfAddedCriteriaForNumber(); i++)
+                addViewToLayoutForCertainSearchCriteria(NUMBERS_VALUE, model.getSelectedEqualSignFromList(NUMBERS_VALUE, i), i);
+        }
+        selectedNoteEditText = view.findViewById(R.id.add_criteria_for_note_edit_text);
+        selectedNoteEditText.setOnClickListener(callPickerSignForNoteDF);
+        if (model.getCountOfAddedCriteriaForNote() != 0) {
+            for (int i = 0; i < model.getCountOfAddedCriteriaForNote(); i++)
+                addViewToLayoutForCertainSearchCriteria(NOTES_VALUE, model.getSelectedEqualSignFromList(NOTES_VALUE, i), i);
+        }
     }
 
     private void setOneDateCalendarToEditText(final EditText et, final TextView tv) {
@@ -203,7 +225,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
                     public void onPositiveButtonClick(Long selection) {
                         Calendar calendar = Calendar.getInstance();
                         calendar.setTimeInMillis(selection);
-                        String date = convertLongToStringDate(calendar);
+                        String date = getStringViewOfDate(calendar);
                         model.setSelectedSignAndStringViewOfDate(tv.getText().toString(), date);
                         model.addSearchCriteriaForDate(model.getPositionOfSign(DATES_VALUE, tv.getText().toString()), selection, null);
                     }
@@ -213,40 +235,36 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         });
     }
 
-    private void prepareEditTextToDisplayAndPreserveNumber(final EditText editText, final TextView textView, final int position) {
-        Observer<String> observerEditText = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                editText.setText(s);
-            }
-        };
-        if ("\u2a7e".equals(textView.getText().toString())) model.getStringViewOfNumberMoreSignLD().observe(getViewLifecycleOwner(), observerEditText);
-        else model.getStringViewOfNumberLessSignLD().observe(getViewLifecycleOwner(), observerEditText);
+    private void prepareEditTextToDisplayAndPreserveNumber(EditText editText, final TextView textView, final int position) {
+        editText.setId(View.generateViewId());
+        final String key = textView.getText().toString();
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String stringViewOfNumber = textView.getText().toString();
-                Float floatViewOfNumber = Float.parseFloat(stringViewOfNumber);
-                if (before == 0) {
-                    model.setSelectedSignAndStringViewOfNumber(stringViewOfNumber, s.toString());
-                    model.addSearchCriteriaForNumber(position, floatViewOfNumber, null);
-                }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                String stringViewOfNumber = s.toString();
+                if (stringViewOfNumber.length() > 0) {
+                    Float floatViewOfNumber = Float.parseFloat(stringViewOfNumber);
+                    model.setSelectedSignAndStringViewOfNumber(key, stringViewOfNumber);
+                    model.addSearchCriteriaForNumber(position, floatViewOfNumber, null);
+                } else {
+                    model.deleteStringViewOfNumber(key);
+                    model.deleteSearchCriteriaForNumber(key);
+                }
             }
         };
+
         editText.addTextChangedListener(textWatcher);
     }
 
-    private void setDialogFragmentWithListOfDateToEditText(final int selectedTypeOfValue, final EditText et, final TextView tv) {
+    private void setDialogFragmentWithListOfValuesToEditText(final int selectedTypeOfValue, final EditText et, final TextView tv) {
         String sign = tv.getText().toString();
         Observer<String> observerEditText = new Observer<String>() {
             @Override
@@ -257,11 +275,13 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         switch (sign) {
             case "=":
                 if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) model.getStringViewOfDateEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
-                else model.getStringViewOfNumberEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) model.getStringViewOfNumberEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else model.getStringViewOfNoteEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
                 break;
             case "\u2260":
                 if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) model.getStringViewOfDateInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
-                model.getStringViewOfNumberInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) model.getStringViewOfNumberInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else model.getStringViewOfNoteInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
                 break;
             case ("\u2a7e" + " " + "\u2a7d"):
                 if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) model.getStringViewOfDateMoreAndLessSignsLD().observe(getViewLifecycleOwner(), observerEditText);
@@ -282,37 +302,48 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     }
 
     @Override
-    public void addViewToLayoutForCertainSearchCriteria(final int selectedTyeOfValue, String selectedSign, int positionOfView) {
+    public void addViewToLayoutForCertainSearchCriteria(final int selectedTypeOfValue, String selectedSign, int positionOfView) {
         LinearLayout.LayoutParams lp;
         Button helperButton;
         EditText helperEditText;
         View[] helperArrayOfView;
         View helperView;
         if (innerLinearLayout == null) innerLinearLayout = getView().findViewById(R.id.add_certain_criteria_ll);
-        switch (selectedTyeOfValue) {
+        switch (selectedTypeOfValue) {
             case DATES_VALUE:
-                if (addCriteriaForDate == null)
-                    addCriteriaForDate = getView().findViewById(R.id.addCriteriaForDateButton);
-                helperButton = addCriteriaForDate;
-                helperEditText = selectedDate;
+                if (addCriteriaForDateButton == null)
+                    addCriteriaForDateButton = getView().findViewById(R.id.addCriteriaForDateButton);
+                helperEditText = selectedDateEditText;
+                helperButton = addCriteriaForDateButton;
                 if (viewsForDates == null)
                     viewsForDates = new View[5];
                 helperArrayOfView = viewsForDates;
                 helperView = requireActivity().getLayoutInflater()
-                        .inflate(R.layout.layout_exactly_criteria_to_compare_date_values, (ViewGroup) getView(), false);
+                        .inflate(R.layout.layout_exactly_criteria_to_compare_values, (ViewGroup) getView(), false);
                 break;
             case NUMBERS_VALUE:
-                if (addCriteriaForNumber == null) addCriteriaForNumber = getView().findViewById(R.id.addCriteriaForNumberButton);
-                helperButton = addCriteriaForNumber;
-                helperEditText = selectedNumber;
+                if (addCriteriaForNumberButton == null)
+                    addCriteriaForNumberButton = getView().findViewById(R.id.addCriteriaForNumberButton);
+                helperEditText = selectedNumberEditText;
+                helperButton = addCriteriaForNumberButton;
                 if (viewsForNumbers == null) viewsForNumbers = new View[5];
                 helperArrayOfView = viewsForNumbers;
                 helperView = requireActivity().getLayoutInflater()
                         .inflate(R.layout.layout_exactly_criteria_to_compare_number_values, (ViewGroup) getView(), false);
                 break;
+            case NOTES_VALUE:
+                if (addCriteriaForNoteButton == null)
+                    addCriteriaForNoteButton = getView().findViewById(R.id.addCriteriaForNoteButton);
+                helperButton = addCriteriaForNoteButton;
+                helperEditText = selectedNoteEditText;
+                if (viewsForNotes == null) viewsForNotes = new View[2];
+                helperArrayOfView = viewsForNotes;
+                helperView = requireActivity().getLayoutInflater()
+                        .inflate(R.layout.layout_exactly_criteria_to_compare_values, (ViewGroup) getView(), false);
+                break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод " +
-                        "void addViewToLayoutForCertainSearchCriteria(int selectedTyeOfValue, String selectedSign, int positionOfView). selectedTyeOfValue - " + selectedTyeOfValue);
+                        "void addViewToLayoutForCertainSearchCriteria(int selectedTypeOfValue, String selectedSign, int positionOfView). selectedTypeOfValue - " + selectedTypeOfValue);
         }
         if (positionOfView == 0) {
             lp = new LinearLayout.LayoutParams(0, 0);
@@ -326,70 +357,90 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         helperArrayOfView[positionOfView].setLayoutParams(lp);
         helperArrayOfView[positionOfView].setVisibility(View.VISIBLE);
         final TextView tv = helperArrayOfView[positionOfView].findViewById(R.id.textView_for_equal_sign);
-        final String currentSign = model.getSelectedEqualSignFromList(selectedTyeOfValue, positionOfView);
+        final String currentSign = model.getSelectedEqualSignFromList(selectedTypeOfValue, positionOfView);
         tv.setText(currentSign);
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String currentSign = tv.getText().toString();
-                int positionOfSign = model.getPositionOfSign(selectedTyeOfValue, currentSign);
+                int positionOfSign = model.getPositionOfSign(selectedTypeOfValue, currentSign);
                 PickerSignsDF pickerSignsDF;
-                if (selectedTyeOfValue == DATES_VALUE)  pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, DATES_VALUE);
-                else pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, NUMBERS_VALUE);
+                if (selectedTypeOfValue == DATES_VALUE)  pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, DATES_VALUE);
+                else if (selectedTypeOfValue == NUMBERS_VALUE) pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, NUMBERS_VALUE);
+                else pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, NOTES_VALUE);
                 pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickerSign");
             }
         });
         final EditText et = helperArrayOfView[positionOfView].findViewById(R.id.editText_filled_value);
         if ("=".equals(currentSign) || "\u2260".equals(currentSign)) {
-            if (selectedTyeOfValue == DATES_VALUE) et.setHint("Выбери дату или даты");
+            if (selectedTypeOfValue == DATES_VALUE) et.setHint("Выбери дату или даты");
             else et.setHint("Введи одно или несколько значений");
         }
         else if (("\u2a7e" + " " + "\u2a7d").equals(currentSign)) {
-            if (selectedTyeOfValue == DATES_VALUE) et.setHint("Выбери даты");
+            if (selectedTypeOfValue == DATES_VALUE) et.setHint("Выбери даты");
             else et.setHint("Введи значения");
         }
-        if (selectedTyeOfValue == DATES_VALUE) et.setText(model.getStringViewOfDate(currentSign));
-        else et.setText(model.getStringViewOfNumber(currentSign));
-        if (positionOfView < 4) {
-            if (helperButton.getHeight() == 0) {
-                if (selectedTyeOfValue == DATES_VALUE) showAddButtonForValueCriteria(DATES_VALUE);
-                else showAddButtonForValueCriteria(NUMBERS_VALUE);
-            }
+        et.setText(model.getStringViewOfSearchCriteria(selectedTypeOfValue, currentSign));
+        if (positionOfView < helperArrayOfView.length - 1)  {
+           if (helperButton.getHeight() == 0) showAddButtonForValueCriteria(selectedTypeOfValue);
         } else helperButton.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
         switch (selectedSign) {
             case "\u2a7e":
             case "\u2a7d":
-                if (selectedTyeOfValue == DATES_VALUE) setOneDateCalendarToEditText(et, tv);
+                if (selectedTypeOfValue == DATES_VALUE) setOneDateCalendarToEditText(et, tv);
                 else prepareEditTextToDisplayAndPreserveNumber(et, tv, positionOfView);
                 break;
             default:
-                setDialogFragmentWithListOfDateToEditText(selectedTyeOfValue, et, tv);
+                setDialogFragmentWithListOfValuesToEditText(selectedTypeOfValue, et, tv);
         }
     }
 
     @Override
     public void changeLayoutForCertainSearchCriteria(int selectedTypeOfValue, int position) {
         TextView tv;
-        if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) tv = viewsForDates[position].findViewById(R.id.textView_for_equal_sign);
-        else tv = viewsForNumbers[position].findViewById(R.id.textView_for_equal_sign);
+        switch (selectedTypeOfValue) {
+            case SearchCriteriaFragment.DATES_VALUE:
+                tv = viewsForDates[position].findViewById(R.id.textView_for_equal_sign);
+                break;
+            case SearchCriteriaFragment.NUMBERS_VALUE:
+                tv = viewsForNumbers[position].findViewById(R.id.textView_for_equal_sign);
+                break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                tv = viewsForNotes[position].findViewById(R.id.textView_for_equal_sign);
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. void changeLayoutForCertainSearchCriteria(int selectedTypeOfValue, int position)." +
+                        "selectedTypeOfValue -" + selectedTypeOfValue);
+        }
         tv.setText(model.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue));
     }
 
     @Override
-    public void deleteViewFormLayoutForCertainSearchCriteria(int selectedTyeOfValue, int position) {
+    public void deleteViewFormLayoutForCertainSearchCriteria(int selectedTypeOfValue, int position) {
         View[] helperViews;
         EditText helperEditText;
         Button helperButton;
-        if (selectedTyeOfValue == SearchCriteriaFragment.DATES_VALUE) {
-            helperViews = viewsForDates;
-            helperEditText = selectedDate;
-            helperButton = addCriteriaForDate;
-        } else {
-            helperViews = viewsForNumbers;
-            helperEditText = selectedNumber;
-            helperButton = addCriteriaForNumber;
+        switch (selectedTypeOfValue) {
+            case SearchCriteriaFragment.DATES_VALUE:
+                helperViews = viewsForDates;
+                helperEditText = selectedDateEditText;
+                helperButton = addCriteriaForDateButton;
+                break;
+            case SearchCriteriaFragment.NUMBERS_VALUE:
+                helperViews = viewsForNumbers;
+                helperEditText = selectedNumberEditText;
+                helperButton = addCriteriaForNumberButton;
+                break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                helperViews = viewsForNotes;
+                helperEditText = selectedNoteEditText;
+                helperButton = addCriteriaForNoteButton;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в коснтантах. void deleteViewFormLayoutForCertainSearchCriteria(int selectedTypeOfValue, int position). " +
+                        "selectedTypeOfValue" + selectedTypeOfValue);
         }
-        int lastVisibleView = getLastVisibleView(selectedTyeOfValue);
+        int lastVisibleView = getLastVisibleView(selectedTypeOfValue);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, 0);
         helperViews[position].setLayoutParams(lp);
         for (int i = position; i < lastVisibleView; i++) helperViews[i] = helperViews[i+1];
@@ -399,13 +450,10 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             helperEditText.setLayoutParams(lp);
             helperEditText.setVisibility(View.VISIBLE);
             helperButton.setLayoutParams(new LinearLayout.LayoutParams(0,0));
-        } else if (helperButton.getHeight() == 0) {
-            if (selectedTyeOfValue == SearchCriteriaFragment.DATES_VALUE) showAddButtonForValueCriteria(DATES_VALUE);
-            showAddButtonForValueCriteria(NUMBERS_VALUE);
-        }
+        } else if (helperButton.getHeight() == 0) showAddButtonForValueCriteria(selectedTypeOfValue);
     }
 
-    public static String convertLongToStringDate(Calendar c) {
+    public static String getStringViewOfDate(Calendar c) {
         int dayOfMonth, month = 1;
         dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         month += c.get(Calendar.MONTH);
@@ -425,26 +473,34 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, height);
         lp.gravity = Gravity.END;
         lp.setMarginEnd(Math.round(8 * density));
+        Button helperButton;
+        View.OnClickListener helperListener;
         switch (typeOfValue) {
             case DATES_VALUE:
-                addCriteriaForDate.setLayoutParams(lp);
-                addCriteriaForDate.setVisibility(View.VISIBLE);
-                addCriteriaForDate.setOnClickListener(callPickerSignForDateDF);
+                helperButton = addCriteriaForDateButton;
+                helperListener = callPickerSignForDateDF;
                 break;
             case NUMBERS_VALUE:
-                addCriteriaForNumber.setLayoutParams(lp);
-                addCriteriaForNumber.setVisibility(View.VISIBLE);
-                addCriteriaForNumber.setOnClickListener(callPickerSignForNumberDF);
+                helperButton = addCriteriaForNumberButton;
+                helperListener = callPickerSignForNumberDF;
+                break;
+            case NOTES_VALUE:
+                helperButton = addCriteriaForNoteButton;
+                helperListener = callPickerSignForNoteDF;
                 break;
             default:
                 throw new RuntimeException("опечатка в константах. Метод void showAddButtonForValueCriteria(int typeOfValue).  typedOfValue - " + typeOfValue);
         }
+        helperButton.setLayoutParams(lp);
+        helperButton.setVisibility(View.VISIBLE);
+        helperButton.setOnClickListener(helperListener);
     }
 
     private int getLastVisibleView(int selectedTypeOfValue) {
         View[] hArray;
         if (selectedTypeOfValue == DATES_VALUE) hArray = viewsForDates;
-        else hArray = viewsForNumbers;
+        else if (selectedTypeOfValue == NUMBERS_VALUE) hArray = viewsForNumbers;
+        else hArray = viewsForNotes;
         int i = 0;
         while (i < hArray.length) {
             if (hArray[i] == null) return i - 1;

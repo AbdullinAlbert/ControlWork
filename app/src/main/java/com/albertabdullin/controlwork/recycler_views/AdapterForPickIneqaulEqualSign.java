@@ -44,7 +44,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
         mLifeCycleOwner = lifeCycleOwner;
         mSigns = mVM.getAvailableOrderedEqualSignsListForDate(selectedTypeOfValue);
         mPickerSignsDF = pickerSignsDF;
-        mSelectedTypeOfValue =selectedTypeOfValue;
+        mSelectedTypeOfValue = selectedTypeOfValue;
     }
 
     public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, String selectedSign, PickerSignsDF pickerSignsDF) {

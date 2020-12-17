@@ -30,7 +30,6 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
     private EditDeleteDataVM viewModel;
     private EditText etFirstNumber;
     private EditText etSecondNumber;
-
     private String mSign;
     private Integer mCurrentPosition;
     private static final String KEY_OF_SIGN = "key of sign";
@@ -48,6 +47,8 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
         }
     };
 
+    public AddItemOfPairOfNumbersValueDF() {}
+
     public AddItemOfPairOfNumbersValueDF(String sign, Integer currentPosition) {
         mSign = sign;
         mCurrentPosition = currentPosition;
@@ -60,7 +61,8 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
         viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
         if (savedInstanceState != null) {
             mSign = savedInstanceState.getString(KEY_OF_SIGN);
-            mCurrentPosition = savedInstanceState.getInt(KEY_OF_CURRENT_POSITION);
+            mCurrentPosition = savedInstanceState.getInt(KEY_OF_CURRENT_POSITION, -1);
+            if (mCurrentPosition == -1) mCurrentPosition = null;
         }
     }
 
@@ -75,6 +77,10 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         etFirstNumber = view.findViewById(R.id.editText_firstNumber);
         etSecondNumber = view.findViewById(R.id.editText_secondNumber);
+        if (mCurrentPosition != null) {
+            etFirstNumber.setText(viewModel.getValueOfNumber(mSign, mCurrentPosition * 2));
+            etSecondNumber.setText(viewModel.getValueOfNumber(mSign, mCurrentPosition * 2 + 1));
+        }
         Button bAdd = view.findViewById(R.id.add_df_button);
         Button bCancel = view.findViewById(R.id.cancel_df_button);
         bAdd.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +110,7 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
                     }
                 } else {
                     viewModel.changeItemToOneNumberList(mSign, mCurrentPosition, stringOfFirstNumber, stringOfSecondNumber);
-                    viewModel.changeSearchCriteriaValueForNumber(mSign, mCurrentPosition * 2, floatOfFirstNumber,floatOfSecondNumber);
+                    viewModel.changeSearchCriteriaValueForNumber(mSign, mCurrentPosition * 2, floatOfFirstNumber, floatOfSecondNumber);
                 }
                 hideKeyBoard();
                 requireDialog().dismiss();
@@ -123,7 +129,7 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(KEY_OF_SIGN, mSign);
-        outState.putInt(KEY_OF_CURRENT_POSITION, mCurrentPosition);
+        if (mCurrentPosition != null) outState.putInt(KEY_OF_CURRENT_POSITION, mCurrentPosition);
     }
 
     @Override

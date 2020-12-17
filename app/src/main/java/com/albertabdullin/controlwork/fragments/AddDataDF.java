@@ -28,7 +28,6 @@ import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 public class AddDataDF extends DialogFragment {
-    public static final String TAG = "DialogFragmnet for add items";
     private ListOfItemsVM viewModel;
     private TextView helperTextView;
     private TextView tvAddNewData;

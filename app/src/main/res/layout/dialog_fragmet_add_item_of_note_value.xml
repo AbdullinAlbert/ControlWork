@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="?android:attr/buttonBarStyle"
+    >
+
+        <EditText
+            android:id="@+id/editTextNewData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:importantForAutofill="no"
+            android:hint="@string/hint_for_insert_number_for_search_criteria"
+            android:backgroundTint="@android:color/black"
+            android:maxLength="30" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_marginTop="32dp">
+
+                <Button
+                    android:id="@+id/cancel_df_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/button_cancel"
+                    style="?android:attr/buttonBarButtonStyle"
+                     />
+
+                <Button
+                    android:id="@+id/add_df_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/button_add_data"
+                    style="?android:attr/buttonBarButtonStyle"/>
+        </LinearLayout>
+
+
+</LinearLayout>

@@ -65,7 +65,8 @@ public class DeleteSearchCriteriaDF extends DialogFragment {
             String description;
             int pos = viewModel.getListOfSelectedPositionForDeleteSign(mSelectedTypeOfValue, mSign).get(0);
             if (mSelectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) description = viewModel.getAdapterListOfCurrentSignForDate(mSign).get(pos);
-            else  description = viewModel.getAdapterListOfCurrentSignForNumber(mSign).get(pos);
+            else if (mSelectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) description = viewModel.getAdapterListOfCurrentSignForNumber(mSign).get(pos);
+            else description = viewModel.getAdapterListOfCurrentSignForNote(mSign).get(pos);
             tvQuestion.setText("Вы действительно хотите удалить " + description + "?");
         }
         Button bYES = view.findViewById(R.id.DeleteDFButtonYES);
@@ -75,7 +76,8 @@ public class DeleteSearchCriteriaDF extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if (mSelectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) viewModel.deleteSearchCriteriaValueForDate(mSign);
-                else viewModel.deleteSearchCriteriaValueForNumber(mSign);
+                else if (mSelectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) viewModel.deleteSearchCriteriaValueForNumber(mSign);
+                else viewModel.deleteSearchCriteriaValueForNote(mSign);
                 getDialog().dismiss();
             }
         });

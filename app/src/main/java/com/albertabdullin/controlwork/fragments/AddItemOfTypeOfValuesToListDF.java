@@ -39,7 +39,7 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
     private int mTypeOfValue;
     private AdapterForListOfTypeOfValues adapter;
     private static final String KEY_FOR_SIGN = "key_for_sign";
-    private static final String KEY_FOR_TYPE_OF_VALUE = "key_for_sign";
+    private static final String KEY_FOR_TYPE_OF_VALUE = "key_for_type_of_value";
     public static final int EMPTY_LIST = 0;
     public static final int ADD_ITEM_TO_LIST = 1;
     public static final int DELETE_ITEM_FROM_LIST = 2;
@@ -92,7 +92,8 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
         };
         final List<String> hList;
         if (mTypeOfValue == SearchCriteriaFragment.DATES_VALUE) hList = model.getAdapterListOfCurrentSignForDate(mSign);
-        else hList = model.getAdapterListOfCurrentSignForNumber(mSign);
+        else if (mTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) hList = model.getAdapterListOfCurrentSignForNumber(mSign);
+        else hList = model.getAdapterListOfCurrentSignForNote(mSign);
         adapter = new AdapterForListOfTypeOfValues(mTypeOfValue, hList, model, mSign, requireActivity());
         RecyclerView rv = view.findViewById(R.id.recyclerView);
         rv.setAdapter(adapter);
@@ -124,36 +125,52 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                 }
             }
         };
-        if (mTypeOfValue == SearchCriteriaFragment.DATES_VALUE) {
-            switch (mSign) {
-                case "=":
-                    model.getDeleteImageViewOnDialogEqualitySignDateLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
-                    model.getAdapterListOfOneDateForEqualitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
-                    break;
-                case "\u2260":
-                    model.getDeleteImageViewOnDialogInequalitySignDateLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
-                    model.getAdapterListOfOneDateForInequalitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
-                    break;
-                case ("\u2a7e" + " " + "\u2a7d"):
-                    model.getDeleteImageViewOnDialogMoreAndLessSignsDateLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
-                    model.getAdapterListOfRangeOfDatesForMoreAndLessSignsLD().observe(getViewLifecycleOwner(), adapterListObserver);
-                    break;
-            }
-        } else {
-            switch (mSign) {
-                case "=":
-                    model.getDeleteImageViewOnDialogEqualitySignNumberLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
-                    model.getAdapterListOfOneNumberForEqualitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
-                    break;
-                case "\u2260":
-                    model.getDeleteImageViewOnDialogInequalitySignNumberLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
-                    model.getAdapterListOfOneNumberForInequalitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
-                    break;
-                case ("\u2a7e" + " " + "\u2a7d"):
-                    model.getDeleteImageViewOnDialogMoreAndLessSignsNumberLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
-                    model.getAdapterListOfRangeOfNumbersForMoreAndLessSignsLD().observe(getViewLifecycleOwner(), adapterListObserver);
-                    break;
-            }
+        switch (mTypeOfValue) {
+            case SearchCriteriaFragment.DATES_VALUE:
+                switch (mSign) {
+                    case "=":
+                        model.getDeleteImageViewOnDialogEqualitySignDateLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfOneDateForEqualitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                    case "\u2260":
+                        model.getDeleteImageViewOnDialogInequalitySignDateLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfOneDateForInequalitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                    case ("\u2a7e" + " " + "\u2a7d"):
+                        model.getDeleteImageViewOnDialogMoreAndLessSignsDateLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfRangeOfDatesForMoreAndLessSignsLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                }
+                break;
+            case SearchCriteriaFragment.NUMBERS_VALUE:
+                switch (mSign) {
+                    case "=":
+                        model.getDeleteImageViewOnDialogEqualitySignNumberLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfOneNumberForEqualitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                    case "\u2260":
+                        model.getDeleteImageViewOnDialogInequalitySignNumberLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfOneNumberForInequalitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                    case ("\u2a7e" + " " + "\u2a7d"):
+                        model.getDeleteImageViewOnDialogMoreAndLessSignsNumberLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfRangeOfNumbersForMoreAndLessSignsLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                }
+                break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                switch (mSign) {
+                    case "=":
+                        model.getDeleteImageViewOnDialogEqualitySignNoteLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfNoteForEqualitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                    case "\u2260":
+                        model.getDeleteImageViewOnDialogInequalitySignNoteLD().observe(getViewLifecycleOwner(), observerOfDeleteImage);
+                        model.getAdapterListOfNoteForInequalitySignLD().observe(getViewLifecycleOwner(), adapterListObserver);
+                        break;
+                }
+                break;
+
         }
         FloatingActionButton fab = view.findViewById(R.id.fab_to_add_one_date);
         switch (mTypeOfValue) {
@@ -169,9 +186,9 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                                 public void onPositiveButtonClick(Pair<Long, Long> selection) {
                                     Calendar calendar = Calendar.getInstance();
                                     calendar.setTimeInMillis(selection.first);
-                                    String beginOfRangeDate = SearchCriteriaFragment.convertLongToStringDate(calendar);
+                                    String beginOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                     calendar.setTimeInMillis(selection.second);
-                                    String endOfRangeDate = SearchCriteriaFragment.convertLongToStringDate(calendar);
+                                    String endOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                     model.addItemToDateList(mSign, beginOfRangeDate, endOfRangeDate);
                                     model.addSearchCriteriaForDate(model.getPositionOfSign(mTypeOfValue, mSign), selection.first, selection.second);
                                 }
@@ -189,7 +206,7 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                             public void onPositiveButtonClick(Long selection) {
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTimeInMillis(selection);
-                                String date = SearchCriteriaFragment.convertLongToStringDate(calendar);
+                                String date = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                 model.addItemToDateList(mSign, date, null);
                                 model.addSearchCriteriaForDate(model.getPositionOfSign(mTypeOfValue, mSign), selection, null);
                             }
@@ -215,6 +232,15 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                     }
                 });
                 break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                fab.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AddItemOfNoteValueDF addItemOfNoteValueDF = new AddItemOfNoteValueDF(mSign, null);
+                        addItemOfNoteValueDF.show(requireActivity().getSupportFragmentManager(), "add note value");
+                    }
+                });
+                break;
         }
 
         Button oKButton = view.findViewById(R.id.ok_button);
@@ -222,12 +248,19 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
             @Override
             public void onClick(View v) {
                 requireDialog().dismiss();
-                if (mTypeOfValue == SearchCriteriaFragment.DATES_VALUE) {
-                    String stringViewOfDate = model.createStringViewOfDate(mSign);
-                    model.setSelectedSignAndStringViewOfDate(mSign, stringViewOfDate);
-                } else {
-                    String stringViewOfNumber = model.createStringViewOfNumber(mSign);
-                    model.setSelectedSignAndStringViewOfNumber(mSign, stringViewOfNumber);
+                switch (mTypeOfValue) {
+                    case SearchCriteriaFragment.DATES_VALUE:
+                        String stringViewOfDate = model.createStringViewOfDate(mSign);
+                        model.setSelectedSignAndStringViewOfDate(mSign, stringViewOfDate);
+                        break;
+                    case SearchCriteriaFragment.NUMBERS_VALUE:
+                        String stringViewOfNumber = model.createStringViewOfNumber(mSign);
+                        model.setSelectedSignAndStringViewOfNumber(mSign, stringViewOfNumber);
+                        break;
+                    case SearchCriteriaFragment.NOTES_VALUE:
+                        String stringViewOfNote = model.createStringViewOfNote(mSign);
+                        model.setSelectedSignAndStringViewOfNote(mSign, stringViewOfNote);
+                        break;
                 }
             }
         });

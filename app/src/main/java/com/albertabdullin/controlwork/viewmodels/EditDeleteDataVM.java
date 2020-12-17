@@ -31,6 +31,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class EditDeleteDataVM extends AndroidViewModel {
@@ -53,17 +55,22 @@ public class EditDeleteDataVM extends AndroidViewModel {
     private List<String> adapterListOfOneNumberForEqualitySign;
     private List<String> adapterListOfOneNumberForInequalitySign;
     private List<String> adapterListOfRangeOfNumbersForMoreAndLessSigns;
+    private List<String> adapterListOfNoteForEqualitySign;
+    private List<String> adapterListOfNoteForInequalitySign;
     private List<Integer> listOfSelectedDatePositionsToDeleteEqualitySign;
     private List<Integer> listOfSelectedDatePositionsToDeleteInequalitySign;
     private List<Integer> listOfSelectedDatePositionsToDeleteMoreAndLessSigns;
     private List<Integer> listOfSelectedNumberPositionsToDeleteEqualitySign;
     private List<Integer> listOfSelectedNumberPositionsToDeleteInequalitySign;
     private List<Integer> listOfSelectedNumberPositionsToDeleteMoreAndLessSigns;
+    private List<Integer> listOfSelectedNotePositionsToDeleteEqualitySign;
+    private List<Integer> listOfSelectedNotePositionsToDeleteInequalitySign;
     private SortedEqualSignsList availableOrderedEqualSignsListForDate;
     private List<OrderedSign> selectedEqualSignsListForDate;
     private SortedEqualSignsList availableOrderedEqualSignsListForNumber;
     private List<OrderedSign> selectedEqualSignsListForNumber;
-    private Map<String, String> stringViewOfDate;
+    private SortedEqualSignsList availableOrderedEqualSignsListForNote;
+    private List<OrderedSign> selectedEqualSignsListForNote;
     private Map<String, String> stringViewOfNumber;
     private MutableLiveData<Integer> entitiesLD;
     private MutableLiveData<String> employeesEditTextLD;
@@ -78,28 +85,34 @@ public class EditDeleteDataVM extends AndroidViewModel {
     private MutableLiveData<String> stringViewOfDateEqualitySignLD;
     private MutableLiveData<String> stringViewOfDateInequalitySignLD;
     private MutableLiveData<String> stringViewOfDateMoreAndLessSignsLD;
-    private MutableLiveData<String> stringViewOfNumberMoreSignLD;
-    private MutableLiveData<String> stringViewOfNumberLessSignLD;
     private MutableLiveData<String> stringViewOfNumberEqualitySignLD;
     private MutableLiveData<String> stringViewOfNumberInequalitySignLD;
     private MutableLiveData<String> stringViewOfNumberMoreAndLessSignsLD;
+    private MutableLiveData<String> stringViewOfNoteEqualitySignLD;
+    private MutableLiveData<String> stringViewOfNoteInequalitySignLD;
     private MutableLiveData<Integer> adapterListOfOneDateForEqualitySignLD;
     private MutableLiveData<Integer> adapterListOfOneDateForInequalitySignLD;
     private MutableLiveData<Integer> adapterListOfRangeOfDatesForMoreAndLessSignsLD;
     private MutableLiveData<Integer> adapterListOfOneNumberForEqualitySignLD;
     private MutableLiveData<Integer> adapterListOfOneNumberForInequalitySignLD;
     private MutableLiveData<Integer> adapterListOfRangeOfNumbersForMoreAndLessSignsLD;
+    private MutableLiveData<Integer> adapterListOfNoteForEqualitySignLD;
+    private MutableLiveData<Integer> adapterListOfNoteForInequalitySignLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogEqualitySignDateLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogInequalitySignDateLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogMoreAndLessSignsDateLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogEqualitySignNumberLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogInequalitySignNumberLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogMoreAndLessSignsNumberLD;
+    private MutableLiveData<Boolean> deleteImageViewOnDialogEqualitySignNoteLD;
+    private MutableLiveData<Boolean> deleteImageViewOnDialogInequalitySignNoteLD;
     private Map<String, List<Long>> searchCriteriaForDate;
     private Map<String, List<Float>> searchCriteriaForNumber;
+    private Map<String, List<String>> searchCriteriaForNote;
     private boolean visibilityOfClearButton = false;
     private String selectedEqualSignForDate;
     private String selectedEqualSignForNumber;
+    private String selectedEqualSignForNote;
     private int mSelectedTable;
     private int positionOfUpdatedItemFromOneDateList;
     private int positionOfUpdatedItemFromOneNumberList;
@@ -221,16 +234,6 @@ public class EditDeleteDataVM extends AndroidViewModel {
         return stringViewOfDateMoreAndLessSignsLD;
     }
 
-    public LiveData<String> getStringViewOfNumberMoreSignLD() {
-        if(stringViewOfNumberMoreSignLD == null) stringViewOfNumberMoreSignLD = new MutableLiveData<>();
-        return stringViewOfNumberMoreSignLD;
-    }
-
-    public LiveData<String> getStringViewOfNumberLessSignLD() {
-        if(stringViewOfNumberLessSignLD == null) stringViewOfNumberLessSignLD = new MutableLiveData<>();
-        return stringViewOfNumberLessSignLD;
-    }
-
     public LiveData<String> getStringViewOfNumberEqualitySignLD() {
         if(stringViewOfNumberEqualitySignLD == null) stringViewOfNumberEqualitySignLD = new MutableLiveData<>();
         return stringViewOfNumberEqualitySignLD;
@@ -244,6 +247,16 @@ public class EditDeleteDataVM extends AndroidViewModel {
     public LiveData<String> getStringViewOfNumberMoreAndLessSignsLD() {
         if(stringViewOfNumberMoreAndLessSignsLD == null) stringViewOfNumberMoreAndLessSignsLD = new MutableLiveData<>();
         return stringViewOfNumberMoreAndLessSignsLD;
+    }
+
+    public LiveData<String> getStringViewOfNoteEqualitySignLD() {
+        if(stringViewOfNoteEqualitySignLD == null) stringViewOfNoteEqualitySignLD = new MutableLiveData<>();
+        return stringViewOfNoteEqualitySignLD;
+    }
+
+    public LiveData<String> getStringViewOfNoteInequalitySignLD() {
+        if(stringViewOfNoteInequalitySignLD == null) stringViewOfNoteInequalitySignLD = new MutableLiveData<>();
+        return stringViewOfNoteInequalitySignLD;
     }
 
     public LiveData<Integer> getAdapterListOfOneDateForEqualitySignLD() {
@@ -305,6 +318,26 @@ public class EditDeleteDataVM extends AndroidViewModel {
     public LiveData<Boolean> getDeleteImageViewOnDialogMoreAndLessSignsNumberLD() {
         if (deleteImageViewOnDialogMoreAndLessSignsNumberLD == null) deleteImageViewOnDialogMoreAndLessSignsNumberLD = new MutableLiveData<>();
         return deleteImageViewOnDialogMoreAndLessSignsNumberLD;
+    }
+
+    public LiveData<Boolean> getDeleteImageViewOnDialogEqualitySignNoteLD() {
+        if (deleteImageViewOnDialogEqualitySignNoteLD == null) deleteImageViewOnDialogEqualitySignNoteLD = new MutableLiveData<>();
+        return deleteImageViewOnDialogEqualitySignNoteLD;
+    }
+
+    public LiveData<Boolean> getDeleteImageViewOnDialogInequalitySignNoteLD() {
+        if (deleteImageViewOnDialogInequalitySignNoteLD == null) deleteImageViewOnDialogInequalitySignNoteLD = new MutableLiveData<>();
+        return deleteImageViewOnDialogInequalitySignNoteLD;
+    }
+
+    public LiveData<Integer> getAdapterListOfNoteForEqualitySignLD() {
+        if(adapterListOfNoteForEqualitySignLD == null) adapterListOfNoteForEqualitySignLD = new MutableLiveData<>();
+        return adapterListOfNoteForEqualitySignLD;
+    }
+
+    public LiveData<Integer> getAdapterListOfNoteForInequalitySignLD() {
+        if(adapterListOfNoteForInequalitySignLD == null) adapterListOfNoteForInequalitySignLD = new MutableLiveData<>();
+        return adapterListOfNoteForInequalitySignLD;
     }
 
     public boolean isNotActivatedDF() {
@@ -584,6 +617,12 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 if (availableOrderedEqualSignsListForNumber == null)
                     availableOrderedEqualSignsListForNumber = new SortedEqualSignsList(Arrays.asList(arraysOfSigns));
                 return availableOrderedEqualSignsListForNumber;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                if (availableOrderedEqualSignsListForNote == null) {
+                    arraysOfSigns = getApplication().getResources().getStringArray(R.array.full_array_for_notes);
+                    availableOrderedEqualSignsListForNote = new SortedEqualSignsList(Arrays.asList(arraysOfSigns));
+                }
+                return availableOrderedEqualSignsListForNote;
             default:
                 throw new RuntimeException("Опечатка в константах. " +
                         "Метод SortedEqualSignsList getAvailableOrderedEqualSignsListForDate(int selectedTypeOfValue). selectedTypeOfValue - " + selectedTypeOfValue);
@@ -634,6 +673,18 @@ public class EditDeleteDataVM extends AndroidViewModel {
                                 "getAvailableOrderedEqualSignsList(int selectedTypeOfValue, String selectedEqualSign). selectedEqualSign - " + selectedEqualSign);
                 }
                 break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                switch (selectedEqualSign) {
+                    case "=":
+                    case "\u2260":
+                        hList = new ArrayList<>(Arrays.asList(resources.getStringArray(R.array.equal_inequal_signs_array)));
+                        for (OrderedSign orderedSign : selectedEqualSignsListForNote) hList.remove(orderedSign.getSign());
+                        break;
+                    default:
+                        throw new RuntimeException("Опечатка в константах. Метод " +
+                                "getAvailableOrderedEqualSignsList(int selectedTypeOfValue, String selectedEqualSign). selectedEqualSign - " + selectedEqualSign);
+                }
+                break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод " +
                         "getAvailableOrderedEqualSignsList(int selectedTypeOfValue, String selectedEqualSign). selectedTypeOfValue - " + selectedTypeOfValue);
@@ -649,6 +700,9 @@ public class EditDeleteDataVM extends AndroidViewModel {
             case SearchCriteriaFragment.NUMBERS_VALUE:
                 selectedEqualSignForNumber = selectedSign;
                 break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                selectedEqualSignForNote = selectedSign;
+                break;
         }
         selectedEqualSignRadioButtonLD.setValue(position);
     }
@@ -659,12 +713,21 @@ public class EditDeleteDataVM extends AndroidViewModel {
 
     public String getSelectedEqualSignForSelectedTypeOfValue(int selectedType) {
         if (selectedType == SearchCriteriaFragment.DATES_VALUE) return selectedEqualSignForDate;
-        else return selectedEqualSignForNumber;
+        else if (selectedType == SearchCriteriaFragment.NUMBERS_VALUE) return selectedEqualSignForNumber;
+        else return selectedEqualSignForNote;
     }
 
     public String getSelectedEqualSignFromList(int selectedTypeOfValue, int position) {
-        if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) return selectedEqualSignsListForDate.get(position).getSign();
-        else return selectedEqualSignsListForNumber.get(position).getSign();
+        switch (selectedTypeOfValue) {
+            case SearchCriteriaFragment.DATES_VALUE:
+                return selectedEqualSignsListForDate.get(position).getSign();
+            case SearchCriteriaFragment.NUMBERS_VALUE:
+                return selectedEqualSignsListForNumber.get(position).getSign();
+            case SearchCriteriaFragment.NOTES_VALUE:
+                return selectedEqualSignsListForNote.get(position).getSign();
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод String getSelectedEqualSignFromList(int selectedTypeOfValue, int position). selectedTypeOfValue - " + selectedTypeOfValue);
+        }
     }
 
     public int getCountOfAddedCriteriaForDate() {
@@ -672,16 +735,38 @@ public class EditDeleteDataVM extends AndroidViewModel {
         return selectedEqualSignsListForDate.size();
     }
 
+    public int getCountOfAddedCriteriaForNumber() {
+        if (selectedEqualSignsListForNumber == null) return 0;
+        return selectedEqualSignsListForNumber.size();
+    }
+
+    public int getCountOfAddedCriteriaForNote() {
+        if (selectedEqualSignsListForNote == null) return 0;
+        return selectedEqualSignsListForNote.size();
+    }
+
     public int getPositionOfAddedCriteriaForSelectedTypeOfValue(int selectedTypeOfValue) {
         if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) return selectedEqualSignsListForDate.size() - 1;
-        else return selectedEqualSignsListForNumber.size() - 1;
+        else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) return selectedEqualSignsListForNumber.size() - 1;
+        else return selectedEqualSignsListForNote.size() - 1;
     }
 
     public int getPositionOfSign(int selectedTypeOfValue, String sign) {
         int p = 0;
         List<OrderedSign> hList;
-        if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) hList = selectedEqualSignsListForDate;
-        else hList = selectedEqualSignsListForNumber;
+        switch (selectedTypeOfValue) {
+            case SearchCriteriaFragment.DATES_VALUE:
+                hList = selectedEqualSignsListForDate;
+                break;
+            case SearchCriteriaFragment.NUMBERS_VALUE:
+                hList = selectedEqualSignsListForNumber;
+                break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                hList = selectedEqualSignsListForNote;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод  int getPositionOfSign(int selectedTypeOfValue, String sign). selectedTypeOfValue - " + selectedTypeOfValue);
+        }
         while (!sign.equals(hList.get(p).getSign())) p++;
         return p;
     }
@@ -708,6 +793,10 @@ public class EditDeleteDataVM extends AndroidViewModel {
             case SearchCriteriaFragment.NUMBERS_VALUE:
                 if (selectedEqualSignsListForNumber == null) selectedEqualSignsListForNumber = new ArrayList<>();
                 selectedEqualSignsListForNumber.add(availableOrderedEqualSignsListForNumber.remove(selectedEqualSignForNumber));
+                break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                if (selectedEqualSignsListForNote == null) selectedEqualSignsListForNote = new ArrayList<>();
+                selectedEqualSignsListForNote.add(availableOrderedEqualSignsListForNote.remove(selectedEqualSignForNote));
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод void addSignToSelectedSignList(int selectedTypeOfValue). selectedTypeOfValue - " + selectedTypeOfValue);
@@ -765,14 +854,7 @@ public class EditDeleteDataVM extends AndroidViewModel {
             case SearchCriteriaFragment.NUMBERS_VALUE:
                 switch (sign) {
                     case "\u2a7e":
-                        helperLDForStringView = stringViewOfNumberMoreSignLD;
-                        stringViewOfNumberMoreSignLD = stringViewOfNumberLessSignLD;
-                        stringViewOfNumberLessSignLD = helperLDForStringView;
-                        break;
                     case "\u2a7d":
-                        helperLDForStringView = stringViewOfNumberLessSignLD;
-                        stringViewOfNumberLessSignLD = stringViewOfNumberMoreSignLD;
-                        stringViewOfNumberMoreSignLD = helperLDForStringView;
                         break;
                     case "=":
                         helperList = adapterListOfOneNumberForEqualitySign;
@@ -807,6 +889,41 @@ public class EditDeleteDataVM extends AndroidViewModel {
                                 "Метод  void swapAdapters(int selectedTypeOfValue, String sign). sign - " + sign);
                 }
                 break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                switch (sign) {
+                    case "=":
+                        helperList = adapterListOfNoteForEqualitySign;
+                        adapterListOfNoteForEqualitySign = adapterListOfNoteForInequalitySign;
+                        adapterListOfNoteForInequalitySign = helperList;
+                        helperLDForStringView = stringViewOfNoteEqualitySignLD;
+                        stringViewOfNoteEqualitySignLD = stringViewOfNoteInequalitySignLD;
+                        stringViewOfNoteInequalitySignLD = helperLDForStringView;
+                        helperLDForAdapter = adapterListOfNoteForEqualitySignLD;
+                        adapterListOfNoteForEqualitySignLD = adapterListOfNoteForInequalitySignLD;
+                        adapterListOfNoteForInequalitySignLD = helperLDForAdapter;
+                        helperLDForDeleteImage = deleteImageViewOnDialogEqualitySignNoteLD;
+                        deleteImageViewOnDialogEqualitySignNoteLD = deleteImageViewOnDialogInequalitySignNoteLD;
+                        deleteImageViewOnDialogInequalitySignNoteLD = helperLDForDeleteImage;
+                        break;
+                    case "\u2260":
+                        helperList = adapterListOfNoteForInequalitySign;
+                        adapterListOfNoteForInequalitySign = adapterListOfNoteForEqualitySign;
+                        adapterListOfNoteForEqualitySign = helperList;
+                        helperLDForStringView = stringViewOfNoteInequalitySignLD;
+                        stringViewOfNoteInequalitySignLD = stringViewOfNoteEqualitySignLD;
+                        stringViewOfNoteEqualitySignLD = helperLDForStringView;
+                        helperLDForAdapter = adapterListOfNoteForInequalitySignLD;
+                        adapterListOfNoteForInequalitySignLD = adapterListOfNoteForEqualitySignLD;
+                        adapterListOfNoteForEqualitySignLD = helperLDForAdapter;
+                        helperLDForDeleteImage = deleteImageViewOnDialogInequalitySignNoteLD;
+                        deleteImageViewOnDialogInequalitySignNoteLD = deleteImageViewOnDialogEqualitySignNoteLD;
+                        deleteImageViewOnDialogEqualitySignNoteLD = helperLDForDeleteImage;
+                        break;
+                    default:
+                        throw new RuntimeException("Опечатка в константах. " +
+                                "Метод  void swapAdapters(int selectedTypeOfValue, String sign). sign - " + sign);
+                }
+            break;
             default:
                 throw new RuntimeException("Опечатка в константах. " +
                         "Метод  void swapAdapters(int selectedTypeOfValue, String sign). selectedTypeOfValue - " + selectedTypeOfValue);
@@ -823,8 +940,6 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 availableOrderedEqualSignsListForDate.remove(selectedEqualSignForDate);
                 id = SortedEqualSignsList.getID(selectedEqualSignForDate);
                 selectedEqualSignsListForDate.set(position, new OrderedSign(id, selectedEqualSignForDate));
-                value = stringViewOfDate.remove(sign);
-                stringViewOfDate.put(selectedEqualSignForDate, value);
                 swapAdaptersAndLiveData(selectedTypeOfValue, selectedEqualSignForDate);
                 changeSearchCriteriaSignForDate(sign);
                 break;
@@ -838,6 +953,15 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 stringViewOfNumber.put(selectedEqualSignForNumber, value);
                 swapAdaptersAndLiveData(selectedTypeOfValue, selectedEqualSignForNumber);
                 changeSearchCriteriaSignForNumber(sign);
+                break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                sign = selectedEqualSignsListForNote.get(position).getSign();
+                availableOrderedEqualSignsListForNote.add(selectedEqualSignsListForNote.get(position));
+                availableOrderedEqualSignsListForNote.remove(selectedEqualSignForNote);
+                id = SortedEqualSignsList.getID(selectedEqualSignForNote);
+                selectedEqualSignsListForNote.set(position, new OrderedSign(id, selectedEqualSignForNote));
+                swapAdaptersAndLiveData(selectedTypeOfValue, selectedEqualSignForNote);
+                changeSearchCriteriaSignForNote(sign);
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. " +
@@ -859,6 +983,14 @@ public class EditDeleteDataVM extends AndroidViewModel {
             List<Float> hList = new ArrayList<>(searchCriteriaForNumber.get(key));
             searchCriteriaForNumber.remove(key);
             searchCriteriaForNumber.put(selectedEqualSignForNumber, hList);
+        }
+    }
+
+    private void changeSearchCriteriaSignForNote(String key) {
+        if (searchCriteriaForNote != null && searchCriteriaForNote.get(key) != null) {
+            List<String> hList = new ArrayList<>(searchCriteriaForNote.get(key));
+            searchCriteriaForNote.remove(key);
+            searchCriteriaForNote.put(selectedEqualSignForNote, hList);
         }
     }
 
@@ -894,16 +1026,12 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 }
                 availableOrderedEqualSignsListForDate.add(selectedEqualSignsListForDate.remove(position));
                 deleteSearchCriteriaForDate(key);
-                stringViewOfDate.remove(key);
                 break;
             case SearchCriteriaFragment.NUMBERS_VALUE:
                 key = selectedEqualSignsListForNumber.get(position).getSign();
                 switch (key) {
                     case "\u2a7e":
-                        stringViewOfNumberMoreSignLD.setValue("");
-                        break;
                     case "\u2a7d":
-                        stringViewOfNumberLessSignLD.setValue("");
                         break;
                     case "=":
                         stringViewOfNumberEqualitySignLD.setValue("");
@@ -927,9 +1055,32 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 deleteSearchCriteriaForNumber(key);
                 stringViewOfNumber.remove(key);
                 break;
+            case SearchCriteriaFragment.NOTES_VALUE:
+                key = selectedEqualSignsListForNote.get(position).getSign();
+                switch (key) {
+                    case "=":
+                        stringViewOfNoteEqualitySignLD.setValue("");
+                        if (adapterListOfNoteForEqualitySign != null)
+                            adapterListOfNoteForEqualitySign.clear();
+                        break;
+                    case "\u2260":
+                        stringViewOfNoteInequalitySignLD.setValue("");
+                        if (adapterListOfNoteForInequalitySign != null)
+                            adapterListOfNoteForInequalitySign.clear();
+                        break;
+                    default:
+                        throw new RuntimeException("опечатка в константах. Метод deleteSignFromSelectedSignList(int selectedTypeOfValue, int position). key - " + key);
+                }
+                availableOrderedEqualSignsListForNote.add(selectedEqualSignsListForNote.remove(position));
+                deleteSearchCriteriaForNote(key);
+                break;
             default:
                 throw new RuntimeException("опечатка в константах. Метод deleteSignFromSelectedSignList(int selectedTypeOfValue, int position). selectedTypeOfValue - " + selectedTypeOfValue);
         }
+    }
+
+    public void deleteStringViewOfNumber(String key) {
+        stringViewOfNumber.remove(key);
     }
 
     private void deleteSearchCriteriaForDate(String key) {
@@ -937,9 +1088,14 @@ public class EditDeleteDataVM extends AndroidViewModel {
             searchCriteriaForDate.remove(key);
     }
 
-    private void deleteSearchCriteriaForNumber(String key) {
+    public void deleteSearchCriteriaForNumber(String key) {
         if (searchCriteriaForNumber != null && searchCriteriaForNumber.get(key) != null)
             searchCriteriaForNumber.remove(key);
+    }
+
+    public void deleteSearchCriteriaForNote(String key) {
+        if (searchCriteriaForNote != null && searchCriteriaForNote.get(key) != null)
+            searchCriteriaForNote.remove(key);
     }
 
     public void addSearchCriteriaForDate(Integer selectedPositionOfSign, Long value1, Long value2) {
@@ -1026,6 +1182,25 @@ public class EditDeleteDataVM extends AndroidViewModel {
         }
     }
 
+    public void addSearchCriteriaForNote(Integer selectedPositionOfSign, String value) {
+        if (searchCriteriaForNote == null) searchCriteriaForNote = new HashMap<>();
+        String key = selectedEqualSignsListForNote.get(selectedPositionOfSign).getSign();
+        switch (key) {
+            case "=":
+            case "\u2260":
+                if (searchCriteriaForNote.containsKey(key)) {
+                    searchCriteriaForNote.get(key).add(value);
+                } else {
+                    List<String> list = new ArrayList<>();
+                    list.add(value);
+                    searchCriteriaForNote.put(key, list);
+                }
+                break;
+            default:
+                throw new RuntimeException("key - " + key);
+        }
+    }
+
     public String createStringViewOfDate(String key) {
         StringBuilder sb = new StringBuilder();
         int lastIndex;
@@ -1078,9 +1253,30 @@ public class EditDeleteDataVM extends AndroidViewModel {
         return sb.toString();
     }
 
+    public String createStringViewOfNote(String key) {
+        StringBuilder sb = new StringBuilder();
+        int lastIndex;
+        List<String> hList;
+        switch (key) {
+            case "=":
+                hList = adapterListOfNoteForEqualitySign;
+                break;
+            case "\u2260":
+                hList = adapterListOfNoteForInequalitySign;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод String createStringViewOfNote(String key). key - " + key);
+        }
+        lastIndex = hList.size();
+        if (lastIndex != 0) {
+            for (int i = 0; i < lastIndex - 1; i++)
+                sb.append(hList.get(i)).append(", ");
+            sb.append(hList.get(lastIndex - 1));
+        }
+        return sb.toString();
+    }
+
     public void setSelectedSignAndStringViewOfDate(String key, String value) {
-        stringViewOfDate.remove(key);
-        stringViewOfDate.put(key, value);
         switch (key) {
             case "\u2a7e":
                 stringViewOfDateMoreSignLD.setValue(value);
@@ -1123,20 +1319,25 @@ public class EditDeleteDataVM extends AndroidViewModel {
         }
     }
 
-    public String getStringViewOfDate(String key) {
-        if (stringViewOfDate == null) stringViewOfDate = new HashMap<>();
-        if (stringViewOfDate.containsKey(key)) {
-            return stringViewOfDate.get(key) == null ? "" : stringViewOfDate.get(key);
+    public void setSelectedSignAndStringViewOfNote(String key, String value) {
+        switch (key) {
+            case "=":
+                stringViewOfNoteEqualitySignLD.setValue(value);
+                break;
+            case "\u2260":
+                stringViewOfNoteInequalitySignLD.setValue(value);
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод void setSelectedSignAndStringViewOfDate(String key, String value). key - " + key);
         }
-        return "";
     }
 
-    public String getStringViewOfNumber(String key) {
-        if (stringViewOfNumber == null) stringViewOfNumber = new HashMap<>();
-        if (stringViewOfNumber.containsKey(key)) {
+    public String getStringViewOfSearchCriteria(int selectedTypeOfValue, String key) {
+        if (selectedTypeOfValue != SearchCriteriaFragment.NUMBERS_VALUE) return "";
+        else {
+            if (stringViewOfNumber == null) stringViewOfNumber = new HashMap<>();
             return stringViewOfNumber.get(key) == null ? "" : stringViewOfNumber.get(key);
         }
-        return "";
     }
 
     public List<String> getAdapterListOfCurrentSignForDate(String sign) {
@@ -1171,12 +1372,42 @@ public class EditDeleteDataVM extends AndroidViewModel {
         }
     }
 
+    public List<String> getAdapterListOfCurrentSignForNote(String sign) {
+        switch (sign) {
+            case "=":
+                if (adapterListOfNoteForEqualitySign == null)  adapterListOfNoteForEqualitySign = new ArrayList<>();
+                return adapterListOfNoteForEqualitySign;
+            case "\u2260":
+                if (adapterListOfNoteForInequalitySign == null)  adapterListOfNoteForInequalitySign = new ArrayList<>();
+                return adapterListOfNoteForInequalitySign;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод getAdapterListOfCurrentSignForDate(String sign). sign - " + sign);
+        }
+    }
+
     public Long getSelection(String key, int position) {
         if (searchCriteriaForDate == null) return null;
-        if (searchCriteriaForDate.containsKey(key) && searchCriteriaForDate.get(key) != null) {
+        if (searchCriteriaForDate.get(key) != null) {
             Long selection = searchCriteriaForDate.get(key).get(position);
             if (selection != null) selection *= 1000;
             return selection;
+        } else return null;
+    }
+
+    public String getValueOfNumber(String key, int position) {
+        if (searchCriteriaForNumber.containsKey(key) && searchCriteriaForNumber.get(key) != null) {
+            String stringViewOfNumber = searchCriteriaForNumber.get(key).get(position).toString();
+            String regExp = ".0$";
+            Pattern pattern = Pattern.compile(regExp);
+            Matcher matcher = pattern.matcher(stringViewOfNumber);
+            if (matcher.find()) return matcher.replaceFirst("");
+            else return stringViewOfNumber;
+        } else return null;
+    }
+
+    public String getValueOfNote(String key, int position) {
+        if (searchCriteriaForNote.containsKey(key) && searchCriteriaForNote.get(key) != null) {
+            return searchCriteriaForNote.get(key).get(position);
         } else return null;
     }
 
@@ -1212,6 +1443,21 @@ public class EditDeleteDataVM extends AndroidViewModel {
             case ("\u2a7e" + " " + "\u2a7d"):
                 adapterListOfRangeOfNumbersForMoreAndLessSigns.add(date1 + " - " + date2);
                 adapterListOfRangeOfNumbersForMoreAndLessSignsLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод addItemToDateList(String sign, String date1, String date2). sign -" + sign);
+        }
+    }
+
+    public void addItemToNoteList(String sign, String note) {
+        switch (sign) {
+            case "=":
+                adapterListOfNoteForEqualitySign.add(note);
+                adapterListOfNoteForEqualitySignLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
+                break;
+            case "\u2260":
+                adapterListOfNoteForInequalitySign.add(note);
+                adapterListOfNoteForInequalitySignLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод addItemToDateList(String sign, String date1, String date2). sign -" + sign);
@@ -1272,6 +1518,21 @@ public class EditDeleteDataVM extends AndroidViewModel {
         setUpdatedItemPositionForOneNumberList(position);
     }
 
+    public void changeItemToNoteList(String sign, int position, String note) {
+        switch (sign) {
+            case "=":
+                adapterListOfNoteForEqualitySign.set(position, note);
+                adapterListOfNoteForEqualitySignLD.setValue(AddItemOfTypeOfValuesToListDF.UPDATE_ITEM_FROM_LIST);
+                break;
+            case "\u2260":
+                adapterListOfNoteForInequalitySign.set(position, note);
+                adapterListOfNoteForInequalitySignLD.setValue(AddItemOfTypeOfValuesToListDF.UPDATE_ITEM_FROM_LIST);
+                break;
+            default: throw new RuntimeException("Опечатка в константах. Метод void changeItemToOneDateList(String sign, int position, String date). Знак - " + sign);
+        }
+        setUpdatedItemPositionForOneNumberList(position);
+    }
+
     public void changeSearchCriteriaValueForDate(String key, int position, Long value1, Long value2) {
         Long helpValue1 = value1 / 1000;
         if (value2 == null) searchCriteriaForDate.get(key).set(position, helpValue1);
@@ -1290,6 +1551,10 @@ public class EditDeleteDataVM extends AndroidViewModel {
         }
     }
 
+    public void changeSearchCriteriaValueForNote(String key, int position, String note) {
+        searchCriteriaForNote.get(key).set(position, note);
+    }
+
     public List<Integer> getListOfSelectedPositionForDeleteSign(int selectedTypeOfValue, String sign) {
         switch (selectedTypeOfValue) {
             case SearchCriteriaFragment.DATES_VALUE:
@@ -1306,7 +1571,13 @@ public class EditDeleteDataVM extends AndroidViewModel {
                     case ("\u2a7e" + " " + "\u2a7d"): return listOfSelectedNumberPositionsToDeleteMoreAndLessSigns;
                     default: throw new RuntimeException("Опечатка в константах. Метод getListOfSelectedPositionForDelete(int selectedTypeOfValue, String sign). sign - " + sign);
                 }
-                default:
+            case SearchCriteriaFragment.NOTES_VALUE:
+                switch (sign) {
+                    case "=": return listOfSelectedNotePositionsToDeleteEqualitySign;
+                    case "\u2260": return listOfSelectedNotePositionsToDeleteInequalitySign;
+                    default: throw new RuntimeException("Опечатка в константах. Метод getListOfSelectedPositionForDelete(int selectedTypeOfValue, String sign). sign - " + sign);
+                }
+            default:
                     throw new RuntimeException("Опечатка в константах. Метод getListOfSelectedPositionForDelete(int selectedTypeOfValue, String sign). selectedTypeOfValue - " + selectedTypeOfValue);
         }
     }
@@ -1418,6 +1689,43 @@ public class EditDeleteDataVM extends AndroidViewModel {
         hListOfSelectedPositions.clear();
     }
 
+    public void deleteSearchCriteriaValueForNote(String key) {
+        List<Integer> hListOfSelectedPositions;
+        List<String> hListOfAdapter;
+        MutableLiveData<Integer> hLiveDataAdapter;
+        MutableLiveData<Boolean> hLiveDataDeleteImageState;
+        switch (key) {
+            case "=":
+                hListOfSelectedPositions = listOfSelectedNotePositionsToDeleteEqualitySign;
+                hListOfAdapter = adapterListOfNoteForEqualitySign;
+                hLiveDataAdapter = adapterListOfNoteForEqualitySignLD;
+                hLiveDataDeleteImageState = deleteImageViewOnDialogEqualitySignNoteLD;
+                break;
+            case "\u2260":
+                hListOfSelectedPositions = listOfSelectedNotePositionsToDeleteInequalitySign;
+                hListOfAdapter = adapterListOfNoteForInequalitySign;
+                hLiveDataAdapter = adapterListOfNoteForInequalitySignLD;
+                hLiveDataDeleteImageState = deleteImageViewOnDialogInequalitySignNoteLD;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод deleteSearchCriteriaValueForDate). Знак - " + key);
+        }
+        hListOfSelectedPositions.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1.compareTo(o2);
+            }
+        });
+        for(int i = 0, j = 0; i < hListOfSelectedPositions.size(); i++, j++) {
+            int pos = hListOfSelectedPositions.get(i) - j;
+            searchCriteriaForNumber.get(key).remove(pos);
+            hListOfAdapter.remove(pos);
+        }
+        hLiveDataDeleteImageState.setValue(false);
+        hLiveDataAdapter.setValue(AddItemOfTypeOfValuesToListDF.DELETE_ITEM_FROM_LIST);
+        hListOfSelectedPositions.clear();
+    }
+
     public void addSelectedItemToListOfDeletedDate(String sign, int id) {
         List<Integer> hList;
         MutableLiveData<Boolean> hLiveData;
@@ -1457,6 +1765,26 @@ public class EditDeleteDataVM extends AndroidViewModel {
             case ("\u2a7e" + " " + "\u2a7d"):
                 hList = listOfSelectedNumberPositionsToDeleteMoreAndLessSigns;
                 hLiveData = deleteImageViewOnDialogMoreAndLessSignsNumberLD;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод  void addSelectedItemToListOfDeletedNumber(String sign, int id). Знак - " + sign);
+        }
+        hList.add(id);
+        Boolean b = hLiveData.getValue();
+        if (b == null || b == false) hLiveData.setValue(true);
+    }
+
+    public void addSelectedItemToListOfDeletedNote(String sign, int id) {
+        List<Integer> hList;
+        MutableLiveData<Boolean> hLiveData;
+        switch (sign) {
+            case "=":
+                hList = listOfSelectedNotePositionsToDeleteEqualitySign;
+                hLiveData = deleteImageViewOnDialogEqualitySignNoteLD;
+                break;
+            case "\u2260":
+                hList = listOfSelectedNotePositionsToDeleteInequalitySign;
+                hLiveData = deleteImageViewOnDialogInequalitySignNoteLD;
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод  void addSelectedItemToListOfDeletedNumber(String sign, int id). Знак - " + sign);
@@ -1506,6 +1834,27 @@ public class EditDeleteDataVM extends AndroidViewModel {
             case ("\u2a7e" + " " + "\u2a7d"):
                 hList = listOfSelectedNumberPositionsToDeleteMoreAndLessSigns;
                 hLiveData = deleteImageViewOnDialogMoreAndLessSignsNumberLD;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод void removeSelectedItemFromListOfDeletedNumber(String sign, int id). sign - " + sign);
+        }
+        int i = 0;
+        while (hList.get(i) != id) i++;
+        hList.remove(i);
+        if (hList.size() == 0) hLiveData.setValue(false);
+    }
+
+    public void removeSelectedItemFromListOfDeletedNote(String sign, int id) {
+        List<Integer> hList;
+        MutableLiveData<Boolean> hLiveData;
+        switch (sign) {
+            case "=":
+                hList = listOfSelectedNotePositionsToDeleteEqualitySign;
+                hLiveData = deleteImageViewOnDialogEqualitySignNoteLD;
+                break;
+            case "\u2260":
+                hList = listOfSelectedNotePositionsToDeleteInequalitySign;
+                hLiveData = deleteImageViewOnDialogInequalitySignNoteLD;
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод void removeSelectedItemFromListOfDeletedNumber(String sign, int id). sign - " + sign);
@@ -1568,6 +1917,33 @@ public class EditDeleteDataVM extends AndroidViewModel {
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод boolean isCheckedSelectableItemFromListOfDeletedNumberPosition(String sign, int id). sign - " + sign);
+        }
+        if (hList.size() == 0) return false;
+        else {
+            int i = 0;
+            while (i < hList.size()) {
+                if (hList.get(i) == id) return true;
+                i++;
+            }
+            return false;
+        }
+    }
+
+    public boolean isCheckedSelectableItemFromListOfDeletedNotePosition(String sign, int id) {
+        List<Integer> hList;
+        switch (sign) {
+            case "=":
+                if (listOfSelectedNotePositionsToDeleteEqualitySign == null)
+                    listOfSelectedNotePositionsToDeleteEqualitySign = new ArrayList<>();
+                hList = listOfSelectedNotePositionsToDeleteEqualitySign;
+                break;
+            case "\u2260":
+                if (listOfSelectedNotePositionsToDeleteInequalitySign == null)
+                    listOfSelectedNotePositionsToDeleteInequalitySign = new ArrayList<>();
+                hList = listOfSelectedNotePositionsToDeleteInequalitySign;
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод boolean isCheckedSelectableItemFromListOfDeletedNotePosition(String sign, int id). sign - " + sign);
         }
         if (hList.size() == 0) return false;
         else {
