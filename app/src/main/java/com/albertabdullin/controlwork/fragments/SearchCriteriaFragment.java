@@ -192,6 +192,13 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             for (int i = 0; i < model.getCountOfAddedCriteriaForNote(); i++)
                 addViewToLayoutForCertainSearchCriteria(NOTES_VALUE, model.getSelectedEqualSignFromList(NOTES_VALUE, i), i);
         }
+        Button searchButton = view.findViewById(R.id.search_button);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               String query = model.getQuery();
+            }
+        });
     }
 
     private void setOneDateCalendarToEditText(final EditText et, final TextView tv) {

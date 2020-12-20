@@ -1,6 +1,5 @@
 package com.albertabdullin.controlwork.db_of_app;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;

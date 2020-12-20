@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1954,6 +1955,127 @@ public class EditDeleteDataVM extends AndroidViewModel {
             }
             return false;
         }
+    }
+
+    private <T> String helperMethodForAddValuesToQuery(String nameOfColumn, Map.Entry<String, List<T>> entry, boolean isWhereExist) {
+        StringBuilder sb = new StringBuilder();
+        if (isWhereExist) sb.append(" AND ");
+        else sb.append(" WHERE ");
+        switch (entry.getKey()) {
+            case ("\u2a7e"):
+                sb.append(nameOfColumn).append(" >= ").append(entry.getValue().get(0));
+                break;
+            case ("\u2a7d"):
+                sb.append(nameOfColumn).append(" <= ").append(entry.getValue().get(0));
+                break;
+            case ("="):
+            case ("\u2260"):
+                sb.append(nameOfColumn);
+                if (entry.getKey().equals("=")) sb.append(" IN (");
+                else sb.append(" NOT IN (");
+                for (int i = 0; i < entry.getValue().size() - 1; i++)
+                    sb.append(entry.getValue().get(i)).append(", ");
+                sb.append(entry.getValue().get(entry.getValue().size() - 1)).append(")");
+                break;
+            case ("\u2a7e" + " " + "\u2a7d"):
+                sb.append("(");
+                int m = (entry.getValue().size() / 2) - 1;
+                for (int i = 0; i < m; i++) {
+                    sb.append("(").append(nameOfColumn).append(" BETWEEN ").append(entry.getValue().get(i * 2))
+                            .append(" AND ").append(entry.getValue().get(i * 2 + 1)).append(") OR ");
+                }
+                sb.append("(").append(nameOfColumn).append(" BETWEEN ").append(entry.getValue().get(m * 2))
+                        .append(" AND ").append(entry.getValue().get(m * 2 + 1)).append("))");
+                break;
+            default:
+                throw new RuntimeException("Опечатка в константах. Метод String helperMethodForAddValuesToQuery(). key -" + entry.getKey());
+        }
+        return sb.toString();
+    }
+
+    private <T> String addSearchCriteriaOfValuesToQuery(String nameOfColumn, Map<String, List<T>> listOfSelectedValues, boolean isWhereExist) {
+        StringBuilder sb = new StringBuilder();
+        Set<Map.Entry<String, List<T>>> entrySet = listOfSelectedValues.entrySet();
+        if (listOfSelectedValues.containsKey("\u2a7e") && listOfSelectedValues.containsKey("\u2a7d")) {
+            if (isWhereExist) sb.append(" AND ");
+            else sb.append(" WHERE ");
+            String lessThanValue = listOfSelectedValues.get("\u2a7d").toString().replaceAll("[\\[\\]]", "");
+            String moreThanValue = listOfSelectedValues.get("\u2a7e").toString().replaceAll("[\\[\\]]", "");
+            sb.append("(").append(nameOfColumn).append(" <= ").append(lessThanValue)
+                    .append(" OR ").append(nameOfColumn).append(" >= ").append(moreThanValue).append(")");
+            for (Map.Entry<String, List<T>> entry : entrySet) {
+                if (!entry.getKey().equals("\u2a7e") && !entry.getKey().equals("\u2a7d")) {
+                    sb.append(helperMethodForAddValuesToQuery(nameOfColumn, entry, true));
+                }
+            }
+        } else {
+            for (Map.Entry<String, List<T>> entry : entrySet) {
+                if (isWhereExist) sb.append(helperMethodForAddValuesToQuery(nameOfColumn, entry, isWhereExist));
+                else {
+                    sb.append(helperMethodForAddValuesToQuery(nameOfColumn, entry, isWhereExist));
+                    isWhereExist = true;
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private String addSearchCriteriaOfItemsToQuery(String nameOfColumn, List<SimpleEntityForDB> listOfSelectedItems, boolean isWhereExist) {
+        StringBuilder sb = new StringBuilder();
+        if (isWhereExist) sb.append(" AND ");
+        else sb.append(" WHERE ");
+        sb.append(nameOfColumn).append(" in (");
+        for (int i = 0; i < listOfSelectedItems.size() - 1; i++) sb.append(listOfSelectedItems.get(i).getID()).append(", ");
+        sb.append(listOfSelectedItems.get(listOfSelectedItems.size() -1).getID()).append(")");
+        return sb.toString();
+    }
+
+    public String getQuery() {
+        boolean whereStatement = false;
+        String query = "SELECT " + CWDBHelper.TABLE_NAME_RESULT + "._id, " +
+            CWDBHelper.TABLE_NAME_EMP + "._id, " +
+            CWDBHelper.TABLE_NAME_EMP + "." + CWDBHelper.T_EMP_C_FIO + ", " +
+            CWDBHelper.TABLE_NAME_FIRM + "." + CWDBHelper.T_FIRM_C_DESCRIPTION + ", " +
+            CWDBHelper.TABLE_NAME_TYPE_OF_WORK + "." + CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION + ", " +
+            CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "." + CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION + ", " +
+            "strftime(\"%m.%d.%Y\", " + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_DATE + ", \"unixepoch\")" + " AS Date, " +
+            CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_VALUE + ", " +
+            CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_NOTE + " " +
+            "FROM " + CWDBHelper.TABLE_NAME_RESULT + " JOIN " + CWDBHelper.TABLE_NAME_EMP + " " +
+            "ON " + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_EMPLOYER + "=" + CWDBHelper.TABLE_NAME_EMP + "._id " +
+            "JOIN " + CWDBHelper.TABLE_NAME_FIRM + " ON " + CWDBHelper.TABLE_NAME_FIRM + "._id=" + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_FIRM + " " +
+            "JOIN " + CWDBHelper.TABLE_NAME_TYPE_OF_WORK + " ON " + CWDBHelper.TABLE_NAME_TYPE_OF_WORK + "._id=" + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_TOW + " " +
+            "JOIN " + CWDBHelper.TABLE_NAME_PLACE_OF_WORK + " ON " + CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "._id=" + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_POW;
+        StringBuilder sb = new StringBuilder(query);
+        if (listOfSelectedEmployees != null && listOfSelectedEmployees.size() != 0) {
+            sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_EMP + "._id", listOfSelectedEmployees, whereStatement));
+            whereStatement = true;
+        }
+        if (listOfSelectedFirms != null && listOfSelectedFirms.size() != 0) {
+            sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_FIRM + "._id", listOfSelectedFirms, whereStatement));
+            if (!whereStatement) whereStatement = true;
+        }
+        if (listOfSelectedTOW != null && listOfSelectedTOW.size() != 0) {
+            sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_TYPE_OF_WORK + "._id", listOfSelectedTOW, whereStatement));
+            if (!whereStatement) whereStatement = true;
+        }
+        if (listOfSelectedPOW != null && listOfSelectedPOW.size() != 0) {
+            sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "._id", listOfSelectedPOW, whereStatement));
+            if (!whereStatement) whereStatement = true;
+        }
+        if (searchCriteriaForDate != null && searchCriteriaForDate.size() != 0) {
+            sb.append(addSearchCriteriaOfValuesToQuery(CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_DATE, searchCriteriaForDate, whereStatement));
+            if (!whereStatement) whereStatement = true;
+        }
+        if (searchCriteriaForNumber != null && searchCriteriaForNumber.size() != 0) {
+            sb.append(addSearchCriteriaOfValuesToQuery(CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_VALUE, searchCriteriaForNumber, whereStatement));
+            if (!whereStatement) whereStatement = true;
+        }
+        if (searchCriteriaForNote != null && searchCriteriaForNote.size() != 0) {
+            sb.append(addSearchCriteriaOfValuesToQuery(CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_NOTE, searchCriteriaForNote, whereStatement));
+        }
+        String s = sb.toString();
+        return s;
     }
 
 }
