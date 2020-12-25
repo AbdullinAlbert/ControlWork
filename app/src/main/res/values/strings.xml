@@ -16,7 +16,7 @@
     <string name="hint_for_add_place_of_work">Выбери из списка или добавь новое</string>
     <string name="hint_for_type_of_work">Выбери из списка или добавь новый</string>
     <string name="hint_for_needless">Необязательное поле</string>
-    <string name="hint_for_search_criteria">Пустое поле - нет критериев поиска</string>
+    <string name="hint_for_search_criteria">Пустое поле - поиск среди всех записей</string>
     <string name="hint_for_search_criteria_one_date"> Выбери дату </string>
     <string name="hint_for_search_criteria_one_number"> Выбери число</string>
     <string name="hint_for_search_criteria_several_date"> Выбери одну или несколько дат </string>

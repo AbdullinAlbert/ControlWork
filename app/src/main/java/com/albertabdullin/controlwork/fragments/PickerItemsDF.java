@@ -1,17 +1,23 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Application;
 import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
 
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.EditText;
 
 
 import androidx.annotation.NonNull;
@@ -25,21 +31,38 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.customView.SearchEditText;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForPickItems;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
 import java.util.List;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
 public class PickerItemsDF extends DialogFragment {
     private EditDeleteDataVM model;
     private int selectedTable;
-    private static final String EMPLOEEYS_TITLE = "Список сотрудников";
+    private static final String EMPLOYEES_TITLE = "Список сотрудников";
     private static final String FIRMS_TITLE = "Список фирм";
     private static final String TYPES_TITLE = "Список типов работы";
     private static final String PLACES_TITLE = "Список мест работы";
     private static final String SAVED_TITLE_OF_TABLE = "saved_table";
     List<SimpleEntityForDB> list = null;
+    private Toolbar toolbar;
+    private View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
+                model.setStateMenuItemSearchText(true);
+                InputMethodManager imm = (InputMethodManager)
+                            requireActivity().getSystemService(INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(0, 0);
+                } else if (!hasFocus) {
+                    hideKeyBoard((EditText) v);
+                }
+        }
+    };
 
     public PickerItemsDF() {}
 
@@ -55,6 +78,14 @@ public class PickerItemsDF extends DialogFragment {
         list = model.getAdapterListOfEntities(selectedTable);
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -64,72 +95,73 @@ public class PickerItemsDF extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Toolbar toolbar = view.findViewById(R.id.title_for_select_items_toolbar);
+        toolbar = view.findViewById(R.id.title_for_select_items_toolbar);
         String title = "";
-        final AdapterForPickItems adapter;
+        final AdapterForPickItems adapter = new AdapterForPickItems(list, model, this, selectedTable);
+        model.showFullListOfItems(selectedTable);
         switch (selectedTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
-                title = EMPLOEEYS_TITLE;
-                adapter = new AdapterForPickItems(list, model, this, selectedTable);
-                model.showFullListOfItems(selectedTable);
+                title = EMPLOYEES_TITLE;
                 break;
             case SearchCriteriaFragment.SELECT_FIRMS:
                 title = FIRMS_TITLE;
-                adapter = new AdapterForPickItems(list, model, this, selectedTable);
-                model.showFullListOfItems(selectedTable);
                 break;
             case SearchCriteriaFragment.SELECT_TYPES:
                 title = TYPES_TITLE;
-                adapter = new AdapterForPickItems(list, model, this, selectedTable);
-                model.showFullListOfItems(selectedTable);
                 break;
             case SearchCriteriaFragment.SELECT_PLACES:
                 title = PLACES_TITLE;
-                adapter = new AdapterForPickItems(list, model, this, selectedTable);
-                model.showFullListOfItems(selectedTable);
                 break;
-            default:
-                adapter = null;
         }
-        final ImageView clearButton = view.findViewById(R.id.button_for_clear_selected_cb);
-        final ImageView selectAllButton = view.findViewById(R.id.button_for_select_all_cb);
-        if (model.getTransientListOfSelectedItems(selectedTable).isEmpty()) {
-            clearButton.setVisibility(View.INVISIBLE);
-            selectAllButton.setVisibility(View.VISIBLE);
-        } else {
-            clearButton.setVisibility(View.VISIBLE);
-            selectAllButton.setVisibility(View.INVISIBLE);
-        }
-        clearButton.setOnClickListener(new View.OnClickListener() {
+        toolbar.setTitle(title);
+        toolbar.inflateMenu(R.menu.menu_for_pick_items);
+        final EditText searchEditText = ((SearchEditText) toolbar.getMenu().getItem(0).getActionView()).getTextView();
+        searchEditText.setOnFocusChangeListener(focusChangeListener);
+        boolean currentStateOfItem = model.getStateOfSelectAllMenuItem(selectedTable);
+        if (currentStateOfItem) model.setCurrentVisiblePositionOfOverFlowMenu(1);
+        else model.setCurrentVisiblePositionOfOverFlowMenu(2);
+        toolbar.getMenu().getItem(1).setVisible(currentStateOfItem);
+        toolbar.getMenu().getItem(2).setVisible(!currentStateOfItem);
+        toolbar.getMenu().getItem(0).setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
-            public void onClick(View v) {
-                model.clearSelectedCheckBoxes(selectedTable);
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                if (item.getItemId() == R.id.action_search) {
+                    toolbar.getMenu().getItem(model.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(false);
+                    searchEditText.requestFocus();
+                    return true;
+                } else return false;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                if (item.getItemId() == R.id.action_search) {
+                    toolbar.getMenu().getItem(model.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(true);
+                    searchEditText.setText("");
+                    return true;
+                } else return false;
             }
         });
-        Observer<Integer> observerClearButton = new Observer<Integer>() {
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
-            public void onChanged(Integer integer) {
-                if (!model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.VISIBLE) {
-                    clearButton.setVisibility(View.VISIBLE);
-                    clearButton.setClickable(true);
-                    selectAllButton.setVisibility(View.INVISIBLE);
-                    selectAllButton.setClickable(false);
-                } else if (model.getTransientListOfSelectedItems(selectedTable).isEmpty() && integer == View.INVISIBLE) {
-                    clearButton.setVisibility(View.INVISIBLE);
-                    clearButton.setClickable(false);
-                    selectAllButton.setVisibility(View.VISIBLE);
-                    selectAllButton.setClickable(true);
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_select_all_items:
+                        toolbar.getMenu().getItem(1).setVisible(false);
+                        toolbar.getMenu().getItem(2).setVisible(true);
+                        model.setCurrentVisiblePositionOfOverFlowMenu(2);
+                        model.selectAllCheckBoxes(selectedTable);
+                        return true;
+                    case R.id.action_clear_all_items:
+                        toolbar.getMenu().getItem(2).setVisible(false);
+                        toolbar.getMenu().getItem(1).setVisible(true);
+                        model.setCurrentVisiblePositionOfOverFlowMenu(1);
+                        model.clearSelectedCheckBoxes(selectedTable);
+                        return true;
+                    default:
+                        return false;
                 }
             }
-        };
-        selectAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model.selectAllCheckBoxes(selectedTable);
-            }
         });
-        model.getVisibilityOfClearButtonLD().observe(getViewLifecycleOwner(), observerClearButton);
-        toolbar.setTitle(title);
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
         Observer<Integer> rvObserver = new Observer<Integer>() {
@@ -151,6 +183,7 @@ public class PickerItemsDF extends DialogFragment {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                model.clearTransientListOfSelectedItems(selectedTable);
                 Dialog dialog = getDialog();
                 if (dialog != null) dialog.dismiss();
 
@@ -167,6 +200,15 @@ public class PickerItemsDF extends DialogFragment {
         });
     }
 
+    public void updateVisibilityOfItemsOfOverFlowMenu() {
+        boolean visibility = toolbar.getMenu().getItem(1).isVisible();
+        toolbar.getMenu().getItem(1).setVisible(!visibility);
+        toolbar.getMenu().getItem(2).setVisible(visibility);
+        if (model.getCurrentVisiblePositionOfOverFlowMenu() == 1) model.setCurrentVisiblePositionOfOverFlowMenu(2);
+        else model.setCurrentVisiblePositionOfOverFlowMenu(1);
+    }
+
+
     @Override
     public void onResume() {
         Window window = getDialog().getWindow();
@@ -178,9 +220,11 @@ public class PickerItemsDF extends DialogFragment {
         super.onResume();
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putInt(SAVED_TITLE_OF_TABLE, selectedTable);
-        super.onSaveInstanceState(outState);
+    private void hideKeyBoard(EditText editText) {
+        InputMethodManager imm = (InputMethodManager)
+                requireActivity().getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        model.setStateMenuItemSearchText(false);
     }
+
 }

@@ -47,6 +47,7 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
         mSelectedTable = selectedTable;
+        mVM.prepareTransientListOfSelectedItems(selectedTable);
     }
 
     @NonNull
@@ -62,14 +63,22 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         TextView description = holder.getDescription();
         TextView id = holder.getID();
         description.setText(mListOfEntities.get(position).getDescription());
-        id.setText("id: " + mListOfEntities.get(position).getID());
+        String text = "id: " + mListOfEntities.get(position).getID();
+        id.setText(text);
         description.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CheckBox cb = holder.getCheckBox();
                 cb.toggle();
-                if (cb.isChecked()) mVM.addSelectedItem(mSelectedTable, position);
-                else mVM.removeSelectedItem(mSelectedTable, position);
+                if (cb.isChecked()) {
+                    mVM.addSelectedItem(mSelectedTable, mListOfEntities.get(position));
+                    if (mVM.getCurrentVisiblePositionOfOverFlowMenu() == 1) mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
+                }
+                else {
+                    mVM.removeSelectedItem(mSelectedTable,  mListOfEntities.get(position));
+                    if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty())
+                        mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
+                }
             }
         });
         id.setOnClickListener(new View.OnClickListener() {
@@ -77,8 +86,15 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
             public void onClick(View v) {
                 CheckBox cb = holder.getCheckBox();
                 cb.toggle();
-                if (cb.isChecked()) mVM.addSelectedItem(mSelectedTable, position);
-                else mVM.removeSelectedItem(mSelectedTable, position);
+                if (cb.isChecked()) {
+                    mVM.addSelectedItem(mSelectedTable, mListOfEntities.get(position));
+                    if (mVM.getCurrentVisiblePositionOfOverFlowMenu() == 1) mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
+                }
+                else {
+                    mVM.removeSelectedItem(mSelectedTable,  mListOfEntities.get(position));
+                    if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty())
+                        mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
+                }
             }
         });
         holder.getCheckBox().setOnClickListener(new View.OnClickListener() {
@@ -86,8 +102,15 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
             @Override
             public void onClick(View v) {
                 CheckBox cb = (CheckBox)v;
-                if (cb.isChecked()) mVM.addSelectedItem(mSelectedTable, position);
-                else mVM.removeSelectedItem(mSelectedTable, position);
+                if (cb.isChecked()) {
+                    mVM.addSelectedItem(mSelectedTable, mListOfEntities.get(position));
+                    if (mVM.getCurrentVisiblePositionOfOverFlowMenu() == 1) mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
+                }
+                else {
+                    mVM.removeSelectedItem(mSelectedTable,  mListOfEntities.get(position));
+                    if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty())
+                        mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
+                }
             }
         });
         if (mVM.getTransientListOfSelectedItems(mSelectedTable).contains(mListOfEntities.get(position)))
@@ -95,10 +118,10 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         Observer<Boolean> observerForCheckBoxes = new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty() && aBoolean == false)
+                if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty() && !aBoolean)
                     holder.getCheckBox().setChecked(aBoolean);
                 if (mVM.getTransientListOfSelectedItems(mSelectedTable).size() == mListOfEntities.size()
-                        && aBoolean == true)
+                        && aBoolean)
                     holder.getCheckBox().setChecked(aBoolean);
             }
         };

@@ -397,7 +397,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     }
 
     private void launchActivityForResult(int i) {
-        Intent intent = new Intent(FillNewData_Activity.this, ListOfBDItemsActivity.class);
+        Intent intent = new Intent(FillNewData_Activity.this, ListOfDBItemsActivity.class);
         intent.putExtra(LAUNCH_DEFINITELY_DB_TABLE, i);
         launcherActivityForDB.launch(intent);
     }

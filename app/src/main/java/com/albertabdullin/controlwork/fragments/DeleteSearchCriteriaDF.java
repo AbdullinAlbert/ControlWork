@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -16,17 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
-import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
-import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class DeleteSearchCriteriaDF extends DialogFragment {
     private EditDeleteDataVM viewModel;
@@ -46,6 +39,14 @@ public class DeleteSearchCriteriaDF extends DialogFragment {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
         if (savedInstanceState != null) mSign = savedInstanceState.getString(KEY_OF_SIGN);
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
     }
 
     @Nullable

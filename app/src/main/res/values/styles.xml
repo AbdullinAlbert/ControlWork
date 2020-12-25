@@ -13,7 +13,7 @@
      </style>
 
     <style name="MyAppActionBarOverFlowMenu" parent="@style/Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:src">@drawable/baseline_more_vert_24</item>
+        <item name="android:tint">@color/standardWhite</item>
     </style>
 
     <style name="ThemeMaterialCalendar" parent="@style/ThemeOverlay.MaterialComponents.MaterialCalendar">
@@ -22,6 +22,10 @@
 
     <style name="ThemeMaterialCalendar.FullScreen" parent="@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen">
         <item name="colorPrimary">@color/standardBlack</item>
+    </style>
+
+    <style name="MySecondAppActionBarOverFlowMenu" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">@color/standardBlack</item>
     </style>
 
 </resources>

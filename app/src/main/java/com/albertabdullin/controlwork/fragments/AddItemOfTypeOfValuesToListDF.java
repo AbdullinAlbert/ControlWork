@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -60,6 +61,14 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
             mSign = savedInstanceState.getString(KEY_FOR_SIGN);
             mTypeOfValue = savedInstanceState.getInt(KEY_FOR_TYPE_OF_VALUE);
         }
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
     }
 
     @Nullable

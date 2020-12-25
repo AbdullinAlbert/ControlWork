@@ -16,4 +16,9 @@
         <item name="materialCalendarFullscreenTheme">@style/ThemeMaterialCalendar.FullScreen</item>
         <item name="materialCalendarTheme">@style/ThemeMaterialCalendar</item>
       </style>
+
+    <style name="SecondAppTheme" parent="AppTheme">
+        <item name="actionOverflowButtonStyle">@style/MySecondAppActionBarOverFlowMenu</item>
+    </style>
+
   </resources>

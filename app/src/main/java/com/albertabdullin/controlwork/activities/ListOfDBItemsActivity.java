@@ -42,7 +42,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
-public class ListOfBDItemsActivity extends AppCompatActivity implements RecyclerViewObserver {
+public class ListOfDBItemsActivity extends AppCompatActivity implements RecyclerViewObserver {
     public static final int ADD = 0;
     public static final int DELETE = 1;
     public static final int UPDATE = 2;
@@ -86,7 +86,7 @@ public class ListOfBDItemsActivity extends AppCompatActivity implements Recycler
         public void onSelectionChanged() {
             if(selectionTracker.hasSelection() && actionMode == null) {
                 actionMode = startSupportActionMode(new AMControllerForListItemsFromDB(selectionTracker, adapterForItemsFromDB,
-                        ListOfBDItemsActivity.this));
+                        ListOfDBItemsActivity.this));
                 adapterForItemsFromDB.setActionMode(actionMode);
                 setSelectedTitle(selectionTracker.getSelection().size());
                 fab.hide();

@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
-
+  <!--
     <ImageView
         android:id="@+id/button_for_clear_selected_cb"
         android:layout_width="wrap_content"
@@ -73,6 +73,6 @@
         app:layout_constraintEnd_toEndOf="@+id/title_for_select_items_toolbar"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/baseline_done_all_24"
-        android:contentDescription="@string/select_all_items" />
+        android:contentDescription="@string/select_all_items" /> -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

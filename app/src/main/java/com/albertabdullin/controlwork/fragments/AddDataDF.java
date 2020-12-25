@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.app.VoiceInteractor;
 import android.content.DialogInterface;
 import android.graphics.Point;
@@ -65,6 +66,14 @@ public class AddDataDF extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(ListOfItemsVM.class);
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
     }
 
     @Nullable

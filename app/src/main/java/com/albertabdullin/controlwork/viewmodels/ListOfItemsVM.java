@@ -16,7 +16,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.albertabdullin.controlwork.activities.FillNewData_Activity;
-import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
+import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
@@ -75,7 +75,7 @@ public class ListOfItemsVM extends AndroidViewModel {
             SimpleEntityForDB eDB = new SimpleEntityForDB(idKey, this.item);
             hListForWorkWithDB = new ArrayList<>(getAdapterListOfEntitiesVM());
             hListForWorkWithDB.add(eDB);
-            ListOfBDItemsActivity.handler.sendEmptyMessage(ListOfBDItemsActivity.ADD);
+            ListOfDBItemsActivity.handler.sendEmptyMessage(ListOfDBItemsActivity.ADD);
         }
     }
 
@@ -124,10 +124,10 @@ public class ListOfItemsVM extends AndroidViewModel {
                 return;
             }
             if (count != 0) {
-                message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.OK, 0);
+                message = ListOfDBItemsActivity.handler.obtainMessage(ListOfDBItemsActivity.DELETE, ListOfDBItemsActivity.OK, 0);
                 listOfDeletedPositions.sort(comparator);
-            } else message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.DELETE, ListOfBDItemsActivity.NOT_OK, 0);
-            ListOfBDItemsActivity.handler.sendMessage(message);
+            } else message = ListOfDBItemsActivity.handler.obtainMessage(ListOfDBItemsActivity.DELETE, ListOfDBItemsActivity.NOT_OK, 0);
+            ListOfDBItemsActivity.handler.sendMessage(message);
         }
     }
 
@@ -162,9 +162,9 @@ public class ListOfItemsVM extends AndroidViewModel {
                 toast.show();
                 return;
             }
-            if(idKey != 0) message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.OK, 0);
-            else message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.UPDATE, ListOfBDItemsActivity.NOT_OK, 0);
-            ListOfBDItemsActivity.handler.sendMessage(message);
+            if(idKey != 0) message = ListOfDBItemsActivity.handler.obtainMessage(ListOfDBItemsActivity.UPDATE, ListOfDBItemsActivity.OK, 0);
+            else message = ListOfDBItemsActivity.handler.obtainMessage(ListOfDBItemsActivity.UPDATE, ListOfDBItemsActivity.NOT_OK, 0);
+            ListOfDBItemsActivity.handler.sendMessage(message);
         }
     }
 
@@ -206,16 +206,16 @@ public class ListOfItemsVM extends AndroidViewModel {
                     }
                 } while (isEntitiesNull());
             }
-            message = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.LOAD);
-            ListOfBDItemsActivity.handler.sendMessage(message);
+            message = ListOfDBItemsActivity.handler.obtainMessage(ListOfDBItemsActivity.LOAD);
+            ListOfDBItemsActivity.handler.sendMessage(message);
         }
     }
 
     private class SearchItemsThread extends Thread {
         public static final String TAG_SEARCH_TREAD = "SearchItemsThread";
-        private BlockingQueue<String> store = new ArrayBlockingQueue<>(1);
+        private final BlockingQueue<String> store = new ArrayBlockingQueue<>(1);
         private String pattern, regEx, hPattern = "";
-        private AtomicBoolean isStopSearch = new AtomicBoolean(false);
+        private final AtomicBoolean isStopSearch = new AtomicBoolean(false);
         private Pattern p;
         private Matcher m;
 
@@ -256,7 +256,7 @@ public class ListOfItemsVM extends AndroidViewModel {
                 i++;
                 if (!store.isEmpty()) {
                     hPattern = store.poll();
-                    regEx = "(?i)" + hPattern + "";
+                    regEx = "(?i)" + hPattern;
                     p = Pattern.compile(regEx);
                     if (hPattern.contains(pattern)) searchInFilteredList();
                     else {
@@ -269,13 +269,13 @@ public class ListOfItemsVM extends AndroidViewModel {
         }
 
         private void searchInFilteredList() {
-            List<SimpleEntityForDB> helperfindedItemsList = new ArrayList<>();
+            List<SimpleEntityForDB> helperFindedItemsList = new ArrayList<>();
             for (int j = 0; j < findedItemsList.size(); j++) {
                 m = p.matcher(findedItemsList.get(j).getDescription());
-                if (m.find()) helperfindedItemsList.add(findedItemsList.get(j));
+                if (m.find()) helperFindedItemsList.add(findedItemsList.get(j));
             }
             findedItemsList.clear();
-            findedItemsList.addAll(helperfindedItemsList);
+            findedItemsList.addAll(helperFindedItemsList);
         }
 
         @Override
@@ -289,14 +289,14 @@ public class ListOfItemsVM extends AndroidViewModel {
                     //Вернуть полный список элементов в List адаптера
                 }
                 if (pattern.equals("")) break;
-                regEx = "(?i)" + pattern + "";
+                regEx = "(?i)" + pattern;
                 p = Pattern.compile(regEx);
                 isStopSearch.set(false);
                 if (!hPattern.equals("") && pattern.contains(hPattern)) searchInFilteredList();
                 else searchInFullList();
                 if (!isStopSearch.get()) {
-                    msg = ListOfBDItemsActivity.handler.obtainMessage(ListOfBDItemsActivity.SEARCH_IS_DONE, 0, 0);
-                    ListOfBDItemsActivity.handler.sendMessage(msg);
+                    msg = ListOfDBItemsActivity.handler.obtainMessage(ListOfDBItemsActivity.SEARCH_IS_DONE, 0, 0);
+                    ListOfDBItemsActivity.handler.sendMessage(msg);
                 } else {
                     if (!store.isEmpty()) store.clear();
                     isStopSearch.set(false);

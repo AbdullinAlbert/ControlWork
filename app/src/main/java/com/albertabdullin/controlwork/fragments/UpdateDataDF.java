@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.text.Editable;
@@ -24,9 +25,8 @@ import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.FillNewData_Activity;
-import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
+import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 import java.util.Iterator;
@@ -67,6 +67,14 @@ public class UpdateDataDF extends DialogFragment {
         viewModel = new ViewModelProvider(requireActivity()).get(ListOfItemsVM.class);
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -95,7 +103,7 @@ public class UpdateDataDF extends DialogFragment {
         helperTextView = view.findViewById(R.id.UpdateDataDFHelper_text);
         Button bAdd = view.findViewById(R.id.UpdateDataDAddButton);
         Button bCancel = view.findViewById(R.id.UpdateDataDFCancelButton);
-        final SelectionTracker tracker = ((ListOfBDItemsActivity) requireActivity()).getSelectionTracker();
+        final SelectionTracker tracker = ((ListOfDBItemsActivity) requireActivity()).getSelectionTracker();
         bAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

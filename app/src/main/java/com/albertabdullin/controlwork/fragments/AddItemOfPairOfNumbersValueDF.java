@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -64,6 +65,14 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
             mCurrentPosition = savedInstanceState.getInt(KEY_OF_CURRENT_POSITION, -1);
             if (mCurrentPosition == -1) mCurrentPosition = null;
         }
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
     }
 
     @Nullable

@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.app.Dialog;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -19,9 +20,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.ListOfBDItemsActivity;
+import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
-import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 import java.util.ArrayList;
@@ -37,6 +37,14 @@ public class DeleteDataDF extends DialogFragment {
         viewModel = new ViewModelProvider(requireActivity()).get(ListOfItemsVM.class);
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setCanceledOnTouchOutside(false);
+        return dialog;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -48,7 +56,7 @@ public class DeleteDataDF extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         TextView tvSelectSize = view.findViewById(R.id.DeleteDFSelectSize);
         TextView tvQuestion = view.findViewById(R.id.DeleteDFQuestion);
-        final SelectionTracker tracker = ((ListOfBDItemsActivity) requireActivity()).getSelectionTracker();
+        final SelectionTracker tracker = ((ListOfDBItemsActivity) requireActivity()).getSelectionTracker();
         tvSelectSize.setText("Выбрано записей: " + tracker.getSelection().size());
         if(tracker.getSelection().size() == 1) {
             Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
