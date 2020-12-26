@@ -14,11 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.fragments.PickerSignsDF;
 import com.albertabdullin.controlwork.models.SortedEqualSignsList;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 
 public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<AdapterForPickIneqaulEqualSign.MyViewHolder> {
-    private EditDeleteDataVM mVM;
+    private MakerSearchCriteriaVM mVM;
     private SortedEqualSignsList mSigns;
     private LifecycleOwner mLifeCycleOwner;
     private PickerSignsDF mPickerSignsDF;
@@ -39,7 +39,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
     public RadioButton getRadioButton() { return radioButton; }
 }
 
-    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, PickerSignsDF pickerSignsDF) {
+    public AdapterForPickIneqaulEqualSign(MakerSearchCriteriaVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, PickerSignsDF pickerSignsDF) {
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
         mSigns = mVM.getAvailableOrderedEqualSignsListForDate(selectedTypeOfValue);
@@ -47,7 +47,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
         mSelectedTypeOfValue = selectedTypeOfValue;
     }
 
-    public AdapterForPickIneqaulEqualSign(EditDeleteDataVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, String selectedSign, PickerSignsDF pickerSignsDF) {
+    public AdapterForPickIneqaulEqualSign(MakerSearchCriteriaVM model, LifecycleOwner lifeCycleOwner, int selectedTypeOfValue, String selectedSign, PickerSignsDF pickerSignsDF) {
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
         mSigns = model.getAvailableOrderedEqualSignsList(selectedTypeOfValue, selectedSign);

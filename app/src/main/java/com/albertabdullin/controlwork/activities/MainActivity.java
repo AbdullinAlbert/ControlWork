@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deleteOrChangeData() {
-        Intent intent = new Intent(this, EditDeleteDataActivity.class);
+        Intent intent = new Intent(this, MakerSearchCriteriaActivity.class);
         startActivity(intent);
     }
 }

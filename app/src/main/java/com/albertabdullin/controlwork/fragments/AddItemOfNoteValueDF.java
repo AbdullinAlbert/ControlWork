@@ -24,10 +24,10 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 public class AddItemOfNoteValueDF extends DialogFragment {
-    private EditDeleteDataVM viewModel;
+    private MakerSearchCriteriaVM viewModel;
     private EditText etAddNewData;
     private String mSign;
     private Integer mCurrentPosition;
@@ -72,7 +72,7 @@ public class AddItemOfNoteValueDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (savedInstanceState != null) {
             mSign = savedInstanceState.getString(KEY_OF_SIGN);
             mCurrentPosition = savedInstanceState.getInt(KEY_OF_CURRENT_POSITION, -1);

@@ -4,8 +4,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,11 +22,11 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
     public static final String TAG = "DialogFragment for add items";
-    private EditDeleteDataVM viewModel;
+    private MakerSearchCriteriaVM viewModel;
     private EditText etFirstNumber;
     private EditText etSecondNumber;
     private String mSign;
@@ -59,7 +57,7 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (savedInstanceState != null) {
             mSign = savedInstanceState.getString(KEY_OF_SIGN);
             mCurrentPosition = savedInstanceState.getInt(KEY_OF_CURRENT_POSITION, -1);

@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.recycler_views.AdapterForListOfTypeOfValues;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -35,7 +35,7 @@ import java.util.List;
 
 
 public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
-    private EditDeleteDataVM model;
+    private MakerSearchCriteriaVM model;
     private String mSign;
     private int mTypeOfValue;
     private AdapterForListOfTypeOfValues adapter;
@@ -56,7 +56,7 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (savedInstanceState != null) {
             mSign = savedInstanceState.getString(KEY_FOR_SIGN);
             mTypeOfValue = savedInstanceState.getInt(KEY_FOR_TYPE_OF_VALUE);

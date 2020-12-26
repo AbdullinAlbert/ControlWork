@@ -19,10 +19,10 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 public class DeleteSearchCriteriaDF extends DialogFragment {
-    private EditDeleteDataVM viewModel;
+    private MakerSearchCriteriaVM viewModel;
     private String mSign;
     private int mSelectedTypeOfValue;
     private static final String KEY_OF_SIGN = "key of sign";
@@ -37,7 +37,7 @@ public class DeleteSearchCriteriaDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (savedInstanceState != null) mSign = savedInstanceState.getString(KEY_OF_SIGN);
     }
 

@@ -16,7 +16,7 @@ import com.albertabdullin.controlwork.fragments.AddItemOfNoteValueDF;
 import com.albertabdullin.controlwork.fragments.AddItemOfNumberValueDF;
 import com.albertabdullin.controlwork.fragments.AddItemOfPairOfNumbersValueDF;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
@@ -25,7 +25,7 @@ import java.util.List;
 
 public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterForListOfTypeOfValues.MyViewHolder>{
     private List<String> listOfEntities;
-    private EditDeleteDataVM mModel;
+    private MakerSearchCriteriaVM mModel;
     private String mSign;
     private FragmentActivity mFragmentActivity;
     private int mSelectedTypeOfValue;
@@ -49,7 +49,7 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
 
     public AdapterForListOfTypeOfValues(int selectedTypeOfValue,
                                         List<String> list,
-                                        EditDeleteDataVM model,
+                                        MakerSearchCriteriaVM model,
                                         String sign,
                                         FragmentActivity fragmentActivity) {
         mSelectedTypeOfValue = selectedTypeOfValue;

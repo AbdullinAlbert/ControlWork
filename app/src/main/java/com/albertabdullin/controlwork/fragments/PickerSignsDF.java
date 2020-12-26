@@ -21,11 +21,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.recycler_views.AdapterForPickIneqaulEqualSign;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 
 public class PickerSignsDF extends DialogFragment implements DFPickerObservable {
-    private EditDeleteDataVM model;
+    private MakerSearchCriteriaVM model;
     private DFPickerObserver mDfPickerObserver;
     private String fromSelectedSign;
     private int selectedTypeOfValue;
@@ -56,7 +56,7 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (mDfPickerObserver == null) mDfPickerObserver = (SearchCriteriaFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("edit_delete_fragment");
         if (savedInstanceState != null) {
             fromSelectedSign = savedInstanceState.getString(SELECTED_SIGN_TAG);

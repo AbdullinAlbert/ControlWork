@@ -13,13 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.fragments.PickerItemsDF;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 import java.util.List;
 
 public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItems.MyVeiwHolder> {
     private List<SimpleEntityForDB> mListOfEntities;
-    private EditDeleteDataVM mVM;
+    private MakerSearchCriteriaVM mVM;
     private PickerItemsDF mLifeCycleOwner;
     private int mSelectedTable;
 
@@ -42,7 +42,7 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         public CheckBox getCheckBox() { return checkBox; }
     }
 
-    public AdapterForPickItems(List<SimpleEntityForDB> list, EditDeleteDataVM model, PickerItemsDF lifeCycleOwner, int selectedTable) {
+    public AdapterForPickItems(List<SimpleEntityForDB> list, MakerSearchCriteriaVM model, PickerItemsDF lifeCycleOwner, int selectedTable) {
         mListOfEntities = list;
         mVM = model;
         mLifeCycleOwner = lifeCycleOwner;
@@ -65,7 +65,7 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         description.setText(mListOfEntities.get(position).getDescription());
         String text = "id: " + mListOfEntities.get(position).getID();
         id.setText(text);
-        description.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CheckBox cb = holder.getCheckBox();
@@ -80,23 +80,9 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
                         mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
                 }
             }
-        });
-        id.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CheckBox cb = holder.getCheckBox();
-                cb.toggle();
-                if (cb.isChecked()) {
-                    mVM.addSelectedItem(mSelectedTable, mListOfEntities.get(position));
-                    if (mVM.getCurrentVisiblePositionOfOverFlowMenu() == 1) mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
-                }
-                else {
-                    mVM.removeSelectedItem(mSelectedTable,  mListOfEntities.get(position));
-                    if (mVM.getTransientListOfSelectedItems(mSelectedTable).isEmpty())
-                        mLifeCycleOwner.updateVisibilityOfItemsOfOverFlowMenu();
-                }
-            }
-        });
+        };
+        description.setOnClickListener(clickListener);
+        id.setOnClickListener(clickListener);
         holder.getCheckBox().setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -115,6 +101,7 @@ public class AdapterForPickItems extends RecyclerView.Adapter<AdapterForPickItem
         });
         if (mVM.getTransientListOfSelectedItems(mSelectedTable).contains(mListOfEntities.get(position)))
             holder.getCheckBox().setChecked(true);
+        else holder.getCheckBox().setChecked(false);
         Observer<Boolean> observerForCheckBoxes = new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {

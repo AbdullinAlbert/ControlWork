@@ -1,16 +1,14 @@
 package com.albertabdullin.controlwork.fragments;
 
-import android.app.Application;
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,14 +32,14 @@ import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.customView.SearchEditText;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForPickItems;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 import java.util.List;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class PickerItemsDF extends DialogFragment {
-    private EditDeleteDataVM model;
+    private MakerSearchCriteriaVM model;
     private int selectedTable;
     private static final String EMPLOYEES_TITLE = "Список сотрудников";
     private static final String FIRMS_TITLE = "Список фирм";
@@ -64,6 +62,26 @@ public class PickerItemsDF extends DialogFragment {
         }
     };
 
+    private TextWatcher textWatcherForSearchEditText = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            String newText = s.toString();
+            if (newText.equals("")) model.sayToStopSearch(before);
+            else if (model.isSearchIsActive()) model.sendNewText(newText);
+            else model.startSearch(newText);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
     public PickerItemsDF() {}
 
     public PickerItemsDF(int table) {
@@ -73,7 +91,7 @@ public class PickerItemsDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (savedInstanceState != null) selectedTable = savedInstanceState.getInt(SAVED_TITLE_OF_TABLE);
         list = model.getAdapterListOfEntities(selectedTable);
     }
@@ -117,6 +135,7 @@ public class PickerItemsDF extends DialogFragment {
         toolbar.inflateMenu(R.menu.menu_for_pick_items);
         final EditText searchEditText = ((SearchEditText) toolbar.getMenu().getItem(0).getActionView()).getTextView();
         searchEditText.setOnFocusChangeListener(focusChangeListener);
+        searchEditText.addTextChangedListener(textWatcherForSearchEditText);
         boolean currentStateOfItem = model.getStateOfSelectAllMenuItem(selectedTable);
         if (currentStateOfItem) model.setCurrentVisiblePositionOfOverFlowMenu(1);
         else model.setCurrentVisiblePositionOfOverFlowMenu(2);
@@ -137,6 +156,7 @@ public class PickerItemsDF extends DialogFragment {
                 if (item.getItemId() == R.id.action_search) {
                     toolbar.getMenu().getItem(model.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(true);
                     searchEditText.setText("");
+                    model.closeSearchThread();
                     return true;
                 } else return false;
             }
@@ -218,6 +238,13 @@ public class PickerItemsDF extends DialogFragment {
         window.setLayout((int) (size.x * 0.95), (int) (size.y * 0.6));
         window.setGravity(Gravity.CENTER);
         super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SAVED_TITLE_OF_TABLE, selectedTable);
+        model.setBlankCallTrue();
     }
 
     private void hideKeyBoard(EditText editText) {

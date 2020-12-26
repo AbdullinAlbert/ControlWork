@@ -20,7 +20,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
@@ -43,7 +43,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     private Button addCriteriaForDateButton;
     private Button addCriteriaForNumberButton;
     private Button addCriteriaForNoteButton;
-    private static EditDeleteDataVM model;
+    private static MakerSearchCriteriaVM model;
     private ViewGroup innerLinearLayout;
 
     private View[] viewsForDates;
@@ -113,7 +113,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
     }
 
     @Nullable
