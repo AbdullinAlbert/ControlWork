@@ -108,16 +108,24 @@ public class AddItemOfPairOfNumbersValueDF extends DialogFragment {
                 if (mCurrentPosition == null) {
                     if (floatOfFirstNumber < floatOfSecondNumber) {
                         viewModel.addItemToNumberList(mSign, stringOfFirstNumber, stringOfSecondNumber);
-                        viewModel.addSearchCriteriaForNumber(
-                            viewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign), floatOfFirstNumber, floatOfSecondNumber);
+                        viewModel.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                            viewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign),
+                                floatOfFirstNumber, floatOfSecondNumber);
                     } else {
                         Toast toast = Toast.makeText(getContext(), "Первое значение не меньше второго", Toast.LENGTH_SHORT);
                         toast.show();
                         return;
                     }
                 } else {
-                    viewModel.changeItemToOneNumberList(mSign, mCurrentPosition, stringOfFirstNumber, stringOfSecondNumber);
-                    viewModel.changeSearchCriteriaValueForNumber(mSign, mCurrentPosition * 2, floatOfFirstNumber, floatOfSecondNumber);
+                    if (floatOfFirstNumber < floatOfSecondNumber) {
+                        viewModel.changeItemToOneNumberList(mSign, mCurrentPosition, stringOfFirstNumber, stringOfSecondNumber);
+                        viewModel.changeSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                                mSign, mCurrentPosition * 2, floatOfFirstNumber, floatOfSecondNumber);
+                    } else {
+                        Toast toast = Toast.makeText(getContext(), "Первое значение не меньше второго", Toast.LENGTH_SHORT);
+                        toast.show();
+                        return;
+                    }
                 }
                 hideKeyBoard();
                 requireDialog().dismiss();

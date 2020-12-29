@@ -109,11 +109,13 @@ public class AddItemOfNumberValueDF extends DialogFragment {
                 if(description.length() != 0) {
                     if (mCurrentPosition == null) {
                         viewModel.addItemToNumberList(mSign, description, null);
-                        viewModel.addSearchCriteriaForNumber(
-                                viewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign), Float.parseFloat(description), null);
+                        viewModel.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                                viewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign),
+                                Float.parseFloat(description), null);
                     } else {
                         viewModel.changeItemToOneNumberList(mSign, mCurrentPosition, description, null);
-                        viewModel.changeSearchCriteriaValueForNumber(mSign, mCurrentPosition * 2, Float.parseFloat(description),null);
+                        viewModel.changeSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                                mSign, mCurrentPosition, Float.parseFloat(description),null);
                     }
                 }
                 else {

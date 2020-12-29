@@ -95,7 +95,8 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                                     calendar.setTimeInMillis(selection.second);
                                     String endOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                     mModel.changeItemToOneDateList(mSign, holder.getCurrentPosition(), beginOfRangeDate, endOfRangeDate);
-                                    mModel.changeSearchCriteriaValueForDate(mSign, holder.getCurrentPosition() * 2, selection.first, selection.second);
+                                    mModel.changeSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
+                                            mSign, holder.getCurrentPosition() * 2, selection.first, selection.second);
                                 }
                             });
                             materialDatePicker.show(mFragmentActivity.getSupportFragmentManager(), "date_picker");
@@ -114,7 +115,8 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                                 calendar.setTimeInMillis(selection);
                                 String date = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                 mModel.changeItemToOneDateList(mSign, holder.getCurrentPosition(), date, null);
-                                mModel.changeSearchCriteriaValueForDate(mSign, holder.getCurrentPosition(), selection, null);
+                                mModel.changeSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
+                                        mSign, holder.getCurrentPosition(), selection, null);
                             }
                         });
                         materialDatePicker.show(mFragmentActivity.getSupportFragmentManager(), "date_picker");
@@ -171,7 +173,9 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                 else {
                     if (mSelectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE)
                         mModel.removeSelectedItemFromListOfDeletedDate(mSign, holder.getCurrentPosition());
-                    else mModel.removeSelectedItemFromListOfDeletedNote(mSign, holder.getCurrentPosition());
+                    else if (mSelectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE)
+                        mModel.removeSelectedItemFromListOfDeletedNumber(mSign, holder.getCurrentPosition());
+                    else  mModel.removeSelectedItemFromListOfDeletedNote(mSign, holder.getCurrentPosition());
                 }
             }
         });

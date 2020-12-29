@@ -123,13 +123,15 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                         break;
                     case DELETE_ITEM_FROM_LIST:
                         List<Integer> hList = model.getListOfSelectedPositionForDeleteSign(mTypeOfValue, mSign);
-                        for (int i = hList.size() - 1; i > -1; i--) {
-                            adapter.notifyItemRemoved(hList.get(i));
+                        if (hList != null) {
+                            for (int i = hList.size() - 1; i > -1; i--) {
+                                adapter.notifyItemRemoved(hList.get(i));
+                            }
+                            hList.clear();
                         }
                         break;
                     case UPDATE_ITEM_FROM_LIST:
-                        if (mTypeOfValue == SearchCriteriaFragment.DATES_VALUE) adapter.notifyItemChanged(model.getPositionOfUpdatedItemFromOneDateList());
-                        else adapter.notifyItemChanged(model.getPositionOfUpdatedItemFromOneNumberList());
+                        adapter.notifyItemChanged(model.getPositionOfUpdatedItem(mTypeOfValue));
                         break;
                 }
             }
@@ -199,7 +201,8 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                                     calendar.setTimeInMillis(selection.second);
                                     String endOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                     model.addItemToDateList(mSign, beginOfRangeDate, endOfRangeDate);
-                                    model.addSearchCriteriaForDate(model.getPositionOfSign(mTypeOfValue, mSign), selection.first, selection.second);
+                                    model.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
+                                            model.getPositionOfSign(mTypeOfValue, mSign), selection.first, selection.second);
                                 }
                             });
                             materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");
@@ -217,7 +220,8 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                                 calendar.setTimeInMillis(selection);
                                 String date = SearchCriteriaFragment.getStringViewOfDate(calendar);
                                 model.addItemToDateList(mSign, date, null);
-                                model.addSearchCriteriaForDate(model.getPositionOfSign(mTypeOfValue, mSign), selection, null);
+                                model.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
+                                        model.getPositionOfSign(mTypeOfValue, mSign), selection, null);
                             }
                         });
                         materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");

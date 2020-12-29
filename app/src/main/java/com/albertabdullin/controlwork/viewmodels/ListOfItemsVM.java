@@ -462,6 +462,8 @@ public class ListOfItemsVM extends AndroidViewModel {
         if (searchItemsThread != null) searchItemsThread.closeThread();
         searchItemsThread = null;
         isBlankCall = true;
+        setStateMenuItemSearchText(false);
+        setItemSearchText("");
     }
 
     public void updateSearchAdapterList() {

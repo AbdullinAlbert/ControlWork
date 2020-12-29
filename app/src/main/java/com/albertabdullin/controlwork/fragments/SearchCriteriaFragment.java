@@ -176,20 +176,20 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         model.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
         selectedDateEditText = view.findViewById(R.id.add_criteria_for_data_editText);
         selectedDateEditText.setOnClickListener(callPickerSignForDateDF);
-        if (model.getCountOfAddedCriteriaForDate() != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteriaForDate(); i++)
+        if (model.getCountOfAddedCriteria(SearchCriteriaFragment.DATES_VALUE) != 0) {
+            for (int i = 0; i < model.getCountOfAddedCriteria(SearchCriteriaFragment.DATES_VALUE); i++)
                 addViewToLayoutForCertainSearchCriteria(DATES_VALUE, model.getSelectedEqualSignFromList(DATES_VALUE, i), i);
         }
         selectedNumberEditText = view.findViewById(R.id.add_criteria_for_result_editText);
         selectedNumberEditText.setOnClickListener(callPickerSignForNumberDF);
-        if (model.getCountOfAddedCriteriaForNumber() != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteriaForNumber(); i++)
+        if (model.getCountOfAddedCriteria(SearchCriteriaFragment.NUMBERS_VALUE) != 0) {
+            for (int i = 0; i < model.getCountOfAddedCriteria(SearchCriteriaFragment.NUMBERS_VALUE); i++)
                 addViewToLayoutForCertainSearchCriteria(NUMBERS_VALUE, model.getSelectedEqualSignFromList(NUMBERS_VALUE, i), i);
         }
         selectedNoteEditText = view.findViewById(R.id.add_criteria_for_note_edit_text);
         selectedNoteEditText.setOnClickListener(callPickerSignForNoteDF);
-        if (model.getCountOfAddedCriteriaForNote() != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteriaForNote(); i++)
+        if (model.getCountOfAddedCriteria(SearchCriteriaFragment.NOTES_VALUE) != 0) {
+            for (int i = 0; i < model.getCountOfAddedCriteria(SearchCriteriaFragment.NOTES_VALUE); i++)
                 addViewToLayoutForCertainSearchCriteria(NOTES_VALUE, model.getSelectedEqualSignFromList(NOTES_VALUE, i), i);
         }
         Button searchButton = view.findViewById(R.id.search_button);
@@ -234,7 +234,8 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
                         calendar.setTimeInMillis(selection);
                         String date = getStringViewOfDate(calendar);
                         model.setSelectedSignAndStringViewOfDate(tv.getText().toString(), date);
-                        model.addSearchCriteriaForDate(model.getPositionOfSign(DATES_VALUE, tv.getText().toString()), selection, null);
+                        model.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
+                                model.getPositionOfSign(DATES_VALUE, tv.getText().toString()), selection, null);
                     }
                 });
                 materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");
@@ -260,10 +261,11 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
                 if (stringViewOfNumber.length() > 0) {
                     Float floatViewOfNumber = Float.parseFloat(stringViewOfNumber);
                     model.setSelectedSignAndStringViewOfNumber(key, stringViewOfNumber);
-                    model.addSearchCriteriaForNumber(position, floatViewOfNumber, null);
+                    model.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                            position, floatViewOfNumber, null);
                 } else {
                     model.deleteStringViewOfNumber(key);
-                    model.deleteSearchCriteriaForNumber(key);
+                    model.deleteSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE, key);
                 }
             }
         };

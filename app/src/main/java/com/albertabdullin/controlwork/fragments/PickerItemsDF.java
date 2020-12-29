@@ -48,6 +48,7 @@ public class PickerItemsDF extends DialogFragment {
     private static final String SAVED_TITLE_OF_TABLE = "saved_table";
     List<SimpleEntityForDB> list = null;
     private Toolbar toolbar;
+    private EditText searchEditText;
     private View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
@@ -133,7 +134,7 @@ public class PickerItemsDF extends DialogFragment {
         }
         toolbar.setTitle(title);
         toolbar.inflateMenu(R.menu.menu_for_pick_items);
-        final EditText searchEditText = ((SearchEditText) toolbar.getMenu().getItem(0).getActionView()).getTextView();
+        searchEditText = ((SearchEditText) toolbar.getMenu().getItem(0).getActionView()).getTextView();
         searchEditText.setOnFocusChangeListener(focusChangeListener);
         searchEditText.addTextChangedListener(textWatcherForSearchEditText);
         boolean currentStateOfItem = model.getStateOfSelectAllMenuItem(selectedTable);
@@ -204,8 +205,7 @@ public class PickerItemsDF extends DialogFragment {
             @Override
             public void onClick(View v) {
                 model.clearTransientListOfSelectedItems(selectedTable);
-                Dialog dialog = getDialog();
-                if (dialog != null) dialog.dismiss();
+                returnValuesToDefault();
 
             }
         });
@@ -214,16 +214,17 @@ public class PickerItemsDF extends DialogFragment {
             @Override
             public void onClick(View v) {
                 model.commitSelectedList(selectedTable);
-                Dialog dialog = getDialog();
-                if (dialog != null) dialog.dismiss();
+                returnValuesToDefault();
             }
         });
     }
 
     public void updateVisibilityOfItemsOfOverFlowMenu() {
-        boolean visibility = toolbar.getMenu().getItem(1).isVisible();
-        toolbar.getMenu().getItem(1).setVisible(!visibility);
-        toolbar.getMenu().getItem(2).setVisible(visibility);
+        if (!model.isSearchIsActive()) {
+            boolean visibility = toolbar.getMenu().getItem(1).isVisible();
+            toolbar.getMenu().getItem(1).setVisible(!visibility);
+            toolbar.getMenu().getItem(2).setVisible(visibility);
+        }
         if (model.getCurrentVisiblePositionOfOverFlowMenu() == 1) model.setCurrentVisiblePositionOfOverFlowMenu(2);
         else model.setCurrentVisiblePositionOfOverFlowMenu(1);
     }
@@ -250,8 +251,20 @@ public class PickerItemsDF extends DialogFragment {
     private void hideKeyBoard(EditText editText) {
         InputMethodManager imm = (InputMethodManager)
                 requireActivity().getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        if (imm.isActive(editText)) {
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        }
+    }
+
+    private void returnValuesToDefault() {
+        if (searchEditText.isFocused()) searchEditText.clearFocus();
         model.setStateMenuItemSearchText(false);
+        if (model.isSearchIsActive()) {
+            model.sayToStopSearch(-1);
+            model.closeSearchThread();
+        }
+        Dialog dialog = getDialog();
+        if (dialog != null) dialog.dismiss();
     }
 
 }

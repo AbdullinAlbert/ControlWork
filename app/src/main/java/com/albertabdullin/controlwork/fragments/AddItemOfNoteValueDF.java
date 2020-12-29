@@ -109,11 +109,11 @@ public class AddItemOfNoteValueDF extends DialogFragment {
                 if(description.length() != 0) {
                     if (mCurrentPosition == null) {
                         viewModel.addItemToNoteList(mSign, description);
-                        viewModel.addSearchCriteriaForNote(
-                                viewModel.getPositionOfSign(SearchCriteriaFragment.NOTES_VALUE, mSign), description);
+                        viewModel.addSearchCriteria(SearchCriteriaFragment.NOTES_VALUE,
+                                viewModel.getPositionOfSign(SearchCriteriaFragment.NOTES_VALUE, mSign), description, null);
                     } else {
                         viewModel.changeItemToNoteList(mSign, mCurrentPosition, description);
-                        viewModel.changeSearchCriteriaValueForNote(mSign, mCurrentPosition, description);
+                        viewModel.changeSearchCriteria(SearchCriteriaFragment.NOTES_VALUE, mSign, mCurrentPosition, description, null);
                     }
                 }
                 else {

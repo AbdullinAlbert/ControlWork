@@ -302,8 +302,6 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     }
 
     private void hideKeyBoard(EditText editText) {
-        model.setStateMenuItemSearchText(false);
-        model.setItemSearchText("");
         InputMethodManager imm = (InputMethodManager)
                 getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
