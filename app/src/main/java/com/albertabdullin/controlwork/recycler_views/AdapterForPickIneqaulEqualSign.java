@@ -59,7 +59,7 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
     @Override
     public AdapterForPickIneqaulEqualSign.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.layout_equality_inequality_sign_for_rv, parent, false);
+                .inflate(R.layout.radiobutton_equality_inequality_sign_for_rv, parent, false);
         return new AdapterForPickIneqaulEqualSign.MyViewHolder(view);
     }
 

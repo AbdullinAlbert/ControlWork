@@ -22,7 +22,7 @@ public class DBListItemLookUP extends ItemDetailsLookup<SimpleEntityForDB> {
         View view =  rv.findChildViewUnder(e.getX(), e.getY());
         if (view != null) {
             RecyclerView.ViewHolder vh = rv.getChildViewHolder(view);
-            if (vh instanceof AdapterForItemsFromDB.MyVeiwHolder) return ((AdapterForItemsFromDB.MyVeiwHolder) vh).getItemDetails();
+            if (vh instanceof AdapterForItemsFromDB.MyViewHolder) return ((AdapterForItemsFromDB.MyViewHolder) vh).getItemDetails();
         }
         return null;
     }

@@ -21,6 +21,7 @@
     <string name="hint_for_search_criteria_one_number"> Выбери число</string>
     <string name="hint_for_search_criteria_several_date"> Выбери одну или несколько дат </string>
     <string name="hint_for_insert_number_for_search_criteria">Введи значение</string>
+    <string name="hint_for_result_of_search_criteria">Выбери нужную строку из таблицы</string>
     <string name="add_remark">Примечание:</string>
     <string name="title_activity_list_of_employers_">ListOfEmployers_Activity</string>
     <string name="hint_firstname_secondname">ФИО сотруднка</string>
@@ -39,4 +40,9 @@
     <string name="default_text">default_text</string>
     <string name="long_dash"> &#8212; </string>
     <string name="warning_about_delete">Вы действительно хотите их удалить?</string>
+    <string name="column_name_of_number">№</string>
+    <string name="column_name_of_date">Дата</string>
+    <string name="column_name_of_res">Результат</string>
+    <string name="column_name_of_note">Примечание</string>
+    <string name="title_for_delete_data_fragment_toolbar">Результат поиска</string>
 </resources>

@@ -6,16 +6,17 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-public class ViewModelFactoryEditDeleteData implements ViewModelProvider.Factory {
+public class ViewModelFactoryMakerSearchCriteria implements ViewModelProvider.Factory {
+
     private Application mApplication;
 
-    public ViewModelFactoryEditDeleteData(Application application) {
+    public ViewModelFactoryMakerSearchCriteria(Application application) {
         mApplication = application;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new EditDeleteDataVM(mApplication);
+        return (T) new MakerSearchCriteriaVM(mApplication);
     }
 }

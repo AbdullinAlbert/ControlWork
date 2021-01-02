@@ -19,19 +19,19 @@ import com.albertabdullin.controlwork.recycler_views.selection_trackers.EntityFo
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyVeiwHolder> implements RecyclerViewObservable{
+public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyViewHolder> implements RecyclerViewObservable{
     private List<SimpleEntityForDB> listOfEntities;
     private RecyclerViewObserver observer;
     private SelectionTracker selectionTracker;
     private ActionMode actionMode;
 
-    public class MyVeiwHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView description;
         private TextView id;
         private ImageView imageView;
         private View itemView;
 
-        public MyVeiwHolder(View v) {
+        public MyViewHolder(View v) {
             super(v);
             itemView = v;
             description = v.findViewById(R.id.item_description);
@@ -86,17 +86,17 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
 
     @NonNull
     @Override
-    public MyVeiwHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_of_item_from_db_for_rv, parent, false);
-        return new MyVeiwHolder(view);
+        return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyVeiwHolder holder, int position) { }
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) { }
 
     @Override
-    public void onBindViewHolder(@NonNull MyVeiwHolder holder, int position, @NonNull List<Object> payloads) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull List<Object> payloads) {
         holder.setActivatedState(selectionTracker.isSelected(listOfEntities.get(position)));
         holder.getDescription().setText(listOfEntities.get(position).getDescription());
         holder.getID().setText("id: " + Integer.toString(listOfEntities.get(position).getID()));

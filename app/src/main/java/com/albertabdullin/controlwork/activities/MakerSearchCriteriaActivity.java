@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
-import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryEditDeleteData;
+import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCriteria;
 
 public class MakerSearchCriteriaActivity extends AppCompatActivity {
     private static MakerSearchCriteriaVM model;
@@ -38,14 +38,14 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_delete_data);
-        model = new ViewModelProvider(this, new ViewModelFactoryEditDeleteData(this.getApplication())).get(MakerSearchCriteriaVM.class);
+        setContentView(R.layout.layout_maker_search_criteria_activity);
+        model = new ViewModelProvider(this, new ViewModelFactoryMakerSearchCriteria(this.getApplication())).get(MakerSearchCriteriaVM.class);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        SearchCriteriaFragment searchCriteriaFragment = (SearchCriteriaFragment) getSupportFragmentManager().findFragmentByTag("edit_delete_fragment");
+        SearchCriteriaFragment searchCriteriaFragment = (SearchCriteriaFragment) getSupportFragmentManager().findFragmentByTag("maker_search_criteria_fragment");
         if (searchCriteriaFragment == null) {
             searchCriteriaFragment = new SearchCriteriaFragment();
-            transaction.add(R.id.container_for_edit_delete_fragment, searchCriteriaFragment, "edit_delete_fragment");
-        } else transaction.replace(R.id.container_for_edit_delete_fragment, searchCriteriaFragment, "edit_delete_fragment");
+            transaction.add(R.id.container_for_maker_search_criteria_fragment, searchCriteriaFragment, "maker_search_criteria_fragment");
+        } else transaction.replace(R.id.container_for_maker_search_criteria_fragment, searchCriteriaFragment, "maker_search_criteria_fragment");
         transaction.commit();
     }
 

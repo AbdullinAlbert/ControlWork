@@ -6,5 +6,6 @@
     <color name="checkImage">#19E821</color>
     <color name="standardBlack">#000000</color>
     <color name="standardWhite">#FFFFFF</color>
-    <color name="highliteBorder">#D50404</color>
+    <color name="highlightBorder">#D50404</color>
+    <color name="backgroundColorOfActivity">#fffafafa</color>
 </resources>

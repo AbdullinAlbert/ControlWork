@@ -19,6 +19,12 @@
             android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
             />
         <activity
+            android:name=".activities.EditDeleteDataActivity"
+            android:label="Результаты поиска"
+            android:theme="@style/AppTheme"
+            android:parentActivityName="com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity"
+            />
+        <activity
             android:name=".activities.MakerSearchCriteriaActivity"
             android:label="Критерии поиска"
             android:theme="@style/SecondAppTheme"

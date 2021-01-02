@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,6 +21,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
+import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -36,6 +39,8 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     public static final int NUMBERS_VALUE = 4;
     public static final int DATES_VALUE = 5;
     public static final int NOTES_VALUE = 6;
+
+    public static final String KEY_FOR_QUERY = "key for query";
 
     private EditText selectedDateEditText;
     private EditText selectedNumberEditText;
@@ -197,6 +202,9 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             @Override
             public void onClick(View v) {
                String query = model.getQuery();
+                Intent intent = new Intent(requireActivity(), EditDeleteDataActivity.class);
+                intent.putExtra(KEY_FOR_QUERY, query);
+                startActivity(intent);
             }
         });
     }

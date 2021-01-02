@@ -239,8 +239,8 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                 default:
                     throw new RuntimeException("Опечатка в константах некорректно заполненных полей");
             }
-            editText.setBackgroundTintList(getColorStateList(R.color.highliteBorder));
-            editText.setTextColor(getResources().getColor(R.color.highliteBorder, null));
+            editText.setBackgroundTintList(getColorStateList(R.color.highlightBorder));
+            editText.setTextColor(getResources().getColor(R.color.highlightBorder, null));
         }
     };
 
