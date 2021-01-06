@@ -1,5 +1,6 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;

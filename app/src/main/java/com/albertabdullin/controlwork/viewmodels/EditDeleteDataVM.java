@@ -19,6 +19,7 @@ import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
+import com.albertabdullin.controlwork.models.PairOfItemPositions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +27,15 @@ import java.util.List;
 public class EditDeleteDataVM extends AndroidViewModel {
     private String mQuery;
     private boolean isNeedSearch;
-    private List<ComplexEntityForDB> listForWorkWithDB = new ArrayList<>();
+    private PairOfItemPositions pairOfItemPositions;
+    private final List<ComplexEntityForDB> listForWorkWithDB = new ArrayList<>();
     private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerView;
     private MutableLiveData<Integer> visibleOfProgressBar;
     private MutableLiveData<String> employeeEditTextLD;
     private MutableLiveData<String> firmEditTextLD;
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
+    private MutableLiveData<PairOfItemPositions> changerColorOfViewHolderLD;
 
     public EditDeleteDataVM(@NonNull Application application) {
         super(application);
@@ -119,6 +122,11 @@ public class EditDeleteDataVM extends AndroidViewModel {
         return typeOfWorkEditTextLD;
     }
 
+    public LiveData<PairOfItemPositions> getChangerColorOfViewHolder() {
+        if (changerColorOfViewHolderLD == null) changerColorOfViewHolderLD = new MutableLiveData<>();
+        return changerColorOfViewHolderLD;
+    }
+
     public void notifyAboutLoadItems() {
         visibleOfProgressBar.setValue(View.GONE);
         stateOfRecyclerView.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
@@ -138,6 +146,22 @@ public class EditDeleteDataVM extends AndroidViewModel {
         firmEditTextLD.setValue(listForWorkWithDB.get(i).getFirmDescription());
         typeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getTOWDescription());
         placeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getPOWDescription());
+    }
+
+    public void changeColorOfPreviousSelectedItem(PairOfItemPositions pair) {
+        if (pairOfItemPositions == null) pairOfItemPositions = new PairOfItemPositions(pair);
+        else if (pairOfItemPositions.getNewPos() != pair.getNewPos())
+            pairOfItemPositions.setNewPos(pair);
+        changerColorOfViewHolderLD.setValue(pairOfItemPositions);
+    }
+
+    public void setNullToOldItemPosition() {
+        if (pairOfItemPositions !=null)
+            pairOfItemPositions.setDefaultValueToOldPos();
+    }
+
+    public int getPosOfSelectedItem() {
+        return pairOfItemPositions == null ? -1 : pairOfItemPositions.getNewPos();
     }
 
 }

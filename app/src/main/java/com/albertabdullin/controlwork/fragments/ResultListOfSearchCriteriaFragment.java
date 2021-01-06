@@ -16,13 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
 import com.albertabdullin.controlwork.recycler_views.AdapterForResultListFromQuery;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
 public class ResultListOfSearchCriteriaFragment extends Fragment {
 
     private EditDeleteDataVM mViewModel;
+    private AdapterForResultListFromQuery adapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class ResultListOfSearchCriteriaFragment extends Fragment {
             }
         };
         mViewModel.getVisibleOfProgressBarLD().observe(getViewLifecycleOwner(), observerOfProgressBar);
-        final AdapterForResultListFromQuery adapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, requireContext());
+        adapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, getViewLifecycleOwner(), requireContext());
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView3);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
@@ -58,6 +58,7 @@ public class ResultListOfSearchCriteriaFragment extends Fragment {
             public void onChanged(DeleteDataFragment.StateOfRecyclerView stateOfRecyclerView) {
                 switch (stateOfRecyclerView) {
                     case LOAD:
+                        adapter.initializeArrayOfViews();
                         adapter.notifyDataSetChanged();
                         break;
                 }
@@ -65,5 +66,11 @@ public class ResultListOfSearchCriteriaFragment extends Fragment {
         };
         mViewModel.getStateOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOfStateOfRV);
         mViewModel.initializeResultList();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mViewModel.setNullToOldItemPosition();
     }
 }
