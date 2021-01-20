@@ -17,9 +17,9 @@ import java.util.List;
 
 
 public class AMControllerForListItemsFromDB implements ActionMode.Callback {
-    private SelectionTracker tracker;
-    private AdapterForItemsFromDB adapter;
-    private AppCompatActivity activity;
+    private final SelectionTracker tracker;
+    private final AdapterForItemsFromDB adapter;
+    private final AppCompatActivity activity;
 
     public AMControllerForListItemsFromDB(SelectionTracker tracker, AdapterForItemsFromDB adapter,
                                           AppCompatActivity activity) {

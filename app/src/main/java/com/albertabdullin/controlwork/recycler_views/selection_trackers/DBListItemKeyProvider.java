@@ -9,7 +9,7 @@ import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 
 
 public class DBListItemKeyProvider extends ItemKeyProvider<SimpleEntityForDB> {
-    private AdapterForItemsFromDB adapter;
+    private final AdapterForItemsFromDB adapter;
     public DBListItemKeyProvider(AdapterForItemsFromDB adapter) {
         super(ItemKeyProvider.SCOPE_CACHED);
         this.adapter = adapter;

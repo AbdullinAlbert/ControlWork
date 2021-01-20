@@ -22,7 +22,10 @@ import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.PairOfItemPositions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class EditDeleteDataVM extends AndroidViewModel {
     private String mQuery;
@@ -36,6 +39,7 @@ public class EditDeleteDataVM extends AndroidViewModel {
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
     private MutableLiveData<PairOfItemPositions> changerColorOfViewHolderLD;
+    private Set<Integer> itemsOfST;
 
     public EditDeleteDataVM(@NonNull Application application) {
         super(application);
@@ -142,26 +146,64 @@ public class EditDeleteDataVM extends AndroidViewModel {
     }
 
     public void notifyEditTexts(int i) {
-        employeeEditTextLD.setValue(listForWorkWithDB.get(i).getEmployerDescription());
-        firmEditTextLD.setValue(listForWorkWithDB.get(i).getFirmDescription());
-        typeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getTOWDescription());
-        placeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getPOWDescription());
+        if (i == -1) {
+            employeeEditTextLD.setValue("");
+            firmEditTextLD.setValue("");
+            typeOfWorkEditTextLD.setValue("");
+            placeOfWorkEditTextLD.setValue("");
+        } else {
+            employeeEditTextLD.setValue(listForWorkWithDB.get(i).getEmployerDescription());
+            firmEditTextLD.setValue(listForWorkWithDB.get(i).getFirmDescription());
+            typeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getTOWDescription());
+            placeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getPOWDescription());
+        }
+    }
+
+    public String getValueOfETLD() {
+        return employeeEditTextLD.getValue() == null ? "" : employeeEditTextLD.getValue();
     }
 
     public void changeColorOfPreviousSelectedItem(PairOfItemPositions pair) {
-        if (pairOfItemPositions == null) pairOfItemPositions = new PairOfItemPositions(pair);
+        if (pairOfItemPositions == null) pairOfItemPositions = new PairOfItemPositions(pair.getNewPos());
         else if (pairOfItemPositions.getNewPos() != pair.getNewPos())
             pairOfItemPositions.setNewPos(pair);
         changerColorOfViewHolderLD.setValue(pairOfItemPositions);
     }
 
     public void setNullToOldItemPosition() {
-        if (pairOfItemPositions !=null)
+        if (pairOfItemPositions != null)
             pairOfItemPositions.setDefaultValueToOldPos();
     }
 
     public int getPosOfSelectedItem() {
         return pairOfItemPositions == null ? -1 : pairOfItemPositions.getNewPos();
+    }
+
+    public void setDefaultValueToNewPosOfPair() {
+        pairOfItemPositions.setDefaultValueToNewPos();
+    }
+
+    public void addItemOfST(int position) {
+        if (itemsOfST == null) itemsOfST = new HashSet<>();
+        itemsOfST.add(position);
+    }
+
+    public void removeItemOfST(int position) {
+        if (itemsOfST != null) {
+            itemsOfST.remove(position);
+            if (itemsOfST.size() == 0) itemsOfST = null;
+        }
+    }
+
+    public int getItemsCountOfST() { return itemsOfST == null ? -1 : itemsOfST.size(); }
+
+    public boolean isItemNotSelected(int position) {
+        if (itemsOfST == null) return true;
+        else return !itemsOfST.contains(position);
+    }
+
+    public Iterator<Integer> itemsOfSTsIterator() {
+        return itemsOfST.iterator();
     }
 
 }

@@ -1,6 +1,5 @@
 package com.albertabdullin.controlwork.models;
 
-import android.view.View;
 
 public class PairOfItemPositions {
     private int mNewPos = -1;
@@ -10,12 +9,12 @@ public class PairOfItemPositions {
         this.mNewPos = mNewPos;
     }
 
-    public PairOfItemPositions(PairOfItemPositions pair) {
-        this.mNewPos = pair.getNewPos();
-    }
-
     public int getNewPos() {
         return mNewPos;
+    }
+
+    public void setDefaultValueToNewPos() {
+        mNewPos = -1;
     }
 
     public void setNewPos(PairOfItemPositions pair) {

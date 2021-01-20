@@ -20,16 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyViewHolder> implements RecyclerViewObservable{
-    private List<SimpleEntityForDB> listOfEntities;
+    private final List<SimpleEntityForDB> listOfEntities;
     private RecyclerViewObserver observer;
     private SelectionTracker selectionTracker;
     private ActionMode actionMode;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView description;
-        private TextView id;
-        private ImageView imageView;
-        private View itemView;
+        private final TextView description;
+        private final TextView id;
+        private final ImageView imageView;
+        private final View itemView;
 
         public MyViewHolder(View v) {
             super(v);
@@ -60,7 +60,7 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
 
         public void setActivatedState(boolean b) {
             itemView.setActivated(b);
-            if(b) imageView.setVisibility(View.VISIBLE);
+            if (b) imageView.setVisibility(View.VISIBLE);
                 else imageView.setVisibility(View.INVISIBLE);
         }
 
@@ -99,7 +99,8 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull List<Object> payloads) {
         holder.setActivatedState(selectionTracker.isSelected(listOfEntities.get(position)));
         holder.getDescription().setText(listOfEntities.get(position).getDescription());
-        holder.getID().setText("id: " + Integer.toString(listOfEntities.get(position).getID()));
+        String text = "id: " + listOfEntities.get(position).getID();
+        holder.getID().setText(text);
     }
 
     @Override
@@ -107,6 +108,6 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
         return listOfEntities.size();
     }
 
-    public List<SimpleEntityForDB> getCopyListOfEntities() { return new ArrayList<SimpleEntityForDB>(listOfEntities); }
+    public List<SimpleEntityForDB> getCopyListOfEntities() { return new ArrayList<>(listOfEntities); }
 
 }

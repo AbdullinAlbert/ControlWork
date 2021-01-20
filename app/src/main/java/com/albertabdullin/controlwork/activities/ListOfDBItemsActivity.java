@@ -81,21 +81,21 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
 
     };
 
-    private SelectionTracker.SelectionObserver<Long> selectionObserver = new SelectionTracker.SelectionObserver<Long>() {
+    private final SelectionTracker.SelectionObserver<Long> selectionObserver = new SelectionTracker.SelectionObserver<Long>() {
         @Override
         public void onSelectionChanged() {
-            if(selectionTracker.hasSelection() && actionMode == null) {
+            if (selectionTracker.hasSelection() && actionMode == null) {
                 actionMode = startSupportActionMode(new AMControllerForListItemsFromDB(selectionTracker, adapterForItemsFromDB,
                         ListOfDBItemsActivity.this));
                 adapterForItemsFromDB.setActionMode(actionMode);
                 setSelectedTitle(selectionTracker.getSelection().size());
                 fab.hide();
-            }else if(!selectionTracker.hasSelection() && actionMode != null) {
+            } else if(!selectionTracker.hasSelection() && actionMode != null) {
                 actionMode.finish();
                 actionMode = null;
                 adapterForItemsFromDB.setActionMode(null);
                 fab.show();
-            }else setSelectedTitle(selectionTracker.getSelection().size());
+            } else setSelectedTitle(selectionTracker.getSelection().size());
         }
 
         private void setSelectedTitle(int i) {

@@ -1,9 +1,12 @@
 package com.albertabdullin.controlwork.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ComplexEntityForDB {
+public class ComplexEntityForDB implements Parcelable {
     private String mID;
     private int mEmployerID;
     private String mEmployerDescription;
@@ -16,6 +19,35 @@ public class ComplexEntityForDB {
     private String mDate;
     private String mResult;
     private String mNote;
+
+    public ComplexEntityForDB() {}
+
+    protected ComplexEntityForDB(Parcel in) {
+        mID = in.readString();
+        mEmployerID = in.readInt();
+        mEmployerDescription = in.readString();
+        mFirmID = in.readInt();
+        mFirmDescription = in.readString();
+        mPlaceOfWorkID = in.readInt();
+        mPOWDescription = in.readString();
+        mTypeOfWorkID = in.readInt();
+        mTOWDescription = in.readString();
+        mDate = in.readString();
+        mResult = in.readString();
+        mNote = in.readString();
+    }
+
+    public static final Creator<ComplexEntityForDB> CREATOR = new Creator<ComplexEntityForDB>() {
+        @Override
+        public ComplexEntityForDB createFromParcel(Parcel in) {
+            return new ComplexEntityForDB(in);
+        }
+
+        @Override
+        public ComplexEntityForDB[] newArray(int size) {
+            return new ComplexEntityForDB[size];
+        }
+    };
 
     public String getID() {
         return mID;
@@ -115,5 +147,26 @@ public class ComplexEntityForDB {
 
     public void setNote(String mNote) {
         this.mNote = mNote;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mID);
+        dest.writeInt(mEmployerID);
+        dest.writeString(mEmployerDescription);
+        dest.writeInt(mFirmID);
+        dest.writeString(mFirmDescription);
+        dest.writeInt(mPlaceOfWorkID);
+        dest.writeString(mPOWDescription);
+        dest.writeInt(mTypeOfWorkID);
+        dest.writeString(mTOWDescription);
+        dest.writeString(mDate);
+        dest.writeString(mResult);
+        dest.writeString(mNote);
     }
 }

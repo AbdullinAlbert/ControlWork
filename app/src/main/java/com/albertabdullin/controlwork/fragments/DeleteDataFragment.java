@@ -1,36 +1,70 @@
 package com.albertabdullin.controlwork.fragments;
 
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.models.ComplexEntityForDB;
+import com.albertabdullin.controlwork.recycler_views.AdapterForResultListFromQuery;
+import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForResultListItemsFromDB;
+import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBResultListItemLookup;
+import com.albertabdullin.controlwork.recycler_views.selection_trackers.ItemFromResultListKeyProvider;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
-import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 public class DeleteDataFragment extends Fragment {
 
-    public enum StateOfRecyclerView {
-        LOAD, ADD, DELETE, UPDATE;
-    }
+    private SelectionTracker<ComplexEntityForDB> mTracker;
+    private ActionMode mActionMode;
+    private AdapterForResultListFromQuery mAdapter;
+    private EditDeleteDataVM mViewModel;
 
-    private EditDeleteDataVM viewModel;
+    private final SelectionTracker.SelectionObserver<ComplexEntityForDB> selectionObserver =
+            new SelectionTracker.SelectionObserver<ComplexEntityForDB>() {
+                @Override
+                public void onSelectionChanged() {
+                    if (mTracker.hasSelection() && mActionMode == null) {
+                        mActionMode = ((AppCompatActivity)requireActivity())
+                                .startSupportActionMode(new AMControllerForResultListItemsFromDB(mTracker, mAdapter,
+                                        (AppCompatActivity)requireActivity()));
+                        setSelectedTitle(mTracker.getSelection().size());
+                    } else if (!mTracker.hasSelection() && mActionMode != null) {
+                        mActionMode.finish();
+                        mActionMode = null;
+                    } else setSelectedTitle(mTracker.getSelection().size());
+                }
+
+                private void setSelectedTitle(int size) {
+                    if(mActionMode != null) mActionMode.setTitle(Integer.toString(size));
+                }
+            };
+
+    public enum StateOfRecyclerView {
+        LOAD, DELETE, UPDATE;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
-        viewModel.setQuery(requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY));
+        mViewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        mViewModel.setQuery(requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY));
     }
 
     @Nullable
@@ -69,19 +103,61 @@ public class DeleteDataFragment extends Fragment {
         };
         Observer<String> observerOfToWET = new Observer<String>() {
             @Override
-            public void onChanged(String s) {
-                typeOfWorkEditText.setText(s);
+            public void onChanged(String s) { typeOfWorkEditText.setText(s);
             }
         };
         Observer<String> observerOfPoWET = new Observer<String>() {
             @Override
-            public void onChanged(String s) {
-                placeOfWorkEditText.setText(s);
+            public void onChanged(String s) { placeOfWorkEditText.setText(s);
             }
         };
-        viewModel.getEmployeeEditTextLD().observe(getViewLifecycleOwner(), observerOfEmployeeET);
-        viewModel.getFirmEditTextLD().observe(getViewLifecycleOwner(), observerOfFirmET);
-        viewModel.getTOWEditTextLD().observe(getViewLifecycleOwner(), observerOfToWET);
-        viewModel.getPOWEditTextLD().observe(getViewLifecycleOwner(), observerOfPoWET);
+        mViewModel.getEmployeeEditTextLD().observe(getViewLifecycleOwner(), observerOfEmployeeET);
+        mViewModel.getFirmEditTextLD().observe(getViewLifecycleOwner(), observerOfFirmET);
+        mViewModel.getTOWEditTextLD().observe(getViewLifecycleOwner(), observerOfToWET);
+        mViewModel.getPOWEditTextLD().observe(getViewLifecycleOwner(), observerOfPoWET);
+        final ProgressBar progressBar = view.findViewById(R.id.progressBar);
+        Observer<Integer> observerOfProgressBar = new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) { progressBar.setVisibility(integer); }
+        };
+        mViewModel.getVisibleOfProgressBarLD().observe(getViewLifecycleOwner(), observerOfProgressBar);
+        mAdapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, getViewLifecycleOwner(), this);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView3);
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
+        DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(divider);
+        Observer<DeleteDataFragment.StateOfRecyclerView> observerOfStateOfRV = new Observer<DeleteDataFragment.StateOfRecyclerView>() {
+            @Override
+            public void onChanged(DeleteDataFragment.StateOfRecyclerView stateOfRecyclerView) {
+                switch (stateOfRecyclerView) {
+                    case LOAD:
+                        mAdapter.initializeArrayOfViews();
+                        mAdapter.notifyDataSetChanged();
+                        break;
+                }
+            }
+        };
+        mViewModel.getStateOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOfStateOfRV);
+        mViewModel.initializeResultList();
+        mTracker = new SelectionTracker.Builder<>(
+                "resultListItems",
+                recyclerView,
+                new ItemFromResultListKeyProvider(mAdapter),
+                new DBResultListItemLookup(recyclerView),
+                StorageStrategy.createParcelableStorage(ComplexEntityForDB.class)
+        ).build();
+        mAdapter.setSelectionTracker(mTracker);
+        mTracker.addObserver(selectionObserver);
+        if (savedInstanceState != null)
+            mTracker.onRestoreInstanceState(savedInstanceState);
     }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mTracker.onSaveInstanceState(outState);
+        mViewModel.setNullToOldItemPosition();
+    }
+
 }
