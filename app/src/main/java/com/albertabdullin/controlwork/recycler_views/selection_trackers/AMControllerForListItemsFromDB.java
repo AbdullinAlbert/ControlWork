@@ -1,27 +1,33 @@
 package com.albertabdullin.controlwork.recycler_views.selection_trackers;
 
+import android.os.Parcel;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.fragments.DeleteDataDF;
+import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
+import com.albertabdullin.controlwork.fragments.CommonDeleteDataDF;
+import com.albertabdullin.controlwork.fragments.ButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.UpdateDataDF;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
 public class AMControllerForListItemsFromDB implements ActionMode.Callback {
-    private final SelectionTracker tracker;
+    private final SelectionTracker<SimpleEntityForDB> tracker;
     private final AdapterForItemsFromDB adapter;
     private final AppCompatActivity activity;
 
-    public AMControllerForListItemsFromDB(SelectionTracker tracker, AdapterForItemsFromDB adapter,
+    public AMControllerForListItemsFromDB(SelectionTracker<SimpleEntityForDB> tracker, AdapterForItemsFromDB adapter,
                                           AppCompatActivity activity) {
         this.tracker = tracker;
         this.adapter = adapter;
@@ -51,8 +57,30 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                     if(!tracker.isSelected(list.get(i))) tracker.select(list.get(i));
                 return true;
             case (R.id.action_delete_item):
-                DeleteDataDF wdf = new DeleteDataDF();
-                wdf.show(activity.getSupportFragmentManager(), "deleteData");
+                CommonDeleteDataDF commonDeleteDataDF = new CommonDeleteDataDF();
+                String header = activity.getResources().getString(R.string.header_of_delete_dialog_fragment) + " " + tracker.getSelection().size();
+                commonDeleteDataDF.setHeader(header);
+                String mainText;
+                if(tracker.getSelection().size() == 1) {
+                    Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
+                    mainText = "Вы действительно хотите удалить " + iterator.next().getDescription();
+                    commonDeleteDataDF.setMainText(mainText);
+                }
+                commonDeleteDataDF.setExecutor(new ButtonClickExecutor() {
+                    @Override
+                    public void executeYesButtonClick(AppCompatActivity appCompatActivity) {
+                        SelectionTracker<SimpleEntityForDB> localTracker = ((ListOfDBItemsActivity) appCompatActivity).getSelectionTracker();
+                        Iterator<SimpleEntityForDB> iterator = localTracker.getSelection().iterator();
+                        List<SimpleEntityForDB> deletedItemsList = new ArrayList<>();
+                        while (iterator.hasNext()) deletedItemsList.add(iterator.next());
+                        ((ListOfDBItemsActivity) appCompatActivity).getViewModel().deleteItem(deletedItemsList);
+                        localTracker.clearSelection();
+                    }
+                    @Override
+                    public void executeNoButtonClick(AppCompatActivity appCompatActivity) {
+                    }
+                });
+                commonDeleteDataDF.show(activity.getSupportFragmentManager(), "deleteData");
                 return true;
             case (R.id.action_rename_item):
                 UpdateDataDF udf = new UpdateDataDF();

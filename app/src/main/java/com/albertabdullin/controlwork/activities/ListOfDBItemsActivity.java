@@ -52,7 +52,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     public static final int NOT_OK = 6;
     private AdapterForItemsFromDB adapterForItemsFromDB;
     private static ListOfItemsVM model;
-    private SelectionTracker selectionTracker;
+    private SelectionTracker<SimpleEntityForDB> selectionTracker;
     private ActionMode actionMode = null;
     private FloatingActionButton fab;
 
@@ -63,12 +63,10 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
                     model.notifyAboutAddItem();
                     break;
                 case DELETE:
-                    if (msg.arg1 == OK) model.notifyAboutDeleteItem(true);
-                    else model.notifyAboutDeleteItem(false);
+                    model.notifyAboutDeleteItem(msg.arg1 == OK);
                     break;
                 case UPDATE:
-                    if (msg.arg1 == OK) model.notifyAboutUpdateItem(true);
-                    else model.notifyAboutUpdateItem(false);
+                    model.notifyAboutUpdateItem(msg.arg1 == OK);
                     break;
                 case LOAD:
                     model.notifyAboutLoadItems();
@@ -81,7 +79,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
 
     };
 
-    private final SelectionTracker.SelectionObserver<Long> selectionObserver = new SelectionTracker.SelectionObserver<Long>() {
+    private final SelectionTracker.SelectionObserver<SimpleEntityForDB> selectionObserver = new SelectionTracker.SelectionObserver<SimpleEntityForDB>() {
         @Override
         public void onSelectionChanged() {
             if (selectionTracker.hasSelection() && actionMode == null) {
@@ -308,7 +306,10 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         fab.show();
     }
 
-    public SelectionTracker getSelectionTracker() {
+    public ListOfItemsVM getViewModel() { return model; }
+
+
+    public SelectionTracker<SimpleEntityForDB> getSelectionTracker() {
         return selectionTracker;
     }
 

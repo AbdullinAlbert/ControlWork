@@ -15,26 +15,31 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
-import com.albertabdullin.controlwork.models.SimpleEntityForDB;
-import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+public class CommonDeleteDataDF extends DialogFragment {
+    private String mHeader;
+    private String mMainText;
+    private ButtonClickExecutor mButtonClickExecutor;
+    private final String KEY_FOR_HEADER = "key for header";
+    private final String KEY_FOR_MAIN_TEXT = "key for main text";
+    private final String KEY_FOR_EXECUTOR = "key for executor";
 
-public class DeleteDataDF extends DialogFragment {
-    private ListOfItemsVM viewModel;
+    public CommonDeleteDataDF() {}
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(ListOfItemsVM.class);
+        if (savedInstanceState != null) {
+            mHeader = savedInstanceState.getString(KEY_FOR_HEADER);
+            mMainText = savedInstanceState.getString(KEY_FOR_MAIN_TEXT);
+            mButtonClickExecutor = savedInstanceState.getParcelable(KEY_FOR_EXECUTOR);
+        }
     }
 
     @NonNull
@@ -54,38 +59,43 @@ public class DeleteDataDF extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        TextView tvSelectSize = view.findViewById(R.id.DeleteDFSelectSize);
-        TextView tvQuestion = view.findViewById(R.id.DeleteDFQuestion);
-        final SelectionTracker tracker = ((ListOfDBItemsActivity) requireActivity()).getSelectionTracker();
-        tvSelectSize.setText("Выбрано записей: " + tracker.getSelection().size());
-        if(tracker.getSelection().size() == 1) {
-            Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
-            String description = iterator.next().getDescription();
-            tvQuestion.setText("Вы действительно хотите удалить " + description + "?");
-        }
+        TextView tvHeader = view.findViewById(R.id.DeleteDFSelectSize);
+        TextView tvMainText = view.findViewById(R.id.DeleteDFQuestion);
+        if (mHeader != null) tvHeader.setText(mHeader);
+        if (mMainText != null) tvMainText.setText(mMainText);
         Button bYES = view.findViewById(R.id.DeleteDFButtonYES);
         Button bNO = view.findViewById(R.id.DeleteDFButtonNO);
         bYES.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
-                List<SimpleEntityForDB> deletedItemsList = new ArrayList<>();
-                while (iterator.hasNext()) deletedItemsList.add(iterator.next());
-                viewModel.deleteItem(deletedItemsList);
-                tracker.clearSelection();
-                getDialog().dismiss();
+                mButtonClickExecutor.executeYesButtonClick((AppCompatActivity) requireActivity());
+                requireDialog().dismiss();
             }
         });
         bNO.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { getDialog().dismiss(); }
+            public void onClick(View v) {
+                mButtonClickExecutor.executeNoButtonClick((AppCompatActivity) requireActivity());
+                requireDialog().dismiss();
+            }
         });
+    }
+
+    public void setHeader(String mHeader) {
+        this.mHeader = mHeader;
+    }
+
+    public void setMainText(String mMainText) {
+        this.mMainText = mMainText;
+    }
+
+    public void setExecutor(ButtonClickExecutor executor) {
+        mButtonClickExecutor = executor;
     }
 
     @Override
     public void onResume() {
-        Window window = getDialog().getWindow();
+        Window window = requireDialog().getWindow();
         Point size = new Point();
         Display display = window.getWindowManager().getDefaultDisplay();
         display.getSize(size);
@@ -93,4 +103,13 @@ public class DeleteDataDF extends DialogFragment {
         window.setGravity(Gravity.CENTER);
         super.onResume();
     }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(KEY_FOR_EXECUTOR, mButtonClickExecutor);
+        outState.putString(KEY_FOR_HEADER, mHeader);
+        outState.putString(KEY_FOR_MAIN_TEXT, mMainText);
+    }
 }
+

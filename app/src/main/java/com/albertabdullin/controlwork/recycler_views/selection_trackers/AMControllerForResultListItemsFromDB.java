@@ -8,8 +8,6 @@ import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.fragments.DeleteDataDF;
-import com.albertabdullin.controlwork.fragments.UpdateDataDF;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForResultListFromQuery;
 
@@ -20,7 +18,6 @@ public class AMControllerForResultListItemsFromDB implements ActionMode.Callback
     private final SelectionTracker<ComplexEntityForDB> mTracker;
     private final AdapterForResultListFromQuery mAdapter;
     private final AppCompatActivity mActivity;
-    private Menu mMenu;
 
     public AMControllerForResultListItemsFromDB(SelectionTracker<ComplexEntityForDB> tracker,
                                                 AdapterForResultListFromQuery adapter,
@@ -32,7 +29,6 @@ public class AMControllerForResultListItemsFromDB implements ActionMode.Callback
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        mMenu = menu;
         mode.getMenuInflater().inflate(R.menu.actions_for_result_list_items, menu);
         return true;
     }
@@ -53,8 +49,6 @@ public class AMControllerForResultListItemsFromDB implements ActionMode.Callback
                 }
                 return true;
             case (R.id.action_delete_item):
-                DeleteDataDF wdf = new DeleteDataDF();
-                wdf.show(mActivity.getSupportFragmentManager(), "deleteData");
                 return true;
             default: return false;
         }

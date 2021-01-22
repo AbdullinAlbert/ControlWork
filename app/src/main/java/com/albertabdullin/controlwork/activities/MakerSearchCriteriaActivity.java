@@ -49,4 +49,8 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    public MakerSearchCriteriaVM getViewModel() {
+        return model;
+    }
+
 }

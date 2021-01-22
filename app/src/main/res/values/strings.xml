@@ -45,4 +45,5 @@
     <string name="column_name_of_res">Результат</string>
     <string name="column_name_of_note">Примечание</string>
     <string name="title_for_delete_data_fragment_toolbar">Результат поиска</string>
+    <string name="header_of_delete_dialog_fragment">Выбрано записей:</string>
 </resources>

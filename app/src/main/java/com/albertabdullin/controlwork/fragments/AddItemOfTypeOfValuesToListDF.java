@@ -14,6 +14,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
 import com.albertabdullin.controlwork.recycler_views.AdapterForListOfTypeOfValues;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -87,8 +89,51 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
         deleteImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DeleteSearchCriteriaDF deleteSearchCriteriaDF = new DeleteSearchCriteriaDF(mTypeOfValue, mSign);
-                deleteSearchCriteriaDF.show(requireActivity().getSupportFragmentManager(), "delete_item_df");
+                CommonDeleteDataDF commonDeleteDataDF = new CommonDeleteDataDF();
+                int count = model.getListOfSelectedPositionForDeleteSign(mTypeOfValue, mSign).size();
+                String header = getResources().getString(R.string.header_of_delete_dialog_fragment) + " " + count;
+                commonDeleteDataDF.setHeader(header);
+                if(count == 1) {
+                    String mainText = "Вы действительно хотите удалить ";
+                    int pos = model.getListOfSelectedPositionForDeleteSign(mTypeOfValue, mSign).get(0);
+                    switch (mTypeOfValue) {
+                        case SearchCriteriaFragment.DATES_VALUE:
+                            mainText += model.getAdapterListOfCurrentSignForDate(mSign).get(pos);
+                            break;
+                        case SearchCriteriaFragment.NUMBERS_VALUE:
+                            mainText += model.getAdapterListOfCurrentSignForNumber(mSign).get(pos);
+                            break;
+                        case SearchCriteriaFragment.NOTES_VALUE:
+                            mainText += model.getAdapterListOfCurrentSignForNote(mSign).get(pos);
+                            break;
+                        default:
+                            throw new RuntimeException("Опечатка в константах. Вызов удаления элементов списка. mTypeOfValue =" + mTypeOfValue);
+                    }
+                    commonDeleteDataDF.setMainText(mainText);
+                }
+                commonDeleteDataDF.setExecutor(new ButtonClickExecutor() {
+                    @Override
+                    public void executeYesButtonClick(AppCompatActivity appCompatActivity) {
+                        switch (mTypeOfValue) {
+                            case SearchCriteriaFragment.DATES_VALUE:
+                                ((MakerSearchCriteriaActivity)appCompatActivity).getViewModel().deleteSearchCriteriaValueForDate(mSign);
+                                break;
+                            case SearchCriteriaFragment.NUMBERS_VALUE:
+                                ((MakerSearchCriteriaActivity)appCompatActivity).getViewModel().deleteSearchCriteriaValueForNumber(mSign);
+                                break;
+                            case SearchCriteriaFragment.NOTES_VALUE:
+                                ((MakerSearchCriteriaActivity)appCompatActivity).getViewModel().deleteSearchCriteriaValueForNote(mSign);
+                                break;
+                            default:
+                                throw new RuntimeException("Опечатка в константах. Метод void executeYesButtonClick. mTypeOfValue =" + mTypeOfValue);
+                        }
+                    }
+
+                    @Override
+                    public void executeNoButtonClick(AppCompatActivity appCompatActivity) {
+                    }
+                });
+                commonDeleteDataDF.show(requireActivity().getSupportFragmentManager(), "delete_item_df");
             }
         });
         Observer<Boolean> observerOfDeleteImage = new Observer<Boolean>() {

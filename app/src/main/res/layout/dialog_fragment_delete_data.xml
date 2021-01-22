@@ -8,7 +8,6 @@
         android:id="@+id/DeleteDFSelectSize"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"
         android:padding="8dp"
         android:textSize="20sp"
         android:background="@color/colorPrimary"
