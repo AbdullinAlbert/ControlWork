@@ -12,10 +12,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
+import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCriteria;
 
-public class MakerSearchCriteriaActivity extends AppCompatActivity {
+public class MakerSearchCriteriaActivity extends AppCompatActivity implements ProviderOfHolderFragmentState{
     private static MakerSearchCriteriaVM model;
 
     public static final int LIST_OF_ENTITIES_IS_READY = 0;
@@ -49,8 +50,8 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    public MakerSearchCriteriaVM getViewModel() {
+    @Override
+    public DialogFragmentStateHolder getHolder() {
         return model;
     }
-
 }

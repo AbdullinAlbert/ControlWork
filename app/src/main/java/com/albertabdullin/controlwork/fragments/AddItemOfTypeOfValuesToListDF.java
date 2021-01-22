@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,7 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
+import com.albertabdullin.controlwork.activities.ProviderOfHolderFragmentState;
 import com.albertabdullin.controlwork.recycler_views.AdapterForListOfTypeOfValues;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -111,18 +112,21 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                     }
                     commonDeleteDataDF.setMainText(mainText);
                 }
-                commonDeleteDataDF.setExecutor(new ButtonClickExecutor() {
+                commonDeleteDataDF.setExecutor(new DeleteDataButtonClickExecutor() {
                     @Override
                     public void executeYesButtonClick(AppCompatActivity appCompatActivity) {
                         switch (mTypeOfValue) {
                             case SearchCriteriaFragment.DATES_VALUE:
-                                ((MakerSearchCriteriaActivity)appCompatActivity).getViewModel().deleteSearchCriteriaValueForDate(mSign);
+                                ((MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)appCompatActivity).getHolder())
+                                        .deleteSearchCriteriaValueForDate(mSign);
                                 break;
                             case SearchCriteriaFragment.NUMBERS_VALUE:
-                                ((MakerSearchCriteriaActivity)appCompatActivity).getViewModel().deleteSearchCriteriaValueForNumber(mSign);
+                                ((MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)appCompatActivity).getHolder())
+                                        .deleteSearchCriteriaValueForNumber(mSign);
                                 break;
                             case SearchCriteriaFragment.NOTES_VALUE:
-                                ((MakerSearchCriteriaActivity)appCompatActivity).getViewModel().deleteSearchCriteriaValueForNote(mSign);
+                                ((MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)appCompatActivity).getHolder())
+                                        .deleteSearchCriteriaValueForNote(mSign);
                                 break;
                             default:
                                 throw new RuntimeException("Опечатка в константах. Метод void executeYesButtonClick. mTypeOfValue =" + mTypeOfValue);
@@ -285,8 +289,31 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                 else fab.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AddItemOfNumberValueDF addItemOfNumberValueDF = new AddItemOfNumberValueDF(mSign, null);
-                        addItemOfNumberValueDF.show(requireActivity().getSupportFragmentManager(), "add number value");
+                        CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                                .setHint(requireContext().getResources().getString(R.string.hint_for_insert_number_for_search_criteria))
+                                .setInputType(CommonAddDataDF.EditTextInputType.NUMBER_DECIMAL)
+                                .setLengthOfText(getResources().getInteger(R.integer.max_digit_length_of_value))
+                                .setExecutor(new InsertDataButtonClickExecutor() {
+                                    @Override
+                                    public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                                        if (text.length() != 0) {
+                                            MakerSearchCriteriaVM localVM =
+                                                    (MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)activity).getHolder();
+                                            localVM.addItemToNumberList(mSign, text, null);
+                                            localVM.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                                                    localVM.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mSign),
+                                                    Float.parseFloat(text), null);
+                                        } else {
+                                            Toast toast = Toast.makeText(requireContext(),
+                                                    "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }
+                                    @Override
+                                    public void executeNoButtonClick() {
+                                    }
+                                });
+                        commonAddDataDF.show(requireActivity().getSupportFragmentManager(), "newData");
                     }
                 });
                 break;
@@ -294,8 +321,31 @@ public class AddItemOfTypeOfValuesToListDF extends DialogFragment {
                 fab.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AddItemOfNoteValueDF addItemOfNoteValueDF = new AddItemOfNoteValueDF(mSign, null);
-                        addItemOfNoteValueDF.show(requireActivity().getSupportFragmentManager(), "add note value");
+                        CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                                .setHint(requireContext().getResources().getString(R.string.hint_for_insert_number_for_search_criteria))
+                                .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
+                                .setLengthOfText(30)
+                                .setExecutor(new InsertDataButtonClickExecutor() {
+                                    @Override
+                                    public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                                        if (text.length() != 0) {
+                                            MakerSearchCriteriaVM localVM =
+                                                    (MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)activity).getHolder();
+                                            localVM.addItemToNoteList(mSign, text);
+                                            localVM.addSearchCriteria(SearchCriteriaFragment.NOTES_VALUE,
+                                                    localVM.getPositionOfSign(SearchCriteriaFragment.NOTES_VALUE, mSign),
+                                                    text, null);
+                                        } else {
+                                            Toast toast = Toast.makeText(requireContext(),
+                                                    "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }
+                                    @Override
+                                    public void executeNoButtonClick() {
+                                    }
+                                });
+                        commonAddDataDF.show(requireActivity().getSupportFragmentManager(), "newData");
                     }
                 });
                 break;

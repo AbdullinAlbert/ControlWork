@@ -5,16 +5,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.fragments.AddItemOfNoteValueDF;
-import com.albertabdullin.controlwork.fragments.AddItemOfNumberValueDF;
+import com.albertabdullin.controlwork.activities.ProviderOfHolderFragmentState;
 import com.albertabdullin.controlwork.fragments.AddItemOfPairOfNumbersValueDF;
+import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
+import com.albertabdullin.controlwork.fragments.InsertDataButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -24,15 +27,15 @@ import java.util.Calendar;
 import java.util.List;
 
 public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterForListOfTypeOfValues.MyViewHolder>{
-    private List<String> listOfEntities;
-    private MakerSearchCriteriaVM mModel;
-    private String mSign;
-    private FragmentActivity mFragmentActivity;
-    private int mSelectedTypeOfValue;
+    private final List<String> listOfEntities;
+    private final MakerSearchCriteriaVM mModel;
+    private final String mSign;
+    private final FragmentActivity mFragmentActivity;
+    private final int mSelectedTypeOfValue;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView description;
-        private CheckBox checkBox;
+        private final TextView description;
+        private final CheckBox checkBox;
 
         public MyViewHolder(View v) {
             super(v);
@@ -136,8 +139,31 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                 else tv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AddItemOfNumberValueDF addItemOfNumberValueDF = new AddItemOfNumberValueDF(mSign, holder.getCurrentPosition());
-                        addItemOfNumberValueDF.show(mFragmentActivity.getSupportFragmentManager(), "add number value");
+                        CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                                .setHint(mFragmentActivity.getResources().getString(R.string.hint_for_insert_number_for_search_criteria))
+                                .setInputType(CommonAddDataDF.EditTextInputType.NUMBER_DECIMAL)
+                                .setLengthOfText(mFragmentActivity.getResources().getInteger(R.integer.max_digit_length_of_value))
+                                .setTextForEditText(mModel.getValueOfNumber(mSign, holder.getCurrentPosition()))
+                                .setExecutor(new InsertDataButtonClickExecutor() {
+                                    @Override
+                                    public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                                        if (text.length() != 0) {
+                                            MakerSearchCriteriaVM localVM =
+                                                    (MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)activity).getHolder();
+                                            localVM.changeItemToOneNumberList(mSign, holder.getCurrentPosition(), text, null);
+                                            localVM.changeSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE, mSign,
+                                                    holder.getCurrentPosition(), text, null);
+                                        } else {
+                                            Toast toast = Toast.makeText(mFragmentActivity,
+                                                    "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }
+                                    @Override
+                                    public void executeNoButtonClick() {
+                                    }
+                                });
+                        commonAddDataDF.show(mFragmentActivity.getSupportFragmentManager(), "changeData");
                     }
                 });
                 break;
@@ -145,8 +171,31 @@ public class AdapterForListOfTypeOfValues extends RecyclerView.Adapter<AdapterFo
                 tv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AddItemOfNoteValueDF addItemOfNoteValueDF = new AddItemOfNoteValueDF(mSign, holder.getCurrentPosition());
-                        addItemOfNoteValueDF.show(mFragmentActivity.getSupportFragmentManager(), "add note value");
+                        CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                                .setHint(mFragmentActivity.getResources().getString(R.string.hint_for_insert_number_for_search_criteria))
+                                .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
+                                .setLengthOfText(30)
+                                .setTextForEditText(mModel.getValueOfNote(mSign, holder.getCurrentPosition()))
+                                .setExecutor(new InsertDataButtonClickExecutor() {
+                                    @Override
+                                    public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                                        if (text.length() != 0) {
+                                            MakerSearchCriteriaVM localVM =
+                                                    (MakerSearchCriteriaVM)((ProviderOfHolderFragmentState)activity).getHolder();
+                                            localVM.changeItemToNoteList(mSign, holder.getCurrentPosition(), text);
+                                            localVM.changeSearchCriteria(SearchCriteriaFragment.NOTES_VALUE, mSign,
+                                                    holder.getCurrentPosition(), text, null);
+                                        } else {
+                                            Toast toast = Toast.makeText(mFragmentActivity,
+                                                    "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }
+                                    @Override
+                                    public void executeNoButtonClick() {
+                                    }
+                                });
+                        commonAddDataDF.show(mFragmentActivity.getSupportFragmentManager(), "changeData");
                     }
                 });
                 break;

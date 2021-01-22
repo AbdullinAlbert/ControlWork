@@ -1,21 +1,23 @@
 package com.albertabdullin.controlwork.recycler_views.selection_trackers;
 
-import android.os.Parcel;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
+import com.albertabdullin.controlwork.activities.ProviderOfHolderFragmentState;
+import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
 import com.albertabdullin.controlwork.fragments.CommonDeleteDataDF;
-import com.albertabdullin.controlwork.fragments.ButtonClickExecutor;
-import com.albertabdullin.controlwork.fragments.UpdateDataDF;
+import com.albertabdullin.controlwork.fragments.DeleteDataButtonClickExecutor;
+import com.albertabdullin.controlwork.fragments.InsertDataButtonClickExecutor;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
+import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,10 +27,10 @@ import java.util.List;
 public class AMControllerForListItemsFromDB implements ActionMode.Callback {
     private final SelectionTracker<SimpleEntityForDB> tracker;
     private final AdapterForItemsFromDB adapter;
-    private final AppCompatActivity activity;
+    private final ListOfDBItemsActivity activity;
 
     public AMControllerForListItemsFromDB(SelectionTracker<SimpleEntityForDB> tracker, AdapterForItemsFromDB adapter,
-                                          AppCompatActivity activity) {
+                                          ListOfDBItemsActivity activity) {
         this.tracker = tracker;
         this.adapter = adapter;
         this.activity = activity;
@@ -63,17 +65,18 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                 String mainText;
                 if(tracker.getSelection().size() == 1) {
                     Iterator<SimpleEntityForDB> iterator = tracker.getSelection().iterator();
-                    mainText = "Вы действительно хотите удалить " + iterator.next().getDescription();
+                    mainText = "Вы действительно хотите удалить " + iterator.next().getDescription() + " ?";
                     commonDeleteDataDF.setMainText(mainText);
                 }
-                commonDeleteDataDF.setExecutor(new ButtonClickExecutor() {
+                commonDeleteDataDF.setExecutor(new DeleteDataButtonClickExecutor() {
                     @Override
                     public void executeYesButtonClick(AppCompatActivity appCompatActivity) {
                         SelectionTracker<SimpleEntityForDB> localTracker = ((ListOfDBItemsActivity) appCompatActivity).getSelectionTracker();
                         Iterator<SimpleEntityForDB> iterator = localTracker.getSelection().iterator();
                         List<SimpleEntityForDB> deletedItemsList = new ArrayList<>();
                         while (iterator.hasNext()) deletedItemsList.add(iterator.next());
-                        ((ListOfDBItemsActivity) appCompatActivity).getViewModel().deleteItem(deletedItemsList);
+                        ProviderOfHolderFragmentState provider = ((ListOfDBItemsActivity) appCompatActivity);
+                        ((ListOfItemsVM)provider.getHolder()).deleteItem(deletedItemsList);
                         localTracker.clearSelection();
                     }
                     @Override
@@ -83,8 +86,33 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                 commonDeleteDataDF.show(activity.getSupportFragmentManager(), "deleteData");
                 return true;
             case (R.id.action_rename_item):
-                UpdateDataDF udf = new UpdateDataDF();
-                udf.show(activity.getSupportFragmentManager(), "updateData");
+                CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                        .setHint(activity.getHintForDialogFragment())
+                        .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
+                        .setLengthOfText(30)
+                        .setExecutor(new InsertDataButtonClickExecutor() {
+                            @Override
+                            public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                                if (text.length() != 0) {
+                                    SelectionTracker<SimpleEntityForDB> localTracker =
+                                            ((ListOfDBItemsActivity) activity).getSelectionTracker();
+                                    Iterator<SimpleEntityForDB> iterator = localTracker.getSelection().iterator();
+                                    SimpleEntityForDB eDB = iterator.next();
+                                    ProviderOfHolderFragmentState provider = ((ListOfDBItemsActivity) activity);
+                                    ((ListOfItemsVM)provider.getHolder()).updateItem(eDB, text);
+                                    localTracker.clearSelection();
+                                }
+                                else {
+                                    Toast toast = Toast.makeText(activity,
+                                            "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                    toast.show();
+                                }
+                            }
+                            @Override
+                            public void executeNoButtonClick() {
+                            }
+                        });
+                commonAddDataDF.show(activity.getSupportFragmentManager(), "newData");
                 return true;
             default: return false;
         }

@@ -29,12 +29,14 @@ import android.widget.Toast;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.customView.SearchEditText;
+import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
+import com.albertabdullin.controlwork.fragments.InsertDataButtonClickExecutor;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
-import com.albertabdullin.controlwork.fragments.AddDataDF;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemKeyProvider;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemLookUP;
 import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
+import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 import com.albertabdullin.controlwork.recycler_views.RecyclerViewObserver;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryListItems;
@@ -42,7 +44,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
-public class ListOfDBItemsActivity extends AppCompatActivity implements RecyclerViewObserver {
+public class ListOfDBItemsActivity extends AppCompatActivity implements RecyclerViewObserver, ProviderOfHolderFragmentState {
     public static final int ADD = 0;
     public static final int DELETE = 1;
     public static final int UPDATE = 2;
@@ -55,6 +57,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     private SelectionTracker<SimpleEntityForDB> selectionTracker;
     private ActionMode actionMode = null;
     private FloatingActionButton fab;
+    private String hintForDialogFragment;
 
     public static Handler handler = new Handler(Looper.getMainLooper()) {
         public void handleMessage (Message msg) {
@@ -120,18 +123,22 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         switch (getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1)) {
             case FillNewData_Activity.TABLE_OF_EMPLOYERS:
                 toolbar.setTitle("Список сотрудников");
+                hintForDialogFragment = getResources().getString(R.string.hint_firstname_secondname);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_EMPLOYERS);
                 break;
             case FillNewData_Activity.TABLE_OF_FIRMS:
                 toolbar.setTitle("Список фирм");
+                hintForDialogFragment = getResources().getString(R.string.hint_firm);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_FIRMS);
                 break;
             case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
                 toolbar.setTitle("Список типов работы");
+                hintForDialogFragment = getResources().getString(R.string.hint_firm);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_TYPES_OF_WORK);
                 break;
             case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
                 toolbar.setTitle("Список мест работы");
+                hintForDialogFragment = getResources().getString(R.string.hint_place_of_work);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_PLACES_OF_WORK);
                 break;
             default:
@@ -198,8 +205,26 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddDataDF dialogFragment = new AddDataDF();
-                dialogFragment.show(getSupportFragmentManager(), "newData");
+                CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                        .setHint(hintForDialogFragment)
+                        .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
+                        .setLengthOfText(30)
+                        .setExecutor(new InsertDataButtonClickExecutor() {
+                            @Override
+                            public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                                if (text.length() != 0)
+                                    ((ListOfDBItemsActivity)activity).model.addItem(text);
+                                else {
+                                    Toast toast = Toast.makeText(ListOfDBItemsActivity.this,
+                                            "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                    toast.show();
+                                }
+                            }
+                            @Override
+                            public void executeNoButtonClick() {
+                            }
+                        });
+                commonAddDataDF.show(getSupportFragmentManager(), "newData");
             }
         });
     }
@@ -306,11 +331,16 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         fab.show();
     }
 
-    public ListOfItemsVM getViewModel() { return model; }
-
+    public String getHintForDialogFragment() {
+        return hintForDialogFragment;
+    }
 
     public SelectionTracker<SimpleEntityForDB> getSelectionTracker() {
         return selectionTracker;
     }
 
+    @Override
+    public DialogFragmentStateHolder getHolder() {
+        return model;
+    }
 }

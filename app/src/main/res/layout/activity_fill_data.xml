@@ -157,7 +157,7 @@
                 android:id="@+id/add_result_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="10"
+                android:maxLength="@integer/max_digit_length_of_value"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
                 android:backgroundTint="@color/standardBlack" />

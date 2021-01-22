@@ -29,13 +29,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ListOfItemsVM extends AndroidViewModel {
+public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentStateHolder {
     private MutableLiveData<List<SimpleEntityForDB>>  entities;
-    private List<SimpleEntityForDB> adapterListOfEntitiesVM = new ArrayList<>();
+    private final List<SimpleEntityForDB> adapterListOfEntitiesVM = new ArrayList<>();
     private List<SimpleEntityForDB> hListForWorkWithDB;
     private List<SimpleEntityForDB> cacheForAdapterList;
     private List<SimpleEntityForDB> findedItemsList;
-    private List<Integer> listOfDeletedPositions = new ArrayList<>();
+    private final List<Integer> listOfDeletedPositions = new ArrayList<>();
     private SimpleEntityForDB eDB;
     private String newDescription;
     private int updatedPosition;
@@ -367,12 +367,14 @@ public class ListOfItemsVM extends AndroidViewModel {
         return updatedPosition;
     }
 
+    @Override
     public void setActivatedDF(boolean b) {
         activatedDF = b;
     }
 
-    public boolean isActivatedDF() {
-        return activatedDF;
+    @Override
+    public boolean isNotActivatedDF() {
+        return !activatedDF;
     }
 
     public void setItemSearchText(String s) { itemSearchText = s; }

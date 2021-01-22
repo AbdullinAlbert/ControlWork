@@ -39,7 +39,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MakerSearchCriteriaVM extends AndroidViewModel {
+public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFragmentStateHolder {
     private List<SimpleEntityForDB> hListForWorkWithDB;
     private List<SimpleEntityForDB> adapterListOfEmployees;
     private List<SimpleEntityForDB> listOfSelectedEmployees;
@@ -343,10 +343,12 @@ public class MakerSearchCriteriaVM extends AndroidViewModel {
         return adapterListOfNoteForInequalitySignLD;
     }
 
+    @Override
     public boolean isNotActivatedDF() {
-        return activatedDF == false;
+        return !activatedDF;
     }
 
+    @Override
     public void setActivatedDF(boolean b) {
         activatedDF = b;
     }

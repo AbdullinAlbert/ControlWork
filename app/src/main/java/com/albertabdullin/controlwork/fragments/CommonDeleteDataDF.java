@@ -17,15 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 
 public class CommonDeleteDataDF extends DialogFragment {
     private String mHeader;
     private String mMainText;
-    private ButtonClickExecutor mButtonClickExecutor;
+    private DeleteDataButtonClickExecutor mDeleteDataButtonClickExecutor;
     private final String KEY_FOR_HEADER = "key for header";
     private final String KEY_FOR_MAIN_TEXT = "key for main text";
     private final String KEY_FOR_EXECUTOR = "key for executor";
@@ -38,7 +36,7 @@ public class CommonDeleteDataDF extends DialogFragment {
         if (savedInstanceState != null) {
             mHeader = savedInstanceState.getString(KEY_FOR_HEADER);
             mMainText = savedInstanceState.getString(KEY_FOR_MAIN_TEXT);
-            mButtonClickExecutor = savedInstanceState.getParcelable(KEY_FOR_EXECUTOR);
+            mDeleteDataButtonClickExecutor = savedInstanceState.getParcelable(KEY_FOR_EXECUTOR);
         }
     }
 
@@ -68,14 +66,14 @@ public class CommonDeleteDataDF extends DialogFragment {
         bYES.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mButtonClickExecutor.executeYesButtonClick((AppCompatActivity) requireActivity());
+                mDeleteDataButtonClickExecutor.executeYesButtonClick((AppCompatActivity) requireActivity());
                 requireDialog().dismiss();
             }
         });
         bNO.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mButtonClickExecutor.executeNoButtonClick((AppCompatActivity) requireActivity());
+                mDeleteDataButtonClickExecutor.executeNoButtonClick((AppCompatActivity) requireActivity());
                 requireDialog().dismiss();
             }
         });
@@ -89,8 +87,8 @@ public class CommonDeleteDataDF extends DialogFragment {
         this.mMainText = mMainText;
     }
 
-    public void setExecutor(ButtonClickExecutor executor) {
-        mButtonClickExecutor = executor;
+    public void setExecutor(DeleteDataButtonClickExecutor executor) {
+        mDeleteDataButtonClickExecutor = executor;
     }
 
     @Override
@@ -107,7 +105,7 @@ public class CommonDeleteDataDF extends DialogFragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(KEY_FOR_EXECUTOR, mButtonClickExecutor);
+        outState.putParcelable(KEY_FOR_EXECUTOR, mDeleteDataButtonClickExecutor);
         outState.putString(KEY_FOR_HEADER, mHeader);
         outState.putString(KEY_FOR_MAIN_TEXT, mMainText);
     }

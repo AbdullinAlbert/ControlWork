@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public abstract class ButtonClickExecutor implements Parcelable {
+public abstract class DeleteDataButtonClickExecutor implements Parcelable {
 
     public abstract void executeYesButtonClick(AppCompatActivity appCompatActivity);
     public abstract void executeNoButtonClick(AppCompatActivity appCompatActivity);
