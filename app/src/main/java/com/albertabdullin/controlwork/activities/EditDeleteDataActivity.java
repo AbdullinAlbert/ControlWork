@@ -20,9 +20,7 @@ import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryEditDeleteData;
 
 public class EditDeleteDataActivity extends AppCompatActivity implements ProviderOfHolderFragmentState {
-
-    private static EditDeleteDataVM viewModel;
-
+    private EditDeleteDataVM viewModel;
     private static String failDelete;
     private static String failLoad;
 
@@ -45,15 +43,20 @@ public class EditDeleteDataActivity extends AppCompatActivity implements Provide
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_delete_data);
+        viewModel = new ViewModelProvider(this, new ViewModelFactoryEditDeleteData(this.getApplication())).get(EditDeleteDataVM.class);
         failDelete = getResources().getString(R.string.fail_attempt_about_delete_data_from_db);
         failLoad = getResources().getString(R.string.fail_attempt_about_load_data_from_db);
-        viewModel = new ViewModelProvider(this, new ViewModelFactoryEditDeleteData(this.getApplication())).get(EditDeleteDataVM.class);
         DeleteDataFragment deleteDataFragment = (DeleteDataFragment)
-                getSupportFragmentManager().findFragmentByTag(
-                        getResources().getString(R.string.tag_for_delete_data_fragment));
-        EditDataFragment editDataFragment = (EditDataFragment)  getSupportFragmentManager().findFragmentByTag
-                (getResources().getString(R.string.tag_for_edit_data_fragment));
+                getSupportFragmentManager().findFragmentByTag(getResources().getString(R.string.tag_for_delete_data_fragment));
+        EditDataFragment editDataFragment = (EditDataFragment)
+                getSupportFragmentManager().findFragmentByTag(getResources().getString(R.string.tag_for_edit_data_fragment));
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if (editDataFragment != null) {
+            transaction.replace(R.id.container_for_edit_delete_data_fragment, editDataFragment,
+                    getResources().getString(R.string.tag_for_edit_data_fragment));
+            transaction.commit();
+            return;
+        }
         if (deleteDataFragment != null) {
             transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
                     getResources().getString(R.string.tag_for_delete_data_fragment));
@@ -62,11 +65,7 @@ public class EditDeleteDataActivity extends AppCompatActivity implements Provide
             transaction.add(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
                     getResources().getString(R.string.tag_for_delete_data_fragment));
         }
-        if (editDataFragment != null)
-            transaction.replace(R.id.container_for_edit_delete_data_fragment, editDataFragment,
-                    getResources().getString(R.string.tag_for_edit_data_fragment));
         transaction.commit();
-
     }
 
     @Override
