@@ -9,6 +9,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -16,33 +17,49 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
+import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.PairOfItemPositions;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class EditDeleteDataVM extends AndroidViewModel {
+public class EditDeleteDataVM extends AndroidViewModel implements DialogFragmentStateHolder {
     private String mQuery;
     private boolean isNeedSearch;
     private PairOfItemPositions pairOfItemPositions;
     private final List<ComplexEntityForDB> listForWorkWithDB = new ArrayList<>();
     private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerView;
     private MutableLiveData<Integer> visibleOfProgressBar;
+    private MutableLiveData<Integer> visibleOfRecyclerView;
     private MutableLiveData<String> employeeEditTextLD;
     private MutableLiveData<String> firmEditTextLD;
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
     private MutableLiveData<PairOfItemPositions> changerColorOfViewHolderLD;
+    private List<Integer> listOfDeletedRowsFromDB;
     private Set<Integer> itemsOfST;
+    private boolean isActivatedDF = false;
 
     public EditDeleteDataVM(@NonNull Application application) {
         super(application);
+    }
+
+    @Override
+    public void setActivatedDF(boolean b) {
+        isActivatedDF = b;
+    }
+
+    @Override
+    public boolean isNotActivatedDF() {
+        return !isActivatedDF;
     }
 
     private class LoadItemsThread extends Thread {
@@ -96,6 +113,70 @@ public class EditDeleteDataVM extends AndroidViewModel {
         loadItemsThread.start();
     }
 
+    private class DeleteItemThread extends Thread {
+        private final List<ComplexEntityForDB> list;
+
+        public DeleteItemThread(List<ComplexEntityForDB> list) {
+            this.list = list;
+        }
+
+        private String makeWhereClause(int size) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("_id in (");
+            for (int i = 0; i < size-1; i ++) sb.append("?, ");
+            sb.append("?)");
+            return sb.toString();
+        }
+
+        @Override
+        public void run() {
+            int count;
+            if (listOfDeletedRowsFromDB == null) listOfDeletedRowsFromDB = new ArrayList<>();
+            if (listOfDeletedRowsFromDB.size() > 0) listOfDeletedRowsFromDB.clear();
+            for (int i = 0; i < list.size(); i++) listOfDeletedRowsFromDB.add(Integer.parseInt(list.get(i).getID()));
+            String[] arguments = listOfDeletedRowsFromDB.toString().replaceAll("[\\[\\]]", "").split(", ");
+            String whereClause = makeWhereClause(listOfDeletedRowsFromDB.size());
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
+                count = db.delete(CWDBHelper.TABLE_NAME_RESULT, whereClause, arguments);
+            } catch (SQLiteException e) {
+                Toast toast = Toast.makeText(getApplication(), "Something went wrong: DB can't delete data", Toast.LENGTH_SHORT);
+                toast.show();
+                return;
+            }
+            if (count == list.size()) {
+                listForWorkWithDB.removeAll(list);
+                stateOfRecyclerView.postValue(DeleteDataFragment.StateOfRecyclerView.DELETE);
+                visibleOfProgressBar.postValue(View.INVISIBLE);
+                visibleOfRecyclerView.postValue(View.VISIBLE);
+            }
+            else {
+                Message message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.FAIL_ABOUT_DELETE_DATA_FROM_DB);
+                EditDeleteDataActivity.mHandler.sendMessage(message);
+            }
+        }
+    }
+
+    public void deleteItem(List<ComplexEntityForDB> list)  {
+        visibleOfRecyclerView.setValue(View.INVISIBLE);
+        visibleOfProgressBar.setValue(View.VISIBLE);
+        DeleteItemThread deleteItemThread = new DeleteItemThread(list);
+        deleteItemThread.start();
+    }
+
+    public List<Integer> getDeletedPositionsFromDB() {
+        for (int i = 0; i < listOfDeletedRowsFromDB.size(); i++)
+            listOfDeletedRowsFromDB.set(i, (listOfDeletedRowsFromDB.get(i) - 1));
+        Comparator<Integer> comparator = new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return (o1 - o2) * (-1);
+            }
+        };
+        listOfDeletedRowsFromDB.sort(comparator);
+        return listOfDeletedRowsFromDB;
+    }
+
     public LiveData<DeleteDataFragment.StateOfRecyclerView> getStateOfRecyclerViewLD() {
         if (stateOfRecyclerView == null) stateOfRecyclerView = new MutableLiveData<>();
         return stateOfRecyclerView;
@@ -131,8 +212,14 @@ public class EditDeleteDataVM extends AndroidViewModel {
         return changerColorOfViewHolderLD;
     }
 
+    public LiveData<Integer> getVisibleOfRecyclerViewLD() {
+        if (visibleOfRecyclerView == null) visibleOfRecyclerView = new MutableLiveData<>();
+        return visibleOfRecyclerView;
+    }
+
     public void notifyAboutLoadItems() {
         visibleOfProgressBar.setValue(View.GONE);
+        visibleOfRecyclerView.setValue(View.VISIBLE);
         stateOfRecyclerView.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
     }
 
@@ -202,6 +289,7 @@ public class EditDeleteDataVM extends AndroidViewModel {
         else return !itemsOfST.contains(position);
     }
 
+    //возвращает итератор выбранных элементов SelectionTracker
     public Iterator<Integer> itemsOfSTsIterator() {
         return itemsOfST.iterator();
     }

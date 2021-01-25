@@ -49,7 +49,7 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     private int numberOfNeededTable;
 
     private class AddItemsThread extends Thread {
-        private String item;
+        private final String item;
         public AddItemsThread(String item) {
             this.item = item;
         }
@@ -80,9 +80,9 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     }
 
     private class DeleteItemThread extends Thread {
-        private List<SimpleEntityForDB> list;
+        private final List<SimpleEntityForDB> list;
 
-        private Comparator<Integer> comparator = new Comparator<Integer>() {
+        private final Comparator<Integer> comparator = new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
                 return o1.compareTo(o2);
@@ -132,8 +132,8 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     }
 
     private class UpdateItemThread extends Thread {
-        private String newDescription;
-        private SimpleEntityForDB eDB;
+        private final String newDescription;
+        private final SimpleEntityForDB eDB;
 
         public UpdateItemThread(SimpleEntityForDB eDB, String newDescription) {
             this.eDB = eDB;

@@ -46,4 +46,5 @@
     <string name="column_name_of_note">Примечание</string>
     <string name="title_for_delete_data_fragment_toolbar">Результат поиска</string>
     <string name="header_of_delete_dialog_fragment">Выбрано записей:</string>
+    <string name="fail_attempt_about_delete_data_from_db">Не получилось удалить данные из БД. Покажи ошибку разработчику</string>
 </resources>

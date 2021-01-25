@@ -81,8 +81,7 @@ public class DeleteDataFragment extends Fragment {
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                requireActivity().onBackPressed();
+            public void onClick(View v) { requireActivity().onBackPressed();
             }
         });
         final EditText employeeEditText = view.findViewById(R.id.editText_for_employer);
@@ -91,8 +90,7 @@ public class DeleteDataFragment extends Fragment {
         final EditText placeOfWorkEditText = view.findViewById(R.id.editText_for_place_of_work);
         Observer<String> observerOfEmployeeET = new Observer<String>() {
             @Override
-            public void onChanged(String s) {
-                employeeEditText.setText(s);
+            public void onChanged(String s) { employeeEditText.setText(s);
             }
         };
         Observer<String> observerOfFirmET = new Observer<String>() {
@@ -122,7 +120,15 @@ public class DeleteDataFragment extends Fragment {
         };
         mViewModel.getVisibleOfProgressBarLD().observe(getViewLifecycleOwner(), observerOfProgressBar);
         mAdapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, getViewLifecycleOwner(), this);
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView3);
+        final RecyclerView recyclerView = view.findViewById(R.id.recyclerView3);
+        recyclerView.setVisibility(View.INVISIBLE);
+        Observer<Integer> observerOFVisibleRecyclerView = new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                recyclerView.setVisibility(integer);
+            }
+        };
+        mViewModel.getVisibleOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOFVisibleRecyclerView);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
         DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
@@ -134,6 +140,9 @@ public class DeleteDataFragment extends Fragment {
                     case LOAD:
                         mAdapter.initializeArrayOfViews();
                         mAdapter.notifyDataSetChanged();
+                        break;
+                    case DELETE:
+                        for (int i: mViewModel.getDeletedPositionsFromDB()) mAdapter.notifyItemRemoved(i);
                         break;
                 }
             }
@@ -158,6 +167,10 @@ public class DeleteDataFragment extends Fragment {
         super.onSaveInstanceState(outState);
         mTracker.onSaveInstanceState(outState);
         mViewModel.setNullToOldItemPosition();
+    }
+
+    public SelectionTracker<ComplexEntityForDB> getSelectionTracker() {
+        return mTracker;
     }
 
 }
