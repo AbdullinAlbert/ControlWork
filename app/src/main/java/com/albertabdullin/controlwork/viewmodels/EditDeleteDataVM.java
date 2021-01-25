@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,12 +16,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
-import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.PairOfItemPositions;
-import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -63,10 +60,8 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     private class LoadItemsThread extends Thread {
-        public static final String LOAD_ITEMS_TAG = "LoadItemsThread";
         @Override
         public void run() {
-            Message message;
             SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
             try (SQLiteDatabase db = cwdbHelper.getReadableDatabase();
                  Cursor cursor = db.rawQuery(mQuery, null, null)) {
@@ -90,10 +85,12 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     } while (cursor.moveToNext());
                 }
             } catch (SQLiteException e) {
-                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы Result");
+                Message message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.FAIL_ABOUT_LOAD_DATA_FROM_DB);
+                EditDeleteDataActivity.mHandler.sendMessage(message);
             }
-            message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.LOAD_ITEMS_FROM_DB);
-            EditDeleteDataActivity.mHandler.sendMessage(message);
+            visibleOfProgressBar.postValue(View.GONE);
+            visibleOfRecyclerView.postValue(View.VISIBLE);
+            stateOfRecyclerView.postValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
         }
     }
 
@@ -147,7 +144,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
             if (count == list.size()) {
                 listForWorkWithDB.removeAll(list);
                 stateOfRecyclerView.postValue(DeleteDataFragment.StateOfRecyclerView.DELETE);
-                visibleOfProgressBar.postValue(View.INVISIBLE);
+                visibleOfProgressBar.postValue(View.GONE);
                 visibleOfRecyclerView.postValue(View.VISIBLE);
             }
             else {
@@ -217,7 +214,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         return visibleOfRecyclerView;
     }
 
-    public void notifyAboutLoadItems() {
+    private void notifyAboutLoadItems() {
         visibleOfProgressBar.setValue(View.GONE);
         visibleOfRecyclerView.setValue(View.VISIBLE);
         stateOfRecyclerView.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
