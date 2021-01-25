@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
+import com.albertabdullin.controlwork.fragments.EditDataFragment;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
 import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
@@ -47,13 +48,25 @@ public class EditDeleteDataActivity extends AppCompatActivity implements Provide
         failDelete = getResources().getString(R.string.fail_attempt_about_delete_data_from_db);
         failLoad = getResources().getString(R.string.fail_attempt_about_load_data_from_db);
         viewModel = new ViewModelProvider(this, new ViewModelFactoryEditDeleteData(this.getApplication())).get(EditDeleteDataVM.class);
+        DeleteDataFragment deleteDataFragment = (DeleteDataFragment)
+                getSupportFragmentManager().findFragmentByTag(
+                        getResources().getString(R.string.tag_for_delete_data_fragment));
+        EditDataFragment editDataFragment = (EditDataFragment)  getSupportFragmentManager().findFragmentByTag
+                (getResources().getString(R.string.tag_for_edit_data_fragment));
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        DeleteDataFragment deleteDataFragment = (DeleteDataFragment) getSupportFragmentManager().findFragmentByTag("delete_result_of_search_criteria_fragment");
-        if (deleteDataFragment == null) {
+        if (deleteDataFragment != null) {
+            transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
+                    getResources().getString(R.string.tag_for_delete_data_fragment));
+        } else {
             deleteDataFragment = new DeleteDataFragment();
-            transaction.add(R.id.container_for_edit_delete_data_fragment, deleteDataFragment, "delete_result_of_search_criteria_fragment");
-        } else transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment, "delete_result_of_search_criteria_fragment");
+            transaction.add(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
+                    getResources().getString(R.string.tag_for_delete_data_fragment));
+        }
+        if (editDataFragment != null)
+            transaction.replace(R.id.container_for_edit_delete_data_fragment, editDataFragment,
+                    getResources().getString(R.string.tag_for_edit_data_fragment));
         transaction.commit();
+
     }
 
     @Override

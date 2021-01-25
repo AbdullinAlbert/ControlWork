@@ -47,7 +47,7 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
         private final TextView date;
         private final TextView result;
         private final TextView note;
-        private View.OnClickListener clickListener = new View.OnClickListener() {
+        private final View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mViewModel.notifyEditTexts(getAbsoluteAdapterPosition());
@@ -176,7 +176,10 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
         }
     }
 
-    public void initializeArrayOfViews() { arrayOfViews = new View[getItemCount()]; }
+    public void initializeArrayOfViews() {
+        if (arrayOfViews == null)
+            arrayOfViews = new View[getItemCount()];
+    }
 
     public ComplexEntityForDB getElement(int position) {
         return mListOfRecyclerView.get(position);

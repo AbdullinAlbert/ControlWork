@@ -36,6 +36,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerView;
     private MutableLiveData<Integer> visibleOfProgressBar;
     private MutableLiveData<Integer> visibleOfRecyclerView;
+    private MutableLiveData<Boolean> visibleOfEditMenuItem;
     private MutableLiveData<String> employeeEditTextLD;
     private MutableLiveData<String> firmEditTextLD;
     private MutableLiveData<String> placeOfWorkEditTextLD;
@@ -214,6 +215,11 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         return visibleOfRecyclerView;
     }
 
+    public LiveData<Boolean> getVisibleOfEditMenuItem() {
+        if (visibleOfEditMenuItem == null) visibleOfEditMenuItem = new MutableLiveData<>();
+        return visibleOfEditMenuItem;
+    }
+
     private void notifyAboutLoadItems() {
         visibleOfProgressBar.setValue(View.GONE);
         visibleOfRecyclerView.setValue(View.VISIBLE);
@@ -231,11 +237,13 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
 
     public void notifyEditTexts(int i) {
         if (i == -1) {
+            visibleOfEditMenuItem.setValue(false);
             employeeEditTextLD.setValue("");
             firmEditTextLD.setValue("");
             typeOfWorkEditTextLD.setValue("");
             placeOfWorkEditTextLD.setValue("");
         } else {
+            visibleOfEditMenuItem.setValue(true);
             employeeEditTextLD.setValue(listForWorkWithDB.get(i).getEmployerDescription());
             firmEditTextLD.setValue(listForWorkWithDB.get(i).getFirmDescription());
             typeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getTOWDescription());

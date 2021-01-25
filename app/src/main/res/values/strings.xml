@@ -32,6 +32,7 @@
     <string name="rename_item">Переименовать</string>
     <string name="delete_item">Удалить</string>
     <string name="hide_item">Скрыть</string>
+    <string name="edit_item">Изменить</string>
     <string name="ok_button">OK</string>
     <string name="select_all_items">Выбрать всё</string>
     <string name="clear_all_items">Очистить</string>
@@ -48,4 +49,6 @@
     <string name="header_of_delete_dialog_fragment">Выбрано записей:</string>
     <string name="fail_attempt_about_delete_data_from_db">Не получилось удалить данные из БД. Покажи ошибку разработчику</string>
     <string name="fail_attempt_about_load_data_from_db">Не удалось получить данные из БД. Покажи ошибку разработчику</string>
+    <string name="tag_for_delete_data_fragment">deleteDataFragment tag</string>
+    <string name="tag_for_edit_data_fragment">editDataFragment tag</string>
 </resources>

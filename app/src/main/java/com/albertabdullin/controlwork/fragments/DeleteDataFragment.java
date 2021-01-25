@@ -2,6 +2,9 @@ package com.albertabdullin.controlwork.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -13,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -64,7 +68,6 @@ public class DeleteDataFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
-        mViewModel.setQuery(requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY));
     }
 
     @Nullable
@@ -76,7 +79,32 @@ public class DeleteDataFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel.setQuery(requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY));
         Toolbar toolbar = view.findViewById(R.id.toolbar_for_delete_data);
+        toolbar.inflateMenu(R.menu.stable_appbar_result_list_items);
+        final MenuItem menuItem = toolbar.getMenu().getItem(0);
+        menuItem.setVisible(false);
+        Observer<Boolean> observerOfEditMenuItem = new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                menuItem.setVisible(aBoolean);
+            }
+        };
+        mViewModel.getVisibleOfEditMenuItem().observe(getViewLifecycleOwner(), observerOfEditMenuItem);
+        menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.action_edit) {
+                    FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                    EditDataFragment deleteDataFragment = new EditDataFragment();
+                    transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
+                            getResources().getString(R.string.tag_for_edit_data_fragment)).
+                            addToBackStack(null).commit();
+                    return true;
+                }
+                return false;
+            }
+        });
         toolbar.setTitle(R.string.title_for_delete_data_fragment_toolbar);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -165,7 +193,7 @@ public class DeleteDataFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        mTracker.onSaveInstanceState(outState);
+        if (mTracker != null) mTracker.onSaveInstanceState(outState);
         mViewModel.setNullToOldItemPosition();
     }
 
