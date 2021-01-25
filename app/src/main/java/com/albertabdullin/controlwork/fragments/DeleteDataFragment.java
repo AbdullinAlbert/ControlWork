@@ -2,8 +2,6 @@ package com.albertabdullin.controlwork.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -137,8 +135,8 @@ public class DeleteDataFragment extends Fragment {
             public void onChanged(String s) { placeOfWorkEditText.setText(s);
             }
         };
-        mViewModel.getEmployeeEditTextLD().observe(getViewLifecycleOwner(), observerOfEmployeeET);
-        mViewModel.getFirmEditTextLD().observe(getViewLifecycleOwner(), observerOfFirmET);
+        mViewModel.getEmployeeEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfEmployeeET);
+        mViewModel.getFirmEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfFirmET);
         mViewModel.getTOWEditTextLD().observe(getViewLifecycleOwner(), observerOfToWET);
         mViewModel.getPOWEditTextLD().observe(getViewLifecycleOwner(), observerOfPoWET);
         final ProgressBar progressBar = view.findViewById(R.id.progressBar);

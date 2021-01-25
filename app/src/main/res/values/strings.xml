@@ -11,11 +11,17 @@
     <string name="add_date">Дата:</string>
     <string name="add_result">Результат:</string>
     <string name="button_add_data">Добавить</string>
+    <string name="button_edit_data">Сохранить изменения</string>
     <string name="button_cancel">Отмена</string>
+    <string name="incorrect_data">Некорректные данные</string>
     <string name="hint_for_add_firm">Выбери из списка или добавь новую</string>
     <string name="hint_for_add_place_of_work">Выбери из списка или добавь новое</string>
     <string name="hint_for_type_of_work">Выбери из списка или добавь новый</string>
     <string name="hint_for_needless">Необязательное поле</string>
+    <string name="list_of_employees">Список сотрудников</string>
+    <string name="list_of_firms">Список фирм</string>
+    <string name="list_of_places_of_work">Список мест работы</string>
+    <string name="list_of_types_of_work">Список типов работы</string>
     <string name="hint_for_search_criteria">Пустое поле - поиск среди всех записей</string>
     <string name="hint_for_search_criteria_one_date"> Выбери дату </string>
     <string name="hint_for_search_criteria_one_number"> Выбери число</string>
@@ -46,9 +52,15 @@
     <string name="column_name_of_res">Результат</string>
     <string name="column_name_of_note">Примечание</string>
     <string name="title_for_delete_data_fragment_toolbar">Результат поиска</string>
+    <string name="title_for_edit_data_fragment_toolbar">Изменение данных</string>
     <string name="header_of_delete_dialog_fragment">Выбрано записей:</string>
     <string name="fail_attempt_about_delete_data_from_db">Не получилось удалить данные из БД. Покажи ошибку разработчику</string>
-    <string name="fail_attempt_about_load_data_from_db">Не удалось получить данные из БД. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_load_data_from_result_table">Не удалось получить данные из таблицы ResultTable. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_load_data_from_primary_table">Не удалось получить данные из одной из первичных таблиц. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_update_data_in_result_table">Не удалось обновить данные в таблице. Покажи ошибку разработчику</string>
     <string name="tag_for_delete_data_fragment">deleteDataFragment tag</string>
     <string name="tag_for_edit_data_fragment">editDataFragment tag</string>
+    <string name="data_has_been_updated">Данные обновлены</string>
+    <string name="tag_for_list_of_DB_items_fragment">listDBItemsFragment tag</string>
+    <string name="cannot_convert_string_to_date">Не получается конвертировать строку в дату. Покажи ошибку разработчику</string>
 </resources>

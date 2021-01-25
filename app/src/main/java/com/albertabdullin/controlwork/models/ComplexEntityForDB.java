@@ -17,6 +17,7 @@ public class ComplexEntityForDB implements Parcelable {
     private int mTypeOfWorkID;
     private String mTOWDescription;
     private String mDate;
+    private long mLongPresentationOfDate;
     private String mResult;
     private String mNote;
 
@@ -137,12 +138,20 @@ public class ComplexEntityForDB implements Parcelable {
         this.mDate = mDate;
     }
 
+    public void setLongPresentationOfDate(long date) { mLongPresentationOfDate = date; }
+
+    public long getLongPresentationOfDate() { return mLongPresentationOfDate; }
+
     public void setResult(Float mResult) {
         String regExp = ".0$";
         Pattern pattern = Pattern.compile(regExp);
         Matcher matcher = pattern.matcher(mResult.toString());
         if (matcher.find()) this.mResult = matcher.replaceFirst("");
         else this.mResult = mResult.toString();
+    }
+
+    public void setResult(String mResult) {
+        this.mResult = mResult;
     }
 
     public void setNote(String mNote) {

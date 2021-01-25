@@ -163,11 +163,11 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
             Observer<PairOfItemPositions> observerOfChangerColorRVItem = new Observer<PairOfItemPositions>() {
                 @Override
                 public void onChanged(PairOfItemPositions pair) {
-                    if (pair.getOldPos() != -1) {
+                    if (pair.getOldPos() != -1 && arrayOfViews[pair.getOldPos()] != null ) {
                         arrayOfViews[pair.getOldPos()].
                                 setBackgroundColor(mParentFragment.getResources().getColor(R.color.backgroundColorOfActivity, null));
                     }
-                    if (pair.getNewPos() != -1) {
+                    if (pair.getNewPos() != -1 && arrayOfViews[pair.getNewPos()] != null) {
                         arrayOfViews[pair.getNewPos()].setBackgroundColor(mParentFragment.getResources().getColor(colorAccent, null));
                     }
                 }

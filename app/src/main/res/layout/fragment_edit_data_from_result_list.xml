@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.FillNewData_Activity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_for_edit_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusableInTouchMode="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/add_employer" />
+
+            <EditText
+                android:id="@+id/edit_empl_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_add_empl"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack"/>
+
+        <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_firm" />
+
+            <EditText
+                android:id="@+id/edit_firm_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_add_firm"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack"/>
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_place_of_work" />
+
+            <EditText
+                android:id="@+id/edit_placeOfWork_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_add_place_of_work"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_type_of_work" />
+
+            <EditText
+                android:id="@+id/edit_typeOfWork_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_type_of_work"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_date"
+                android:labelFor="@id/add_date_editText"/>
+
+            <EditText
+                android:id="@+id/edit_date_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="date"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_result"
+                android:labelFor="@id/add_result_editText"/>
+
+            <EditText
+                android:id="@+id/edit_result_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLength="@integer/max_digit_length_of_value"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/incorrectResultValueFocus_for_edit_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/incorrect_data"
+                android:textSize="8sp"
+                android:textColor="@color/highlightBorder"
+                tools:ignore="SmallSp" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_remark" />
+
+            <EditText
+                android:id="@+id/edit_note_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_needless"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no"
+                android:maxLength="30"
+                android:backgroundTint="@color/standardBlack" />
+
+            <Button
+                android:id="@+id/save_changed_data_button"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryDark"
+                android:text="@string/button_edit_data"
+                style="?android:attr/borderlessButtonStyle"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

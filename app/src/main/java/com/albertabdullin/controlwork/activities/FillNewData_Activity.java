@@ -79,8 +79,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                     model.setTypeOfWorkEditText();
                     break;
                 case ADD_DATA_TO_BD:
-                    if (msg.arg1 == 1) model.notifyAboutCompleteOperation(true);
-                    else model.notifyAboutCompleteOperation(false);
+                    model.notifyAboutCompleteOperation(msg.arg1 == 1);
                     break;
                 case NOTIFY_ABOUT_CHECK_DATA_FROM_DB:
                     model.readResultOfCheck();

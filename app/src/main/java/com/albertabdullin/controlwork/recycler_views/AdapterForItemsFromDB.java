@@ -97,7 +97,7 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull List<Object> payloads) {
-        holder.setActivatedState(selectionTracker.isSelected(listOfEntities.get(position)));
+        if (selectionTracker != null) holder.setActivatedState(selectionTracker.isSelected(listOfEntities.get(position)));
         holder.getDescription().setText(listOfEntities.get(position).getDescription());
         String text = "id: " + listOfEntities.get(position).getID();
         holder.getID().setText(text);

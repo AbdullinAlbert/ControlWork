@@ -1,12 +1,15 @@
 package com.albertabdullin.controlwork.viewmodels;
 
 import android.app.Application;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.text.Editable;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,11 +18,16 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
+import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
+import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
+import com.albertabdullin.controlwork.fragments.ListDBItemsFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.PairOfItemPositions;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,16 +40,48 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private String mQuery;
     private boolean isNeedSearch;
     private PairOfItemPositions pairOfItemPositions;
-    private final List<ComplexEntityForDB> listForWorkWithDB = new ArrayList<>();
-    private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerView;
-    private MutableLiveData<Integer> visibleOfProgressBar;
+    private final List<ComplexEntityForDB> listForWorkWithResultTableItems = new ArrayList<>();
+    private List<SimpleEntityForDB> listForWorkWithEmployerTableItems;
+    private List<SimpleEntityForDB> listForWorkWithFirmTableItems;
+    private List<SimpleEntityForDB> listForWorkWithPoWTableItems;
+    private List<SimpleEntityForDB> listForWorkWithToWTableItems;
+    private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerViewForResultList;
+    private MutableLiveData<Integer> visibleOfProgressBarForResultList;
     private MutableLiveData<Integer> visibleOfRecyclerView;
     private MutableLiveData<Boolean> visibleOfEditMenuItem;
-    private MutableLiveData<String> employeeEditTextLD;
-    private MutableLiveData<String> firmEditTextLD;
-    private MutableLiveData<String> placeOfWorkEditTextLD;
-    private MutableLiveData<String> typeOfWorkEditTextLD;
+    private MutableLiveData<Boolean> toastAboutSuccessUpdateData;
+    private MutableLiveData<Integer> visibleOfTextViewResultValue;
+    private MutableLiveData<String> employeeEditTextForResultListLD;
+    private MutableLiveData<String> firmEditTextForResultListLD;
+    private MutableLiveData<String> placeOfWorkEditTextForResultListLD;
+    private MutableLiveData<String> typeOfWorkEditTextForResultListLD;
+    private MutableLiveData<String> employeeEditTextForEditDataLD;
+    private MutableLiveData<String> firmEditTextForEditDataLD;
+    private MutableLiveData<String> placeOfWorkEditTextForEditDataLD;
+    private MutableLiveData<String> typeOfWorkEditTextForEditDataLD;
+    private MutableLiveData<String> dateEditTextForEditDataLD;
+    private MutableLiveData<String> resultEditTextForEditDataLD;
+    private MutableLiveData<String> noteEditTextForEditDataLD;
+    private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerViewForPrimaryList;
+    private MutableLiveData<Integer> visibleOfRecyclerViewForPrimaryList;
+    private MutableLiveData<Integer> visibleOfProgressBarForPrimaryTableList;
+    private MutableLiveData<Boolean> stateOfSaveChangedDataButton;
     private MutableLiveData<PairOfItemPositions> changerColorOfViewHolderLD;
+    private ListDBItemsFragment.TableNameForList selectedTable;
+    private LoadItemsFromPrimaryTableThread loadItemsFromPrimaryTableThread;
+    private SimpleEntityForDB mSelectedItemForChangeData;
+    private ComplexEntityForDB itemForChangeDataInDB;
+    private String textForResultEditText;
+    private String textForNoteEditText;
+    private boolean mStateOfChangeEmployerEditText = false;
+    private boolean mStateOfChangeFirmEditText = false;
+    private boolean mStateOfChangePoWEditText = false;
+    private boolean mStateOfChangeToWEditText = false;
+    private boolean mStateOfChangeDateEditText = false;
+    private boolean mStateOfChangeResultEditText = false;
+    private boolean mStateOfChangeNoteEditText = false;
+    private boolean pressedBackButton = false;
+
     private List<Integer> listOfDeletedRowsFromDB;
     private Set<Integer> itemsOfST;
     private boolean isActivatedDF = false;
@@ -60,7 +100,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         return !isActivatedDF;
     }
 
-    private class LoadItemsThread extends Thread {
+    private class LoadItemsThreadFromResultTable extends Thread {
         @Override
         public void run() {
             SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
@@ -82,16 +122,16 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                         eDB.setDate(cursor.getString(b++));
                         eDB.setResult(cursor.getFloat(b++));
                         eDB.setNote(cursor.getString(b));
-                        listForWorkWithDB.add(eDB);
+                        listForWorkWithResultTableItems.add(eDB);
                     } while (cursor.moveToNext());
                 }
             } catch (SQLiteException e) {
-                Message message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.FAIL_ABOUT_LOAD_DATA_FROM_DB);
+                Message message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.FAIL_ABOUT_LOAD_DATA_FROM_RESULT_TABLE);
                 EditDeleteDataActivity.mHandler.sendMessage(message);
             }
-            visibleOfProgressBar.postValue(View.GONE);
+            visibleOfProgressBarForResultList.postValue(View.GONE);
             visibleOfRecyclerView.postValue(View.VISIBLE);
-            stateOfRecyclerView.postValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
+            stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
         }
     }
 
@@ -106,9 +146,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     public void startSearch() {
-        LoadItemsThread loadItemsThread = new LoadItemsThread();
-        loadItemsThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        loadItemsThread.start();
+        LoadItemsThreadFromResultTable loadItemsThreadFromResultTable = new LoadItemsThreadFromResultTable();
+        loadItemsThreadFromResultTable.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        loadItemsThreadFromResultTable.start();
     }
 
     private class DeleteItemThread extends Thread {
@@ -143,9 +183,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                 return;
             }
             if (count == list.size()) {
-                listForWorkWithDB.removeAll(list);
-                stateOfRecyclerView.postValue(DeleteDataFragment.StateOfRecyclerView.DELETE);
-                visibleOfProgressBar.postValue(View.GONE);
+                listForWorkWithResultTableItems.removeAll(list);
+                stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.DELETE);
+                visibleOfProgressBarForResultList.postValue(View.GONE);
                 visibleOfRecyclerView.postValue(View.VISIBLE);
             }
             else {
@@ -157,8 +197,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
 
     public void deleteItem(List<ComplexEntityForDB> list)  {
         visibleOfRecyclerView.setValue(View.INVISIBLE);
-        visibleOfProgressBar.setValue(View.VISIBLE);
+        visibleOfProgressBarForResultList.setValue(View.VISIBLE);
         DeleteItemThread deleteItemThread = new DeleteItemThread(list);
+        deleteItemThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
         deleteItemThread.start();
     }
 
@@ -176,33 +217,33 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     public LiveData<DeleteDataFragment.StateOfRecyclerView> getStateOfRecyclerViewLD() {
-        if (stateOfRecyclerView == null) stateOfRecyclerView = new MutableLiveData<>();
-        return stateOfRecyclerView;
+        if (stateOfRecyclerViewForResultList == null) stateOfRecyclerViewForResultList = new MutableLiveData<>();
+        return stateOfRecyclerViewForResultList;
     }
 
     public LiveData<Integer> getVisibleOfProgressBarLD() {
-        if (visibleOfProgressBar == null) visibleOfProgressBar = new MutableLiveData<>();
-        return visibleOfProgressBar;
+        if (visibleOfProgressBarForResultList == null) visibleOfProgressBarForResultList = new MutableLiveData<>();
+        return visibleOfProgressBarForResultList;
     }
 
-    public LiveData<String> getEmployeeEditTextLD() {
-        if (employeeEditTextLD == null) employeeEditTextLD = new MutableLiveData<>();
-        return employeeEditTextLD;
+    public LiveData<String> getEmployeeEditTextForResultListLD() {
+        if (employeeEditTextForResultListLD == null) employeeEditTextForResultListLD = new MutableLiveData<>();
+        return employeeEditTextForResultListLD;
     }
 
-    public LiveData<String> getFirmEditTextLD() {
-        if (firmEditTextLD == null) firmEditTextLD = new MutableLiveData<>();
-        return firmEditTextLD;
+    public LiveData<String> getFirmEditTextForResultListLD() {
+        if (firmEditTextForResultListLD == null) firmEditTextForResultListLD = new MutableLiveData<>();
+        return firmEditTextForResultListLD;
     }
 
     public LiveData<String> getPOWEditTextLD() {
-        if (placeOfWorkEditTextLD == null) placeOfWorkEditTextLD = new MutableLiveData<>();
-        return placeOfWorkEditTextLD;
+        if (placeOfWorkEditTextForResultListLD == null) placeOfWorkEditTextForResultListLD = new MutableLiveData<>();
+        return placeOfWorkEditTextForResultListLD;
     }
 
     public LiveData<String> getTOWEditTextLD() {
-        if (typeOfWorkEditTextLD == null) typeOfWorkEditTextLD = new MutableLiveData<>();
-        return typeOfWorkEditTextLD;
+        if (typeOfWorkEditTextForResultListLD == null) typeOfWorkEditTextForResultListLD = new MutableLiveData<>();
+        return typeOfWorkEditTextForResultListLD;
     }
 
     public LiveData<PairOfItemPositions> getChangerColorOfViewHolder() {
@@ -220,16 +261,116 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         return visibleOfEditMenuItem;
     }
 
+    public LiveData<String> getEmployeeEditTextForEditDataLD() {
+        if (employeeEditTextForEditDataLD == null) {
+            employeeEditTextForEditDataLD = new MutableLiveData<>();
+            employeeEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getEmployerDescription());
+        }
+        return employeeEditTextForEditDataLD;
+    }
+
+    public LiveData<String> getFirmEditTextForEditDataLD() {
+        if (firmEditTextForEditDataLD == null) {
+            firmEditTextForEditDataLD = new MutableLiveData<>();
+            firmEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getFirmDescription());
+        }
+        return firmEditTextForEditDataLD;
+    }
+
+    public LiveData<String> getPlaceOfWorkEditTextForEditDataLD() {
+        if (placeOfWorkEditTextForEditDataLD == null) {
+            placeOfWorkEditTextForEditDataLD = new MutableLiveData<>();
+            placeOfWorkEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getPOWDescription());
+        }
+        return placeOfWorkEditTextForEditDataLD;
+    }
+
+    public LiveData<String> getTypeOfWorkEditTextForEditDataLD() {
+        if (typeOfWorkEditTextForEditDataLD == null) {
+            typeOfWorkEditTextForEditDataLD = new MutableLiveData<>();
+            typeOfWorkEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getTOWDescription());
+        }
+        return typeOfWorkEditTextForEditDataLD;
+    }
+
+    public LiveData<String> getDateEditTextForEditDataLD() {
+        if (dateEditTextForEditDataLD == null) {
+            dateEditTextForEditDataLD = new MutableLiveData<>();
+            dateEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getDate());
+        }
+        return dateEditTextForEditDataLD;
+    }
+
+    public LiveData<String> getResultEditTextForEditDataLD() {
+        if (resultEditTextForEditDataLD == null) resultEditTextForEditDataLD = new MutableLiveData<>();
+        if (textForResultEditText == null) resultEditTextForEditDataLD
+                .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getResult());
+        else resultEditTextForEditDataLD.setValue(textForResultEditText);
+        return resultEditTextForEditDataLD;
+    }
+
+    public LiveData<String> getNoteEditTextForEditDataLD() {
+        if (noteEditTextForEditDataLD == null) noteEditTextForEditDataLD = new MutableLiveData<>();
+        if (textForNoteEditText == null) noteEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getNote());
+        else noteEditTextForEditDataLD.setValue(textForNoteEditText);
+        return noteEditTextForEditDataLD;
+    }
+
+    public synchronized LiveData<DeleteDataFragment.StateOfRecyclerView> getStateOfRVForPrimaryTableLD() {
+        if (stateOfRecyclerViewForPrimaryList == null) stateOfRecyclerViewForPrimaryList = new MutableLiveData<>();
+        return stateOfRecyclerViewForPrimaryList;
+    }
+
+    public LiveData<Integer> getVisibleOfRVForPrimaryTableLD() {
+        if (visibleOfRecyclerViewForPrimaryList == null) visibleOfRecyclerViewForPrimaryList = new MutableLiveData<>();
+        return visibleOfRecyclerViewForPrimaryList;
+    }
+
+    public LiveData<Integer> getVisibleOfProgressBarForPrimaryTableListLD() {
+        if (visibleOfProgressBarForPrimaryTableList == null) visibleOfProgressBarForPrimaryTableList = new MutableLiveData<>();
+        return visibleOfProgressBarForPrimaryTableList;
+    }
+
+    public LiveData<Boolean> getToastAboutSuccessUpdateDataLD() {
+        if (toastAboutSuccessUpdateData == null) toastAboutSuccessUpdateData = new MutableLiveData<>();
+        return toastAboutSuccessUpdateData;
+    }
+
+    public LiveData<Boolean> getStateOfSaveChangedDataButtonLD() {
+        if (stateOfSaveChangedDataButton == null) stateOfSaveChangedDataButton = new MutableLiveData<>();
+        return stateOfSaveChangedDataButton;
+    }
+
+    public LiveData<Integer> getVisibleOfTextViewResultValueLD() {
+        if (visibleOfTextViewResultValue == null) {
+            visibleOfTextViewResultValue = new MutableLiveData<>();
+            visibleOfTextViewResultValue.setValue(View.INVISIBLE);
+        }
+        return visibleOfTextViewResultValue;
+    }
+
+    public void initItemForChangedDataInDB() {
+        if (itemForChangeDataInDB == null) itemForChangeDataInDB = new ComplexEntityForDB();
+    }
+
     private void notifyAboutLoadItems() {
-        visibleOfProgressBar.setValue(View.GONE);
+        visibleOfProgressBarForResultList.setValue(View.GONE);
         visibleOfRecyclerView.setValue(View.VISIBLE);
-        stateOfRecyclerView.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
+        stateOfRecyclerViewForResultList.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
     }
 
+    //лист для адаптера в ListDBItemsFragment
     public List<ComplexEntityForDB> getResultList() {
-        return listForWorkWithDB;
+        return listForWorkWithResultTableItems;
     }
 
+    //инициализация списка из таблицы ResultList для DeleteDataFragment
     public void initializeResultList() {
         if (isNeedSearch) startSearch();
         else notifyAboutLoadItems();
@@ -238,21 +379,21 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     public void notifyEditTexts(int i) {
         if (i == -1) {
             visibleOfEditMenuItem.setValue(false);
-            employeeEditTextLD.setValue("");
-            firmEditTextLD.setValue("");
-            typeOfWorkEditTextLD.setValue("");
-            placeOfWorkEditTextLD.setValue("");
+            employeeEditTextForResultListLD.setValue("");
+            firmEditTextForResultListLD.setValue("");
+            typeOfWorkEditTextForResultListLD.setValue("");
+            placeOfWorkEditTextForResultListLD.setValue("");
         } else {
             visibleOfEditMenuItem.setValue(true);
-            employeeEditTextLD.setValue(listForWorkWithDB.get(i).getEmployerDescription());
-            firmEditTextLD.setValue(listForWorkWithDB.get(i).getFirmDescription());
-            typeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getTOWDescription());
-            placeOfWorkEditTextLD.setValue(listForWorkWithDB.get(i).getPOWDescription());
+            employeeEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getEmployerDescription());
+            firmEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getFirmDescription());
+            typeOfWorkEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getTOWDescription());
+            placeOfWorkEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getPOWDescription());
         }
     }
 
     public String getValueOfETLD() {
-        return employeeEditTextLD.getValue() == null ? "" : employeeEditTextLD.getValue();
+        return employeeEditTextForResultListLD.getValue() == null ? "" : employeeEditTextForResultListLD.getValue();
     }
 
     public void changeColorOfPreviousSelectedItem(PairOfItemPositions pair) {
@@ -297,6 +438,349 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     //возвращает итератор выбранных элементов SelectionTracker
     public Iterator<Integer> itemsOfSTsIterator() {
         return itemsOfST.iterator();
+    }
+
+    public void setSelectedTable(ListDBItemsFragment.TableNameForList tableName) {
+        selectedTable = tableName;
+    }
+
+    public ListDBItemsFragment.TableNameForList getSelectedTable() { return selectedTable; }
+
+    private synchronized boolean isLiveDataForPrimaryTableListNull() {
+        return stateOfRecyclerViewForPrimaryList == null;
+    }
+
+    private class LoadItemsFromPrimaryTableThread extends Thread {
+
+        private final String mTableName;
+        private final String mColumnName;
+        private final List<SimpleEntityForDB> mListForLoadData;
+
+        LoadItemsFromPrimaryTableThread(String tableName, String columnName, List<SimpleEntityForDB> listForLoadData) {
+            mTableName = tableName;
+            mColumnName = columnName;
+            mListForLoadData = listForLoadData;
+        }
+
+        @Override
+        public void run() {
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
+                 Cursor cursor = db.query(mTableName,
+                    new String[]{"_id", mColumnName},
+                    null, null, null, null, null)
+            ) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        SimpleEntityForDB eDB = new SimpleEntityForDB();
+                        eDB.setId(cursor.getInt(0));
+                        eDB.setDescription(cursor.getString(1));
+                        mListForLoadData.add(eDB);
+                    } while (cursor.moveToNext());
+                }
+            } catch (SQLiteException e) {
+                EditDeleteDataActivity.mHandler.sendEmptyMessage(EditDeleteDataActivity.FAIL_ABOUT_LOAD_DATA_FROM_PRIMARY_TABLE);
+            }
+            if (isLiveDataForPrimaryTableListNull()) {
+                do {
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (isLiveDataForPrimaryTableListNull());
+            }
+            stateOfRecyclerViewForPrimaryList.postValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
+            visibleOfRecyclerViewForPrimaryList.postValue(View.VISIBLE);
+            visibleOfProgressBarForPrimaryTableList.postValue(View.GONE);
+        }
+    }
+
+    private void initializeViewsFromListDBItemsFragment() {
+        stateOfRecyclerViewForPrimaryList.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
+        visibleOfRecyclerViewForPrimaryList.setValue(View.VISIBLE);
+        visibleOfProgressBarForPrimaryTableList.setValue(View.GONE);
+    }
+
+    public void startLoadDataFromTable() {
+        switch (selectedTable) {
+            case EMPLOYEES:
+                if (listForWorkWithEmployerTableItems == null) {
+                    listForWorkWithEmployerTableItems = new ArrayList<>();
+                    loadItemsFromPrimaryTableThread = new LoadItemsFromPrimaryTableThread(
+                            CWDBHelper.TABLE_NAME_EMP, CWDBHelper.T_EMP_C_FIO, listForWorkWithEmployerTableItems);
+                    break;
+                } else {
+                    initializeViewsFromListDBItemsFragment();
+                    return;
+                }
+            case FIRMS:
+                if (listForWorkWithFirmTableItems == null) {
+                    listForWorkWithFirmTableItems = new ArrayList<>();
+                    loadItemsFromPrimaryTableThread = new LoadItemsFromPrimaryTableThread(
+                            CWDBHelper.TABLE_NAME_FIRM, CWDBHelper.T_FIRM_C_DESCRIPTION, listForWorkWithFirmTableItems);
+                    break;
+                } else {
+                    initializeViewsFromListDBItemsFragment();
+                    return;
+                }
+            case POW:
+                if (listForWorkWithPoWTableItems == null) {
+                    listForWorkWithPoWTableItems = new ArrayList<>();
+                    loadItemsFromPrimaryTableThread = new LoadItemsFromPrimaryTableThread(
+                            CWDBHelper.TABLE_NAME_PLACE_OF_WORK, CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION, listForWorkWithPoWTableItems);
+                    break;
+                } else {
+                    initializeViewsFromListDBItemsFragment();
+                    return;
+                }
+            case TOW:
+                if (listForWorkWithToWTableItems == null) {
+                    listForWorkWithToWTableItems = new ArrayList<>();
+                    loadItemsFromPrimaryTableThread = new LoadItemsFromPrimaryTableThread(
+                            CWDBHelper.TABLE_NAME_TYPE_OF_WORK, CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION, listForWorkWithToWTableItems);
+                    break;
+                } else {
+                    initializeViewsFromListDBItemsFragment();
+                    return;
+                }
+        }
+        loadItemsFromPrimaryTableThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        loadItemsFromPrimaryTableThread.start();
+    }
+
+    public List<SimpleEntityForDB> getCurrentListForPrimaryTable() {
+        switch (selectedTable) {
+            case EMPLOYEES: return listForWorkWithEmployerTableItems;
+            case FIRMS: return listForWorkWithFirmTableItems;
+            case POW: return listForWorkWithPoWTableItems;
+            case TOW: return listForWorkWithToWTableItems;
+            default:
+                throw new RuntimeException("Опечатка в enum-классе TableNameForList. selectedTable -" + selectedTable);
+        }
+    }
+
+    public void setSelectedItemForChangeData(SimpleEntityForDB eDB) {
+        mSelectedItemForChangeData = eDB;
+    }
+
+    public void tryToStopLoadDataFromPrimaryTableThread() {
+        if (loadItemsFromPrimaryTableThread.isAlive())
+            loadItemsFromPrimaryTableThread.interrupt();
+    }
+
+    public void setDefaultValuesToListDBItemsFragmentViews() {
+        stateOfRecyclerViewForPrimaryList.setValue(null);
+        visibleOfRecyclerViewForPrimaryList.setValue(View.INVISIBLE);
+        visibleOfProgressBarForPrimaryTableList.postValue(View.VISIBLE);
+    }
+
+    public void setDefaultValuesToEditDataFragmentViews() {
+        textForResultEditText = null;
+        textForNoteEditText = null;
+        itemForChangeDataInDB = null;
+        employeeEditTextForEditDataLD = null;
+        firmEditTextForEditDataLD = null;
+        placeOfWorkEditTextForEditDataLD = null;
+        typeOfWorkEditTextForEditDataLD = null;
+        dateEditTextForEditDataLD = null;
+        mStateOfChangeDateEditText = false;
+        mStateOfChangeEmployerEditText = false;
+        mStateOfChangeFirmEditText = false;
+        mStateOfChangePoWEditText = false;
+        mStateOfChangeToWEditText = false;
+        mStateOfChangeResultEditText = false;
+        mStateOfChangeNoteEditText = false;
+    }
+
+    public void setPressedBackButton(boolean b) { pressedBackButton = b; }
+
+    public boolean isBackButtonNotPressed() { return !pressedBackButton; }
+
+    private void attemptToChangeValueOfEmployerData() {
+        mStateOfChangeEmployerEditText = mSelectedItemForChangeData.getID() !=
+                listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getEmployerID();
+        employeeEditTextForEditDataLD.setValue(mSelectedItemForChangeData.getDescription());
+        if (mStateOfChangeEmployerEditText) {
+            itemForChangeDataInDB.setEmployerID(mSelectedItemForChangeData.getID());
+            itemForChangeDataInDB.setEmployerDescription(mSelectedItemForChangeData.getDescription());
+        } else {
+            itemForChangeDataInDB.setEmployerID(0);
+            itemForChangeDataInDB.setEmployerDescription("");
+        }
+    }
+
+    private void attemptToChangeValueOfFirmData() {
+        mStateOfChangeFirmEditText = mSelectedItemForChangeData.getID() !=
+                listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getFirmID();
+        firmEditTextForEditDataLD.setValue(mSelectedItemForChangeData.getDescription());
+        if (mStateOfChangeFirmEditText) {
+            itemForChangeDataInDB.setFirmID(mSelectedItemForChangeData.getID());
+            itemForChangeDataInDB.setFirmDescription(mSelectedItemForChangeData.getDescription());
+        } else {
+            itemForChangeDataInDB.setFirmID(0);
+            itemForChangeDataInDB.setFirmDescription("");
+        }
+    }
+
+    private void attemptToChangeValueOfPoWData() {
+        mStateOfChangePoWEditText = mSelectedItemForChangeData.getID() !=
+                listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getPlaceOfWorkID();
+        placeOfWorkEditTextForEditDataLD.setValue(mSelectedItemForChangeData.getDescription());
+        if (mStateOfChangePoWEditText) {
+            itemForChangeDataInDB.setPlaceOfWorkID(mSelectedItemForChangeData.getID());
+            itemForChangeDataInDB.setPOWDescription(mSelectedItemForChangeData.getDescription());
+        } else {
+            itemForChangeDataInDB.setPlaceOfWorkID(0);
+            itemForChangeDataInDB.setPOWDescription("");
+        }
+    }
+
+    private void attemptToChangeValueOfToWData() {
+        mStateOfChangeToWEditText = mSelectedItemForChangeData.getID() !=
+                listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getTypeOfWorkID();
+        typeOfWorkEditTextForEditDataLD.setValue(mSelectedItemForChangeData.getDescription());
+        if (mStateOfChangeToWEditText) {
+            itemForChangeDataInDB.setTypeOfWorkID(mSelectedItemForChangeData.getID());
+            itemForChangeDataInDB.setTOWDescription(mSelectedItemForChangeData.getDescription());
+        } else {
+            itemForChangeDataInDB.setTypeOfWorkID(0);
+            itemForChangeDataInDB.setTOWDescription("");
+        }
+    }
+
+    public void tryToChangeStateOfSaveChangedDataButton() {
+        if (selectedTable != null && mSelectedItemForChangeData != null) {
+            switch (selectedTable) {
+                case EMPLOYEES:
+                    attemptToChangeValueOfEmployerData();
+                    break;
+                case FIRMS:
+                    attemptToChangeValueOfFirmData();
+                    break;
+                case POW:
+                    attemptToChangeValueOfPoWData();
+                    break;
+                case TOW:
+                    attemptToChangeValueOfToWData();
+                    break;
+            }
+            changeStateOfSaveChangedDataButton();
+        }
+    }
+
+    public void attemptToChangeValueOfResultData(Editable s) {
+        if (visibleOfTextViewResultValue.getValue() != null && visibleOfTextViewResultValue.getValue() != View.INVISIBLE)
+            visibleOfTextViewResultValue.setValue(View.INVISIBLE);
+        mStateOfChangeResultEditText = !(s.toString().equals(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getResult()));
+        if (mStateOfChangeResultEditText) {
+            textForResultEditText = s.toString();
+            itemForChangeDataInDB.setResult(textForResultEditText);
+        } else itemForChangeDataInDB.setResult("");
+        changeStateOfSaveChangedDataButton();
+    }
+
+    public void attemptToChangeValueOfNoteData(Editable s) {
+        mStateOfChangeNoteEditText = !(s.toString().equals(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getNote()));
+        if (mStateOfChangeNoteEditText) {
+            textForNoteEditText = s.toString();
+            itemForChangeDataInDB.setNote(textForNoteEditText);
+        } else itemForChangeDataInDB.setNote(null);
+        changeStateOfSaveChangedDataButton();
+    }
+
+    public void attemptToChangeValueOfDateData(String stringDate, long longDate) {
+        mStateOfChangeDateEditText = !(stringDate.equals(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getDate()));
+        if (mStateOfChangeDateEditText) {
+            itemForChangeDataInDB.setDate(stringDate);
+            dateEditTextForEditDataLD.setValue(stringDate);
+            itemForChangeDataInDB.setLongPresentationOfDate(longDate / 1000);
+        } else itemForChangeDataInDB.setLongPresentationOfDate(0);
+        changeStateOfSaveChangedDataButton();
+    }
+
+    private void changeStateOfSaveChangedDataButton() {
+        boolean valueForButton = (mStateOfChangeEmployerEditText | mStateOfChangeFirmEditText | mStateOfChangePoWEditText |
+                mStateOfChangeToWEditText | mStateOfChangeDateEditText | mStateOfChangeResultEditText | mStateOfChangeNoteEditText);
+        if (stateOfSaveChangedDataButton.getValue() == null || stateOfSaveChangedDataButton.getValue() != valueForButton)
+            stateOfSaveChangedDataButton.setValue(valueForButton);
+    }
+
+    private class UpdateItemThread extends Thread {
+        @Override
+        public void run() {
+            try {
+              if (!itemForChangeDataInDB.getResult().equals("")) Float.parseFloat(itemForChangeDataInDB.getResult());
+            } catch (NumberFormatException e) {
+                visibleOfTextViewResultValue.postValue(View.VISIBLE);
+                return;
+            }
+            ContentValues cv = new ContentValues();
+            if (itemForChangeDataInDB.getEmployerID() != 0)
+                cv.put(CWDBHelper.T_RESULT_C_ID_EMPLOYER, itemForChangeDataInDB.getEmployerID());
+            if (itemForChangeDataInDB.getFirmID() != 0)
+                cv.put(CWDBHelper.T_RESULT_C_ID_FIRM, itemForChangeDataInDB.getFirmID());
+            if (itemForChangeDataInDB.getPlaceOfWorkID() != 0)
+                cv.put(CWDBHelper.T_RESULT_C_ID_POW, itemForChangeDataInDB.getPlaceOfWorkID());
+            if (itemForChangeDataInDB.getTypeOfWorkID() != 0)
+                cv.put(CWDBHelper.T_RESULT_C_ID_TOW, itemForChangeDataInDB.getTypeOfWorkID());
+            if (itemForChangeDataInDB.getLongPresentationOfDate() != 0)
+                cv.put(CWDBHelper.T_RESULT_C_DATE, itemForChangeDataInDB.getLongPresentationOfDate());
+            if (!itemForChangeDataInDB.getResult().equals(""))
+                cv.put(CWDBHelper.T_RESULT_C_VALUE, Float.parseFloat(itemForChangeDataInDB.getResult()));
+            if (itemForChangeDataInDB.getNote() != null)
+                cv.put(CWDBHelper.T_RESULT_C_NOTE, itemForChangeDataInDB.getNote());
+            int idKey;
+            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
+                 SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
+                idKey = db.update(CWDBHelper.TABLE_NAME_RESULT,
+                        cv,
+                        "_id = ?",
+                        new String[] { Integer.toString(pairOfItemPositions.getNewPos()) });
+            } catch (SQLiteException e) {
+                ListOfDBItemsActivity.handler.sendEmptyMessage(EditDeleteDataActivity.FAIL_ABOUT_UPDATE_DATA_IN_RESULT_TABLE);
+                return;
+            }
+            if(idKey != 0) {
+                ComplexEntityForDB shortLinkToObject = listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos());
+                if (itemForChangeDataInDB.getEmployerID() != 0) {
+                    shortLinkToObject.setEmployerID(itemForChangeDataInDB.getEmployerID());
+                    shortLinkToObject.setEmployerDescription(itemForChangeDataInDB.getEmployerDescription());
+                    employeeEditTextForResultListLD.postValue(itemForChangeDataInDB.getEmployerDescription());
+                }
+                if (itemForChangeDataInDB.getFirmID() != 0) {
+                    shortLinkToObject.setFirmID(itemForChangeDataInDB.getFirmID());
+                    shortLinkToObject.setFirmDescription(itemForChangeDataInDB.getFirmDescription());
+                    firmEditTextForResultListLD.postValue(itemForChangeDataInDB.getFirmDescription());
+                }
+                if (itemForChangeDataInDB.getPlaceOfWorkID() != 0) {
+                    shortLinkToObject.setPlaceOfWorkID(itemForChangeDataInDB.getPlaceOfWorkID());
+                    shortLinkToObject.setPOWDescription(itemForChangeDataInDB.getPOWDescription());
+                    placeOfWorkEditTextForResultListLD.postValue(itemForChangeDataInDB.getPOWDescription());
+                }
+                if (itemForChangeDataInDB.getTypeOfWorkID() != 0) {
+                    shortLinkToObject.setTypeOfWorkID(itemForChangeDataInDB.getTypeOfWorkID());
+                    shortLinkToObject.setTOWDescription(itemForChangeDataInDB.getTOWDescription());
+                    typeOfWorkEditTextForResultListLD.postValue(itemForChangeDataInDB.getTOWDescription());
+                }
+                if (itemForChangeDataInDB.getLongPresentationOfDate() != 0)
+                    shortLinkToObject.setDate(itemForChangeDataInDB.getDate());
+                if (!itemForChangeDataInDB.getResult().equals(""))
+                    shortLinkToObject.setResult(itemForChangeDataInDB.getResult());
+                if (itemForChangeDataInDB.getNote() != null)
+                    shortLinkToObject.setNote(itemForChangeDataInDB.getNote());
+                stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.UPDATE);
+                toastAboutSuccessUpdateData.postValue(true);
+            }
+            else EditDeleteDataActivity.mHandler.sendEmptyMessage(EditDeleteDataActivity.FAIL_ABOUT_UPDATE_DATA_IN_RESULT_TABLE);
+        }
+    }
+
+    public void tryToSaveChangedData() {
+        stateOfSaveChangedDataButton.setValue(false);
+        UpdateItemThread updateItemThread = new UpdateItemThread();
+        updateItemThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        updateItemThread.start();
     }
 
 }
