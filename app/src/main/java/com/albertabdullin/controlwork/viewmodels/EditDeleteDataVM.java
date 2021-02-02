@@ -74,6 +74,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private MutableLiveData<PairOfItemPositions> changerColorOfViewHolderLD;
     private ListDBItemsFragment.TableNameForList selectedTable;
     private LoadItemsFromPrimaryTableThread loadItemsFromPrimaryTableThread;
+    private LoadItemsThreadFromResultTable loadItemsThreadFromResultTable;
     private SearchItemsThread searchItemsThread;
     private SimpleEntityForDB mSelectedItemForChangeData;
     private ComplexEntityForDB itemForChangeDataInDB;
@@ -575,6 +576,12 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         if (loadItemsFromPrimaryTableThread.isAlive())
             loadItemsFromPrimaryTableThread.interrupt();
     }
+
+    public void tryToStopLoadDataFromResultTableThread() {
+        if (loadItemsThreadFromResultTable.isAlive())
+            loadItemsThreadFromResultTable.interrupt();
+    }
+    
 
     public void setDefaultValuesToListDBItemsFragmentViews() {
         stateOfRecyclerViewForPrimaryList.setValue(null);

@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.NotifierOfBackPressed;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForResultListFromQuery;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForResultListItemsFromDB;
@@ -31,7 +32,7 @@ import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBResult
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.ItemFromResultListKeyProvider;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
-public class DeleteDataFragment extends Fragment {
+public class DeleteDataFragment extends Fragment implements BackPressListener {
 
     private SelectionTracker<ComplexEntityForDB> mTracker;
     private ActionMode mActionMode;
@@ -58,6 +59,11 @@ public class DeleteDataFragment extends Fragment {
                 }
             };
 
+    @Override
+    public void OnBackPress() {
+        mViewModel.tryToStopLoadDataFromResultTableThread();
+    }
+
     public enum StateOfRecyclerView {
         LOAD, DELETE, UPDATE;
     }
@@ -66,6 +72,7 @@ public class DeleteDataFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
+        ((NotifierOfBackPressed)requireActivity()).addListener(this);
     }
 
     @Nullable
@@ -193,6 +200,12 @@ public class DeleteDataFragment extends Fragment {
         super.onSaveInstanceState(outState);
         if (mTracker != null) mTracker.onSaveInstanceState(outState);
         mViewModel.setNullToOldItemPosition();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        ((NotifierOfBackPressed)requireActivity()).removeListener();
     }
 
     public SelectionTracker<ComplexEntityForDB> getSelectionTracker() {
