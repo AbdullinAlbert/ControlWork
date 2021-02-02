@@ -49,7 +49,7 @@ public class PickerItemsDF extends DialogFragment {
     List<SimpleEntityForDB> list = null;
     private Toolbar toolbar;
     private EditText searchEditText;
-    private View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+    private final View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
             if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
@@ -63,7 +63,7 @@ public class PickerItemsDF extends DialogFragment {
         }
     };
 
-    private TextWatcher textWatcherForSearchEditText = new TextWatcher() {
+    private final TextWatcher textWatcherForSearchEditText = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -189,7 +189,6 @@ public class PickerItemsDF extends DialogFragment {
             @Override
             public void onChanged(Integer integer) {
                 if (selectedTable == integer) {
-                    assert adapter != null;
                     adapter.notifyDataSetChanged();
                 }
             }

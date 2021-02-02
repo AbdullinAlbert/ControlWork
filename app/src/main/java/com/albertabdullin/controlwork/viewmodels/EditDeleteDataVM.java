@@ -6,10 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.text.Editable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,11 +18,10 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
 import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
+import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
-import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.fragments.ListDBItemsFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
@@ -35,6 +34,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class EditDeleteDataVM extends AndroidViewModel implements DialogFragmentStateHolder {
     private String mQuery;
@@ -45,6 +49,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private List<SimpleEntityForDB> listForWorkWithFirmTableItems;
     private List<SimpleEntityForDB> listForWorkWithPoWTableItems;
     private List<SimpleEntityForDB> listForWorkWithToWTableItems;
+    private List<SimpleEntityForDB> cacheForAdapterList;
     private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerViewForResultList;
     private MutableLiveData<Integer> visibleOfProgressBarForResultList;
     private MutableLiveData<Integer> visibleOfRecyclerView;
@@ -69,6 +74,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private MutableLiveData<PairOfItemPositions> changerColorOfViewHolderLD;
     private ListDBItemsFragment.TableNameForList selectedTable;
     private LoadItemsFromPrimaryTableThread loadItemsFromPrimaryTableThread;
+    private SearchItemsThread searchItemsThread;
     private SimpleEntityForDB mSelectedItemForChangeData;
     private ComplexEntityForDB itemForChangeDataInDB;
     private String textForResultEditText;
@@ -81,7 +87,8 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private boolean mStateOfChangeResultEditText = false;
     private boolean mStateOfChangeNoteEditText = false;
     private boolean pressedBackButton = false;
-
+    private boolean stateMenuItemSearchText = false;
+    private boolean isBlankCall = true;
     private List<Integer> listOfDeletedRowsFromDB;
     private Set<Integer> itemsOfST;
     private boolean isActivatedDF = false;
@@ -145,7 +152,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         } else isNeedSearch = false;
     }
 
-    public void startSearch() {
+    public void startSearchInResultTable() {
         LoadItemsThreadFromResultTable loadItemsThreadFromResultTable = new LoadItemsThreadFromResultTable();
         loadItemsThreadFromResultTable.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
         loadItemsThreadFromResultTable.start();
@@ -372,7 +379,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
 
     //инициализация списка из таблицы ResultList для DeleteDataFragment
     public void initializeResultList() {
-        if (isNeedSearch) startSearch();
+        if (isNeedSearch) startSearchInResultTable();
         else notifyAboutLoadItems();
     }
 
@@ -781,6 +788,145 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         UpdateItemThread updateItemThread = new UpdateItemThread();
         updateItemThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
         updateItemThread.start();
+    }
+
+    public void setStateMenuItemSearchText(boolean b) {
+        stateMenuItemSearchText = b;
+    }
+
+    public boolean isStateMenuItemSearchTextActive() {
+        return stateMenuItemSearchText;
+    }
+
+    private class SearchItemsThread extends Thread {
+        public static final String TAG_SEARCH_TREAD = "SearchItemsThread";
+        private final BlockingQueue<String> store = new ArrayBlockingQueue<>(1);
+        private String pattern, regEx, hPattern = "";
+        private final AtomicBoolean isStopSearch = new AtomicBoolean(false);
+        private Pattern p;
+        private Matcher m;
+
+        SearchItemsThread(String pattern) {
+            try {
+                store.put(pattern);
+            } catch (InterruptedException e) {
+                Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
+                return;
+            }
+            cacheForAdapterList = new ArrayList<>(getCurrentListForPrimaryTable());
+        }
+
+        public void setNewPattern(String newPattern) {
+            if (!store.isEmpty()) store.clear();
+            try {
+                store.put(newPattern);
+            } catch (InterruptedException e) {
+                Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
+                //Вернуть полный список элементов в List адаптер
+            }
+        }
+
+        public void stopSearch() {
+            isStopSearch.set(true);
+        }
+
+        public void closeThread() {
+            setNewPattern("");
+        }
+
+        private void searchInFullList() {
+            int i = 0;
+            getCurrentListForPrimaryTable().clear();
+            while (i < cacheForAdapterList.size()) {
+                m = p.matcher(cacheForAdapterList.get(i).getDescription());
+                if (m.find()) getCurrentListForPrimaryTable().add(cacheForAdapterList.get(i));
+                i++;
+                if (!store.isEmpty()) {
+                    hPattern = store.poll();
+                    regEx = "(?i)" + hPattern;
+                    p = Pattern.compile(regEx);
+                    if (hPattern.contains(pattern)) searchInFilteredList();
+                    else {
+                        i = 0;
+                        getCurrentListForPrimaryTable().clear();
+                    }
+                }
+                if (isStopSearch.get()) break;
+            }
+        }
+
+        private void searchInFilteredList() {
+            List<SimpleEntityForDB> helperFoundItemsList = new ArrayList<>();
+            for (int j = 0; j < getCurrentListForPrimaryTable().size(); j++) {
+                m = p.matcher(getCurrentListForPrimaryTable().get(j).getDescription());
+                if (m.find()) helperFoundItemsList.add(getCurrentListForPrimaryTable().get(j));
+            }
+            getCurrentListForPrimaryTable().clear();
+            getCurrentListForPrimaryTable().addAll(helperFoundItemsList);
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    pattern = store.take();
+                } catch (InterruptedException e) {
+                    Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
+                    return;
+                    //Вернуть полный список элементов в List адаптера
+                }
+                if (pattern.equals("")) break;
+                regEx = "(?i)" + pattern;
+                p = Pattern.compile(regEx);
+                isStopSearch.set(false);
+                if (!hPattern.equals("") && pattern.contains(hPattern)) searchInFilteredList();
+                else searchInFullList();
+                if (!isStopSearch.get()) {
+                    stateOfRecyclerViewForPrimaryList.postValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
+                } else {
+                    if (!store.isEmpty()) store.clear();
+                    isStopSearch.set(false);
+                    getCurrentListForPrimaryTable().clear();
+                }
+                if (!hPattern.contains(pattern)) hPattern = pattern;
+            }
+        }
+    }
+
+    public void startSearchInResultTable(String pattern) {
+        searchItemsThread = new SearchItemsThread(pattern);
+        searchItemsThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        searchItemsThread.start();
+    }
+
+    public boolean isSearchIsActive() {
+        if (searchItemsThread == null) return false;
+        else return searchItemsThread.isAlive();
+    }
+
+    public void sendNewText(String text) {
+        searchItemsThread.setNewPattern(text);
+    }
+
+    public void setBlankCallTrue() {
+        isBlankCall = true;
+    }
+    public void sayToStopSearch(int before) {
+        if ((isBlankCall) && (before == 0)) isBlankCall = false;
+        else if (searchItemsThread != null) {
+            searchItemsThread.stopSearch();
+            if (cacheForAdapterList.size() == getCurrentListForPrimaryTable().size()) return;
+            getCurrentListForPrimaryTable().clear();
+            getCurrentListForPrimaryTable().addAll(cacheForAdapterList);
+            stateOfRecyclerViewForPrimaryList.setValue(DeleteDataFragment.StateOfRecyclerView.LOAD);
+        }
+    }
+
+    public void closeSearchThread() {
+        if (searchItemsThread != null) searchItemsThread.closeThread();
+        searchItemsThread = null;
+        isBlankCall = true;
+        if (cacheForAdapterList != null) cacheForAdapterList.clear();
     }
 
 }
