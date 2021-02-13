@@ -180,23 +180,11 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         };
         model.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
         selectedDateEditText = view.findViewById(R.id.add_criteria_for_data_editText);
-        selectedDateEditText.setOnClickListener(callPickerSignForDateDF);
-        if (model.getCountOfAddedCriteria(SearchCriteriaFragment.DATES_VALUE) != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteria(SearchCriteriaFragment.DATES_VALUE); i++)
-                addViewToLayoutForCertainSearchCriteria(DATES_VALUE, model.getSelectedEqualSignFromList(DATES_VALUE, i), i);
-        }
+        setDateSearchCriteria();
         selectedNumberEditText = view.findViewById(R.id.add_criteria_for_result_editText);
-        selectedNumberEditText.setOnClickListener(callPickerSignForNumberDF);
-        if (model.getCountOfAddedCriteria(SearchCriteriaFragment.NUMBERS_VALUE) != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteria(SearchCriteriaFragment.NUMBERS_VALUE); i++)
-                addViewToLayoutForCertainSearchCriteria(NUMBERS_VALUE, model.getSelectedEqualSignFromList(NUMBERS_VALUE, i), i);
-        }
+        setSearchCriteriaForValuesWithoutTable(selectedNumberEditText, callPickerSignForNumberDF, NUMBERS_VALUE);
         selectedNoteEditText = view.findViewById(R.id.add_criteria_for_note_edit_text);
-        selectedNoteEditText.setOnClickListener(callPickerSignForNoteDF);
-        if (model.getCountOfAddedCriteria(SearchCriteriaFragment.NOTES_VALUE) != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteria(SearchCriteriaFragment.NOTES_VALUE); i++)
-                addViewToLayoutForCertainSearchCriteria(NOTES_VALUE, model.getSelectedEqualSignFromList(NOTES_VALUE, i), i);
-        }
+        setSearchCriteriaForValuesWithoutTable(selectedNoteEditText, callPickerSignForNoteDF, NOTES_VALUE);
         Button searchButton = view.findViewById(R.id.search_button);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,6 +195,18 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
                 startActivity(intent);
             }
         });
+    }
+    
+    private void setDateSearchCriteria() {
+        setSearchCriteriaForValuesWithoutTable(selectedDateEditText, callPickerSignForDateDF, DATES_VALUE);
+    }
+
+    private void setSearchCriteriaForValuesWithoutTable(EditText et, View.OnClickListener listener, int typeOfValue) {
+        et.setOnClickListener(listener);
+        if (model.getCountOfAddedCriteria(typeOfValue) != 0) {
+            for (int i = 0; i < model.getCountOfAddedCriteria(typeOfValue); i++)
+                addViewToLayoutForCertainSearchCriteria(typeOfValue, model.getSelectedEqualSignFromList(typeOfValue, i), i);
+        }
     }
 
     private void setOneDateCalendarToEditText(final EditText et, final TextView tv) {

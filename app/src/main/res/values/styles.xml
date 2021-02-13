@@ -28,4 +28,8 @@
         <item name="android:tint">@color/standardBlack</item>
     </style>
 
+    <style name="DialogToolbarTextSize" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+    </style>
+
 </resources>

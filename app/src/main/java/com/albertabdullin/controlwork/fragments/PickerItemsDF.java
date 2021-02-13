@@ -114,7 +114,7 @@ public class PickerItemsDF extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        toolbar = view.findViewById(R.id.title_for_select_items_toolbar);
+        toolbar = view.findViewById(R.id.title_for_search_criteria);
         String title = "";
         final AdapterForPickItems adapter = new AdapterForPickItems(list, model, this, selectedTable);
         model.showFullListOfItems(selectedTable);

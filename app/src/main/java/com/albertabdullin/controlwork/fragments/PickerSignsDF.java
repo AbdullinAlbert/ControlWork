@@ -13,6 +13,7 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -82,6 +83,10 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Toolbar toolbar = view.findViewById(R.id.title_for_search_criteria);
+        int subTitleString = selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE ? R.string.results
+                : selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE ? R.string.dates : R.string.notes;
+        toolbar.setSubtitle(getResources().getString(subTitleString));
         final AdapterForPickIneqaulEqualSign adapter;
         if (fromSelectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), selectedTypeOfValue, this);
         else adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), selectedTypeOfValue, fromSelectedSign, this);

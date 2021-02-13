@@ -51,6 +51,10 @@
     <string name="column_name_of_date">Дата</string>
     <string name="column_name_of_res">Результат</string>
     <string name="column_name_of_note">Примечание</string>
+    <string name="criteria_for_select">Критерии для выборки</string>
+    <string name="dates">Даты</string>
+    <string name="results">Результаты</string>
+    <string name="notes">Примечания</string>
     <string name="title_for_delete_data_fragment_toolbar">Результат поиска</string>
     <string name="title_for_edit_data_fragment_toolbar">Изменение данных</string>
     <string name="header_of_delete_dialog_fragment">Выбрано записей:</string>

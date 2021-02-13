@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/title_for_select_items_toolbar"
+        android:id="@+id/title_for_search_criteria"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -23,7 +23,7 @@
         app:layout_constraintBottom_toTopOf="@+id/agree_button_for_selected_items"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_for_select_items_toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/title_for_search_criteria" />
 
     <Button
         android:id="@+id/cancel_select_items_for_search"
