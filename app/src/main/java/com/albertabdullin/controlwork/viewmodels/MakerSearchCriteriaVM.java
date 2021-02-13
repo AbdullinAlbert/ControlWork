@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
@@ -15,7 +14,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.AddItemOfTypeOfValuesToListDF;
 import com.albertabdullin.controlwork.fragments.PickerSignsDF;
@@ -28,19 +26,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFragmentStateHolder {
-    private List<SimpleEntityForDB> hListForWorkWithDB;
     private List<SimpleEntityForDB> adapterListOfEmployees;
     private List<SimpleEntityForDB> listOfSelectedEmployees;
     private List<SimpleEntityForDB> transientListOfSelectedEmployees;
@@ -54,7 +52,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private List<SimpleEntityForDB> listOfSelectedPOW;
     private List<SimpleEntityForDB> transientListOfSelectedPOW;
     private List<SimpleEntityForDB> cacheForAdapterList;
-    private List<SimpleEntityForDB> findedItemsList;
     private List<String> adapterListOfOneDateForEqualitySign;
     private List<String> adapterListOfOneDateForInequalitySign;
     private List<String> adapterListOfRangeOfDateForMoreAndLessSigns;
@@ -78,6 +75,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private SortedEqualSignsList availableOrderedEqualSignsListForNote;
     private List<OrderedSign> selectedEqualSignsListForNote;
     private Map<String, String> stringViewOfNumber;
+    private MutableLiveData<String> exceptionFromBackgroundThreadsLD;
     private MutableLiveData<Integer> entitiesLD;
     private MutableLiveData<String> employeesEditTextLD;
     private MutableLiveData<String> firmsEditTextLD;
@@ -126,6 +124,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private boolean stateMenuItemSearchText = false;
     private boolean isBlankCall = true;
     private MakerSearchCriteriaVM.SearchItemsThread searchItemsThread;
+    private Executor executor;
 
     public MakerSearchCriteriaVM(@NonNull Application application) {
         super(application);
@@ -134,7 +133,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private class SelectItemsTread extends Thread {
         private final String mCurrentNameOfTable;
         private final String mCurrentNameOfColumn;
-        public static final String LOAD_ITEMS_TAG = "SelectItemsTreadVM";
 
         public SelectItemsTread(String currentNameOfTable, String currentNameOfColumn) {
             mCurrentNameOfTable = currentNameOfTable;
@@ -143,8 +141,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
 
         @Override
         public void run() {
-            if (hListForWorkWithDB == null) hListForWorkWithDB = new ArrayList<>();
-            Message msg;
             CWDBHelper cwdbHelper = new CWDBHelper(getApplication());
             try (SQLiteDatabase db = cwdbHelper.getReadableDatabase(); Cursor cursor = db.query(mCurrentNameOfTable,
                     new String[]{"_id", mCurrentNameOfColumn},
@@ -152,34 +148,26 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 if (cursor.moveToFirst()) {
                     do {
                         SimpleEntityForDB eDB = new SimpleEntityForDB(cursor.getInt(0), cursor.getString(1));
-                        hListForWorkWithDB.add(eDB);
+                        getAdapterListOfEntities(mSelectedTable).add(eDB);
                     } while (cursor.moveToNext());
                 }
             } catch (SQLiteException e) {
-                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + mCurrentNameOfTable);
-                msg = MakerSearchCriteriaActivity.mHandler.obtainMessage(MakerSearchCriteriaActivity.LIST_OF_ENTITIES_IS_READY);
-                MakerSearchCriteriaActivity.mHandler.sendMessage(msg);
+                exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.fail_attempt_about_load_data_from_primary_table)
+                + ": " + e.getMessage());
                 return;
             }
-            msg = MakerSearchCriteriaActivity.mHandler.obtainMessage(MakerSearchCriteriaActivity.LIST_OF_ENTITIES_IS_READY, 1,0);
-            if (isEntitiesLDNull()) do {
-                try {
-                    sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } while (isEntitiesLDNull());
-            MakerSearchCriteriaActivity.mHandler.sendMessage(msg);
+            entitiesLD.postValue(mSelectedTable);
         }
     }
 
-    private synchronized boolean isEntitiesLDNull() {
-        return entitiesLD == null;
-    }
-
-    public synchronized LiveData<Integer> getEntitiesLiveData() {
+    public LiveData<Integer> getEntitiesLiveData() {
         if (entitiesLD == null) entitiesLD = new MutableLiveData<>();
         return entitiesLD;
+    }
+
+    public LiveData<String> getExceptionFromBackgroundThreadsLD() {
+        if (exceptionFromBackgroundThreadsLD == null) exceptionFromBackgroundThreadsLD = new MutableLiveData<>();
+        return exceptionFromBackgroundThreadsLD;
     }
 
     public LiveData<String> getEmployeesEditTextLD() {
@@ -408,7 +396,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         if (hList.isEmpty()) {
             SelectItemsTread selectItemsTread = new SelectItemsTread(tableName, columnName);
             selectItemsTread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            selectItemsTread.start();
+            if (executor == null) executor = Executors.newSingleThreadExecutor();
+            executor.execute(selectItemsTread);
         } else entitiesLD.setValue(mSelectedTable);
     }
 
@@ -531,26 +520,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         }
     }
 
-    public void notifyAboutLoadedItems() {
-        switch (mSelectedTable) {
-            case SearchCriteriaFragment.SELECT_EMPLOYEES:
-                adapterListOfEmployees.addAll(hListForWorkWithDB);
-                break;
-            case SearchCriteriaFragment.SELECT_FIRMS:
-                adapterListOfFirms.addAll(hListForWorkWithDB);
-                break;
-            case SearchCriteriaFragment.SELECT_TYPES:
-                adapterListOfTOW.addAll(hListForWorkWithDB);
-                break;
-            case SearchCriteriaFragment.SELECT_PLACES:
-                adapterListOfPOW.addAll(hListForWorkWithDB);
-                break;
-            default: throw new RuntimeException("опечатка в константах. Метод notifyAboutLoadedItems()");
-        }
-        entitiesLD.setValue(mSelectedTable);
-        hListForWorkWithDB.clear();
-    }
-
     public void addSelectedItem(int selectedTable, SimpleEntityForDB eDB) {
         switch (selectedTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
@@ -653,10 +622,10 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             try {
                 store.put(pattern);
             } catch (InterruptedException e) {
-                Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
+                exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.thread_for_search_has_been_interrupted) + ": " + e.getMessage());
+                interrupt();
             }
             cacheForAdapterList = new ArrayList<>(getAdapterListOfEntities(mSelectedTable));
-            findedItemsList = new ArrayList<>();
         }
 
         public void setNewPattern(String newPattern) {
@@ -664,8 +633,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             try {
                 store.put(newPattern);
             } catch (InterruptedException e) {
-                Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
-                //Вернуть полный список элементов в List адаптера
+                exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.thread_for_search_has_been_interrupted) + ": " + e.getMessage());
+                interrupt();
             }
         }
 
@@ -679,10 +648,10 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
 
         private void searchInFullList() {
             int i = 0;
-            findedItemsList.clear();
+            getAdapterListOfEntities(mSelectedTable).clear();
             while (i < cacheForAdapterList.size()) {
                 m = p.matcher(cacheForAdapterList.get(i).getDescription());
-                if (m.find()) findedItemsList.add(cacheForAdapterList.get(i));
+                if (m.find()) getAdapterListOfEntities(mSelectedTable).add(cacheForAdapterList.get(i));
                 i++;
                 if (!store.isEmpty()) {
                     hPattern = store.poll();
@@ -691,7 +660,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                     if (hPattern.contains(pattern)) searchInFilteredList();
                     else {
                         i = 0;
-                        findedItemsList.clear();
+                        getAdapterListOfEntities(mSelectedTable).clear();
                     }
                 }
                 if (isStopSearch.get()) break;
@@ -699,24 +668,23 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         }
 
         private void searchInFilteredList() {
-            List<SimpleEntityForDB> helperFindedItemsList = new ArrayList<>();
-            for (int j = 0; j < findedItemsList.size(); j++) {
-                m = p.matcher(findedItemsList.get(j).getDescription());
-                if (m.find()) helperFindedItemsList.add(findedItemsList.get(j));
+            List<SimpleEntityForDB> helperFoundItemsList = new ArrayList<>();
+            for (int j = 0; j < getAdapterListOfEntities(mSelectedTable).size(); j++) {
+                m = p.matcher(getAdapterListOfEntities(mSelectedTable).get(j).getDescription());
+                if (m.find()) helperFoundItemsList.add(getAdapterListOfEntities(mSelectedTable).get(j));
             }
-            findedItemsList.clear();
-            findedItemsList.addAll(helperFindedItemsList);
+            getAdapterListOfEntities(mSelectedTable).clear();
+            getAdapterListOfEntities(mSelectedTable).addAll(helperFoundItemsList);
         }
 
         @Override
         public void run() {
-            Message msg;
             while (true) {
                 try {
                     pattern = store.take();
                 } catch (InterruptedException e) {
-                    Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
-                    //Вернуть полный список элементов в List адаптера
+                    exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.thread_for_search_has_been_interrupted) + ": " + e.getMessage());
+                    return;
                 }
                 if (pattern.equals("")) break;
                 regEx = "(?i)" + pattern;
@@ -725,12 +693,11 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 if (!hPattern.equals("") && pattern.contains(hPattern)) searchInFilteredList();
                 else searchInFullList();
                 if (!isStopSearch.get()) {
-                    msg = MakerSearchCriteriaActivity.mHandler.obtainMessage(MakerSearchCriteriaActivity.SEARCH_IS_DONE);
-                    MakerSearchCriteriaActivity.mHandler.sendMessage(msg);
+                    entitiesLD.postValue(mSelectedTable);
                 } else {
                     if (!store.isEmpty()) store.clear();
                     isStopSearch.set(false);
-                    findedItemsList.clear();
+                    getAdapterListOfEntities(mSelectedTable).clear();
                 }
                 if (!hPattern.contains(pattern)) hPattern = pattern;
             }
@@ -739,7 +706,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
 
     public void startSearch(String pattern) {
         searchItemsThread = new MakerSearchCriteriaVM.SearchItemsThread(pattern);
-        searchItemsThread.start();
+        searchItemsThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        executor.execute(searchItemsThread);
     }
 
     public boolean isSearchIsActive() {
@@ -770,13 +738,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         searchItemsThread = null;
         isBlankCall = true;
         if (cacheForAdapterList != null) cacheForAdapterList.clear();
-        if (findedItemsList != null) findedItemsList.clear();
-    }
-
-    public void updateSearchAdapterList() {
-        getAdapterListOfEntities(mSelectedTable).clear();
-        getAdapterListOfEntities(mSelectedTable).addAll(findedItemsList);
-        entitiesLD.setValue(mSelectedTable);
     }
 
     public SortedEqualSignsList getAvailableOrderedEqualSignsListForDate(int selectedTypeOfValue) {
@@ -2082,25 +2043,13 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         return sb.toString();
     }
 
+    private String getFirstPartOfQuery() {
+        return getApplication().getResources().getString(R.string.search_criteria_for_edit_delete_data);
+    }
+
     public String getQuery() {
         boolean whereStatement = false;
-        String query = "SELECT " + CWDBHelper.TABLE_NAME_RESULT + "._id, " +
-            CWDBHelper.TABLE_NAME_EMP + "._id, " +
-            CWDBHelper.TABLE_NAME_EMP + "." + CWDBHelper.T_EMP_C_FIO + ", " +
-            CWDBHelper.TABLE_NAME_FIRM + "._id, " +
-            CWDBHelper.TABLE_NAME_FIRM + "." + CWDBHelper.T_FIRM_C_DESCRIPTION + ", " +
-            CWDBHelper.TABLE_NAME_TYPE_OF_WORK + "._id, " +
-            CWDBHelper.TABLE_NAME_TYPE_OF_WORK + "." + CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION + ", " +
-            CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "._id, " +
-            CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "." + CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION + ", " +
-            "strftime(\"%d.%m.%Y\", " + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_DATE + ", \"unixepoch\")" + " AS Date, " +
-            CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_VALUE + ", " +
-            CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_NOTE + " " +
-            "FROM " + CWDBHelper.TABLE_NAME_RESULT + " JOIN " + CWDBHelper.TABLE_NAME_EMP + " " +
-            "ON " + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_EMPLOYER + "=" + CWDBHelper.TABLE_NAME_EMP + "._id " +
-            "JOIN " + CWDBHelper.TABLE_NAME_FIRM + " ON " + CWDBHelper.TABLE_NAME_FIRM + "._id=" + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_FIRM + " " +
-            "JOIN " + CWDBHelper.TABLE_NAME_TYPE_OF_WORK + " ON " + CWDBHelper.TABLE_NAME_TYPE_OF_WORK + "._id=" + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_TOW + " " +
-            "JOIN " + CWDBHelper.TABLE_NAME_PLACE_OF_WORK + " ON " + CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "._id=" + CWDBHelper.TABLE_NAME_RESULT + "." + CWDBHelper.T_RESULT_C_ID_POW;
+        String query = getFirstPartOfQuery();
         StringBuilder sb = new StringBuilder(query);
         if (listOfSelectedEmployees != null && listOfSelectedEmployees.size() != 0) {
             sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_EMP + "._id", listOfSelectedEmployees, whereStatement));

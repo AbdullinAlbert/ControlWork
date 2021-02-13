@@ -1,13 +1,11 @@
 package com.albertabdullin.controlwork.activities;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
@@ -19,20 +17,10 @@ import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCrit
 public class MakerSearchCriteriaActivity extends AppCompatActivity implements ProviderOfHolderFragmentState{
     private static MakerSearchCriteriaVM model;
 
-    public static final int LIST_OF_ENTITIES_IS_READY = 0;
-    public static final int SEARCH_IS_DONE = 1;
-
-    public static Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private final Observer<String> exceptionObserver = new Observer<String>() {
         @Override
-        public void handleMessage(@NonNull Message msg) {
-            switch (msg.what) {
-                case LIST_OF_ENTITIES_IS_READY:
-                    model.notifyAboutLoadedItems();
-                    break;
-                case SEARCH_IS_DONE:
-                    model.updateSearchAdapterList();
-                    break;
-            }
+        public void onChanged(String string) {
+            Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -41,6 +29,8 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_maker_search_criteria_activity);
         model = new ViewModelProvider(this, new ViewModelFactoryMakerSearchCriteria(this.getApplication())).get(MakerSearchCriteriaVM.class);
+        if (model.getExceptionFromBackgroundThreadsLD().hasObservers()) model.getExceptionFromBackgroundThreadsLD().removeObservers(this);
+        model.getExceptionFromBackgroundThreadsLD().observe(this, exceptionObserver);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         SearchCriteriaFragment searchCriteriaFragment = (SearchCriteriaFragment) getSupportFragmentManager().findFragmentByTag("maker_search_criteria_fragment");
         if (searchCriteriaFragment == null) {

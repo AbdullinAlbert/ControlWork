@@ -117,7 +117,6 @@ public class PickerItemsDF extends DialogFragment {
         toolbar = view.findViewById(R.id.title_for_search_criteria);
         String title = "";
         final AdapterForPickItems adapter = new AdapterForPickItems(list, model, this, selectedTable);
-        model.showFullListOfItems(selectedTable);
         switch (selectedTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
                 title = EMPLOYEES_TITLE;
@@ -194,6 +193,7 @@ public class PickerItemsDF extends DialogFragment {
             }
         };
         model.getEntitiesLiveData().observe(this, rvObserver);
+        model.showFullListOfItems(selectedTable);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(requireActivity());
         rv.setLayoutManager(mLayoutManager);
         DividerItemDecoration divider = new DividerItemDecoration

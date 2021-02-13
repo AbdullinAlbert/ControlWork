@@ -154,7 +154,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     public void startSearchInResultTable() {
-        LoadItemsThreadFromResultTable loadItemsThreadFromResultTable = new LoadItemsThreadFromResultTable();
+        loadItemsThreadFromResultTable = new LoadItemsThreadFromResultTable();
         loadItemsThreadFromResultTable.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
         loadItemsThreadFromResultTable.start();
     }
