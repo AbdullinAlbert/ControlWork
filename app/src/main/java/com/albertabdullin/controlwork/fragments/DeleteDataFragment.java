@@ -37,7 +37,18 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
     private SelectionTracker<ComplexEntityForDB> mTracker;
     private ActionMode mActionMode;
     private AdapterForResultListFromQuery mAdapter;
-    private EditDeleteDataVM mViewModel;
+    protected EditDeleteDataVM mViewModel;
+    private RecyclerView recyclerView;
+    private Toolbar toolbar;
+    private String mQuery;
+
+    private final String KEY_FOR_QUERY = "key for mQuery";
+
+    public DeleteDataFragment(String query) {
+        mQuery = query;
+    }
+
+    public DeleteDataFragment() { }
 
     private final SelectionTracker.SelectionObserver<ComplexEntityForDB> selectionObserver =
             new SelectionTracker.SelectionObserver<ComplexEntityForDB>() {
@@ -72,7 +83,7 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
-        ((NotifierOfBackPressed)requireActivity()).addListener(this);
+        addingListenerToBackPressedNotifier();
     }
 
     @Nullable
@@ -84,32 +95,15 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewModel.setQuery(requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY));
-        Toolbar toolbar = view.findViewById(R.id.toolbar_for_delete_data);
-        toolbar.inflateMenu(R.menu.stable_appbar_result_list_items);
-        final MenuItem menuItem = toolbar.getMenu().getItem(0);
-        menuItem.setVisible(false);
-        Observer<Boolean> observerOfEditMenuItem = new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                menuItem.setVisible(aBoolean);
-            }
-        };
-        mViewModel.getVisibleOfEditMenuItem().observe(getViewLifecycleOwner(), observerOfEditMenuItem);
-        menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_edit) {
-                    FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                    EditDataFragment deleteDataFragment = new EditDataFragment();
-                    transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
-                            getResources().getString(R.string.tag_for_edit_data_fragment)).
-                            addToBackStack(null).commit();
-                    return true;
-                }
-                return false;
-            }
-        });
+        if (mQuery == null) {
+            if (savedInstanceState == null)
+                mQuery = requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY);
+            else
+                mQuery = savedInstanceState.getString(KEY_FOR_QUERY);
+        }
+        mViewModel.setQuery(mQuery);
+        toolbar = view.findViewById(R.id.toolbar_for_delete_data);
+        inflateToolbarMenu(toolbar);
         toolbar.setTitle(R.string.title_for_delete_data_fragment_toolbar);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -153,7 +147,7 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         };
         mViewModel.getVisibleOfProgressBarLD().observe(getViewLifecycleOwner(), observerOfProgressBar);
         mAdapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, getViewLifecycleOwner(), this);
-        final RecyclerView recyclerView = view.findViewById(R.id.recyclerView3);
+        recyclerView = view.findViewById(R.id.recyclerView3);
         recyclerView.setVisibility(View.INVISIBLE);
         Observer<Integer> observerOFVisibleRecyclerView = new Observer<Integer>() {
             @Override
@@ -182,22 +176,16 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         };
         mViewModel.getStateOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOfStateOfRV);
         mViewModel.initializeResultList();
-        mTracker = new SelectionTracker.Builder<>(
-                "resultListItems",
-                recyclerView,
-                new ItemFromResultListKeyProvider(mAdapter),
-                new DBResultListItemLookup(recyclerView),
-                StorageStrategy.createParcelableStorage(ComplexEntityForDB.class)
-        ).build();
-        mAdapter.setSelectionTracker(mTracker);
-        mTracker.addObserver(selectionObserver);
-        if (savedInstanceState != null)
+        initializeSelectionTracker();
+        if (savedInstanceState != null && mTracker != null) {
             mTracker.onRestoreInstanceState(savedInstanceState);
+        }
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putString(KEY_FOR_QUERY, mQuery);
         if (mTracker != null) mTracker.onSaveInstanceState(outState);
         mViewModel.setNullToOldItemPosition();
     }
@@ -205,11 +193,55 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ((NotifierOfBackPressed)requireActivity()).removeListener();
+        if (requireActivity() instanceof NotifierOfBackPressed)
+            ((NotifierOfBackPressed)requireActivity()).removeListener();
     }
 
     public SelectionTracker<ComplexEntityForDB> getSelectionTracker() {
         return mTracker;
+    }
+
+    protected void initializeSelectionTracker() {
+        mTracker = new SelectionTracker.Builder<>(
+                "resultListItems",
+                recyclerView,
+                new ItemFromResultListKeyProvider(mAdapter),
+                new DBResultListItemLookup(recyclerView),
+                StorageStrategy.createParcelableStorage(ComplexEntityForDB.class)
+        ).build();
+        mTracker.addObserver(selectionObserver);
+        mAdapter.setSelectionTracker(mTracker);
+    }
+
+    protected void addingListenerToBackPressedNotifier() {
+        ((NotifierOfBackPressed)requireActivity()).addListener(this);
+    }
+
+    protected void inflateToolbarMenu(Toolbar toolbar) {
+        toolbar.inflateMenu(R.menu.stable_appbar_result_list_items);
+        final MenuItem menuItem = toolbar.getMenu().getItem(0);
+        menuItem.setVisible(false);
+        Observer<Boolean> observerOfEditMenuItem = new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                menuItem.setVisible(aBoolean);
+            }
+        };
+        mViewModel.getVisibleOfEditMenuItem().observe(getViewLifecycleOwner(), observerOfEditMenuItem);
+        menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.action_edit) {
+                    FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                    EditDataFragment deleteDataFragment = new EditDataFragment();
+                    transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
+                            getResources().getString(R.string.tag_for_edit_data_fragment)).
+                            addToBackStack(null).commit();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
 }

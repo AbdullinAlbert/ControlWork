@@ -168,7 +168,8 @@ public class EditDataFragment extends Fragment implements BackPressListener {
             try {
                 builder.setSelection(DateConverter.convertStringDateToLong(dateEditText.getText().toString()));
             } catch (java.text.ParseException e) {
-                Toast.makeText(requireContext(), getResources().getString(R.string.cannot_convert_string_to_date), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getResources().getString(R.string.cannot_convert_string_to_date) +
+                        " : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
             }
             MaterialDatePicker<Long> materialDatePicker = builder.build();

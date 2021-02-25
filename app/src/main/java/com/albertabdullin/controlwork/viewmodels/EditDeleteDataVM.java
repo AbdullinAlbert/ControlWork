@@ -386,13 +386,13 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
 
     public void notifyEditTexts(int i) {
         if (i == -1) {
-            visibleOfEditMenuItem.setValue(false);
+            if (visibleOfEditMenuItem != null) visibleOfEditMenuItem.setValue(false);
             employeeEditTextForResultListLD.setValue("");
             firmEditTextForResultListLD.setValue("");
             typeOfWorkEditTextForResultListLD.setValue("");
             placeOfWorkEditTextForResultListLD.setValue("");
         } else {
-            visibleOfEditMenuItem.setValue(true);
+            if (visibleOfEditMenuItem != null) visibleOfEditMenuItem.setValue(true);
             employeeEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getEmployerDescription());
             firmEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getFirmDescription());
             typeOfWorkEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getTOWDescription());
@@ -918,6 +918,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     public void setBlankCallTrue() {
         isBlankCall = true;
     }
+
     public void sayToStopSearch(int before) {
         if ((isBlankCall) && (before == 0)) isBlankCall = false;
         else if (searchItemsThread != null) {

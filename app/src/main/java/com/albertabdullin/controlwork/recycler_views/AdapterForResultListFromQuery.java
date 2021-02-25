@@ -139,7 +139,8 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.setActivatedState(mSelectionTracker.isSelected(mListOfRecyclerView.get(position)));
+        if (mSelectionTracker != null)
+            holder.setActivatedState(mSelectionTracker.isSelected(mListOfRecyclerView.get(position)));
         holder.getId().setText(mListOfRecyclerView.get(position).getID());
         holder.getDate().setText(mListOfRecyclerView.get(position).getDate());
         holder.getResult().setText(mListOfRecyclerView.get(position).getResult());

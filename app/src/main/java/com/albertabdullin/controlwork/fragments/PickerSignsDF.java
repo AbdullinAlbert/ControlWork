@@ -21,12 +21,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.SearchCriteriaVMProvider;
 import com.albertabdullin.controlwork.recycler_views.AdapterForPickIneqaulEqualSign;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 
 
 public class PickerSignsDF extends DialogFragment implements DFPickerObservable {
-    private MakerSearchCriteriaVM model;
+    protected MakerSearchCriteriaVM mViewModel;
     private DFPickerObserver mDfPickerObserver;
     private String fromSelectedSign;
     private int selectedTypeOfValue;
@@ -57,7 +58,6 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (mDfPickerObserver == null) mDfPickerObserver = (SearchCriteriaFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("edit_delete_fragment");
         if (savedInstanceState != null) {
             fromSelectedSign = savedInstanceState.getString(SELECTED_SIGN_TAG);
@@ -83,13 +83,14 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel = ((SearchCriteriaVMProvider)requireActivity()).getMakerSearchCriteriaVM();
         Toolbar toolbar = view.findViewById(R.id.title_for_search_criteria);
         int subTitleString = selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE ? R.string.results
                 : selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE ? R.string.dates : R.string.notes;
         toolbar.setSubtitle(getResources().getString(subTitleString));
         final AdapterForPickIneqaulEqualSign adapter;
-        if (fromSelectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), selectedTypeOfValue, this);
-        else adapter = new AdapterForPickIneqaulEqualSign(model, getViewLifecycleOwner(), selectedTypeOfValue, fromSelectedSign, this);
+        if (fromSelectedSign == null ) adapter = new AdapterForPickIneqaulEqualSign(mViewModel, getViewLifecycleOwner(), selectedTypeOfValue, this);
+        else adapter = new AdapterForPickIneqaulEqualSign(mViewModel, getViewLifecycleOwner(), selectedTypeOfValue, fromSelectedSign, this);
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(requireActivity()));
@@ -99,24 +100,21 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                model.clearSelectedEqualSign();
+                mViewModel.clearSelectedEqualSign();
                 Dialog dialog = getDialog();
                 if (dialog != null) dialog.dismiss();
             }
         });
         Button agreeButton = view.findViewById(R.id.agree_button_for_selected_items);
-        agreeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (haveSelectedItem()) {
-                    model.clearSelectedEqualSign();
-                    Dialog dialog = getDialog();
-                    if (dialog != null) dialog.dismiss();
-                    if (fromSelectedSign == null) selectedAction = ADD_ITEM;
-                    else selectedAction = "Удалить критерий".equals(model.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue)) ? DELETE_ITEM : CHANGE_ITEM;
-                    model.notifyAboutTapAddButton(selectedTypeOfValue, selectedAction, positionOnSelectedAction);
-                    notifyAboutSelection();
-                }
+        agreeButton.setOnClickListener(v -> {
+            if (haveSelectedItem()) {
+                mViewModel.clearSelectedEqualSign();
+                Dialog dialog = getDialog();
+                if (dialog != null) dialog.dismiss();
+                if (fromSelectedSign == null) selectedAction = ADD_ITEM;
+                else selectedAction = "Удалить критерий".equals(mViewModel.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue)) ? DELETE_ITEM : CHANGE_ITEM;
+                mViewModel.notifyAboutTapAddButton(selectedTypeOfValue, selectedAction, positionOnSelectedAction);
+                notifyAboutSelection();
             }
         });
     }
@@ -145,8 +143,8 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
         switch (selectedAction) {
             case ADD_ITEM:
                 mDfPickerObserver.addViewToLayoutForCertainSearchCriteria(selectedTypeOfValue,
-                        model.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue),
-                        model.getPositionOfAddedCriteriaForSelectedTypeOfValue(selectedTypeOfValue));
+                        mViewModel.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue),
+                        mViewModel.getPositionOfAddedCriteriaForSelectedTypeOfValue(selectedTypeOfValue));
                 break;
             case CHANGE_ITEM:
                 mDfPickerObserver.changeLayoutForCertainSearchCriteria(selectedTypeOfValue, positionOnSelectedAction);

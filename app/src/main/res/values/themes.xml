@@ -19,6 +19,7 @@
 
     <style name="SecondAppTheme" parent="AppTheme">
         <item name="actionOverflowButtonStyle">@style/MySecondAppActionBarOverFlowMenu</item>
+        <item name="popupTheme">@style/MyColorOfMenuItem</item>
     </style>
 
   </resources>

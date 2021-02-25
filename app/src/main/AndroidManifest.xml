@@ -11,24 +11,30 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activities.ListOfDBItemsActivity"
             android:windowSoftInputMode="stateUnchanged"
-            android:parentActivityName="com.albertabdullin.controlwork.activities.FillNewData_Activity">
+            android:parentActivityName=".activities.FillNewData_Activity">
         </activity>
         <activity
             android:name=".activities.FillNewData_Activity"
-            android:label="Добавьте результат работы"
-            android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
+            android:label="@string/add_work_results"
+            android:parentActivityName=".activities.MainActivity"
             />
         <activity
             android:name=".activities.EditDeleteDataActivity"
-            android:label="Результаты поиска"
+            android:label="@string/search_results"
             android:theme="@style/AppTheme"
-            android:parentActivityName="com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity"
+            android:parentActivityName=".activities.MakerSearchCriteriaActivity"
             />
         <activity
             android:name=".activities.MakerSearchCriteriaActivity"
-            android:label="Критерии поиска"
+            android:label="@string/search_criteria"
             android:theme="@style/SecondAppTheme"
-            android:parentActivityName="com.albertabdullin.controlwork.activities.MainActivity"
+            android:parentActivityName=".activities.MainActivity"
+            />
+        <activity
+            android:name=".activities.ReportActivity"
+            android:label="@string/search_criteria_for_report"
+            android:theme="@style/SecondAppTheme"
+            android:parentActivityName=".activities.MainActivity"
             />
         <activity android:name=".activities.MainActivity">
             <intent-filter>

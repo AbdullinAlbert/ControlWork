@@ -22,7 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
-import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
+import com.albertabdullin.controlwork.activities.SearchCriteriaVMProvider;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -42,83 +42,60 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
 
     public static final String KEY_FOR_QUERY = "key for query";
 
-    private EditText selectedDateEditText;
+    protected EditText selectedDateEditText;
     private EditText selectedNumberEditText;
     private EditText selectedNoteEditText;
     private Button addCriteriaForDateButton;
     private Button addCriteriaForNumberButton;
     private Button addCriteriaForNoteButton;
-    private static MakerSearchCriteriaVM model;
+    protected MakerSearchCriteriaVM mViewModel;
     private ViewGroup innerLinearLayout;
 
     private View[] viewsForDates;
     private View[] viewsForNumbers;
     private View[] viewsForNotes;
 
-    View.OnClickListener callPickerEmployersDF = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            PickerItemsDF pickerItemsDF = new PickerItemsDF(SELECT_EMPLOYEES);
-            pickerItemsDF.show(requireActivity().getSupportFragmentManager(), "newData");
-        }
+    View.OnClickListener callPickerEmployersDF = v -> {
+        openPickerItems(SELECT_EMPLOYEES);
     };
 
-    View.OnClickListener callPickerFirmsDF = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            PickerItemsDF pickerItemsDF = new PickerItemsDF(SELECT_FIRMS);
-            pickerItemsDF.show(requireActivity().getSupportFragmentManager(), "newData");
-        }
+    View.OnClickListener callPickerFirmsDF = v -> {
+        openPickerItems(SELECT_FIRMS);
     };
 
-    View.OnClickListener callPickerTOWDF = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            PickerItemsDF pickerItemsDF = new PickerItemsDF(SELECT_TYPES);
-            pickerItemsDF.show(requireActivity().getSupportFragmentManager(), "newData");
-        }
+    View.OnClickListener callPickerTOWDF = v -> {
+        openPickerItems(SELECT_TYPES);
     };
 
-    View.OnClickListener callPickerPOWDF = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            PickerItemsDF pickerItemsDF = new PickerItemsDF(SELECT_PLACES);
-            pickerItemsDF.show(requireActivity().getSupportFragmentManager(), "newData");
-        }
+    View.OnClickListener callPickerPOWDF = v -> {
+        openPickerItems(SELECT_PLACES);
     };
 
-    View.OnClickListener callPickerSignForDateDF = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, DATES_VALUE);
-            pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickSign");
-        }
+    protected void openPickerItems(int selectedTable) {
+        PickerItemsDF pickerItemsDF = new PickerItemsDF(selectedTable);
+        pickerItemsDF.show(requireActivity().getSupportFragmentManager(), "newData");
+    }
+
+    View.OnClickListener callPickerSignForDateDF = v -> {
+        openPickerSigns(DATES_VALUE);
     };
 
-    View.OnClickListener callPickerSignForNumberDF = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, NUMBERS_VALUE);
-            pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickSign");
-        }
+    View.OnClickListener callPickerSignForNumberDF = v -> {
+        openPickerSigns(NUMBERS_VALUE);
     };
 
-    View.OnClickListener callPickerSignForNoteDF = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, NOTES_VALUE);
-            pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickSign");
-        }
+    View.OnClickListener callPickerSignForNoteDF = v -> {
+        openPickerSigns(NOTES_VALUE);
     };
+
+    protected void openPickerSigns(int selectedValue) {
+        PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, selectedValue);
+        pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickSign");
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
     }
 
     @Nullable
@@ -130,55 +107,39 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel = ((SearchCriteriaVMProvider)requireActivity()).getMakerSearchCriteriaVM();
         Toolbar toolbar = view.findViewById(R.id.toolbar_search_criteria);
-        toolbar.setTitle("Критерии поиска");
+        setTitleForToolBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                requireActivity().onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         final EditText selectedEmployersET = view.findViewById(R.id.select_empl_editText);
         selectedEmployersET.setOnClickListener(callPickerEmployersDF);
-        Observer<String> editTextEmployeesObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                selectedEmployersET.setText("");
-                selectedEmployersET.setText(s);
-            }
+        Observer<String> editTextEmployeesObserver = s -> {
+            selectedEmployersET.setText("");
+            selectedEmployersET.setText(s);
         };
-        model.getEmployeesEditTextLD().observe(getViewLifecycleOwner(), editTextEmployeesObserver);
+        mViewModel.getEmployeesEditTextLD().observe(getViewLifecycleOwner(), editTextEmployeesObserver);
         final EditText selectedFirmsET = view.findViewById(R.id.select_firm_editText);
         selectedFirmsET.setOnClickListener(callPickerFirmsDF);
-        Observer<String> editTextFirmsObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                selectedFirmsET.setText("");
-                selectedFirmsET.setText(s);
-            }
+        Observer<String> editTextFirmsObserver = s -> {
+            selectedFirmsET.setText("");
+            selectedFirmsET.setText(s);
         };
-        model.getFirmsEditTextLD().observe(getViewLifecycleOwner(), editTextFirmsObserver);
+        mViewModel.getFirmsEditTextLD().observe(getViewLifecycleOwner(), editTextFirmsObserver);
         final EditText selectedToWET = view.findViewById(R.id.select_typeOfWork_editText);
         selectedToWET.setOnClickListener(callPickerTOWDF);
-        Observer<String> editTextToWObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                selectedToWET.setText("");
-                selectedToWET.setText(s);
-            }
+        Observer<String> editTextToWObserver = s -> {
+            selectedToWET.setText("");
+            selectedToWET.setText(s);
         };
-        model.getToWEditTextLD().observe(getViewLifecycleOwner(), editTextToWObserver);
+        mViewModel.getToWEditTextLD().observe(getViewLifecycleOwner(), editTextToWObserver);
         final EditText selectedPoWET = view.findViewById(R.id.select_placeOfWork_editText);
         selectedPoWET.setOnClickListener(callPickerPOWDF);
-        Observer<String> editTextPoWObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                selectedPoWET.setText("");
-                selectedPoWET.setText(s);
-            }
+        Observer<String> editTextPoWObserver = s -> {
+            selectedPoWET.setText("");
+            selectedPoWET.setText(s);
         };
-        model.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
+        mViewModel.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
         selectedDateEditText = view.findViewById(R.id.add_criteria_for_data_editText);
         setDateSearchCriteria();
         selectedNumberEditText = view.findViewById(R.id.add_criteria_for_result_editText);
@@ -186,68 +147,62 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         selectedNoteEditText = view.findViewById(R.id.add_criteria_for_note_edit_text);
         setSearchCriteriaForValuesWithoutTable(selectedNoteEditText, callPickerSignForNoteDF, NOTES_VALUE);
         Button searchButton = view.findViewById(R.id.search_button);
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               String query = model.getQuery();
-                Intent intent = new Intent(requireActivity(), EditDeleteDataActivity.class);
-                intent.putExtra(KEY_FOR_QUERY, query);
-                startActivity(intent);
-            }
+        setTextToSearchButton(searchButton);
+        searchButton.setOnClickListener(v -> {
+            String query = mViewModel.createQuery();
+            startViewForResult(query);
         });
     }
+
+    protected void setTitleForToolBar(Toolbar toolbar) {
+        toolbar.setTitle(R.string.search_criteria);
+    }
     
-    private void setDateSearchCriteria() {
+    protected void setDateSearchCriteria() {
         setSearchCriteriaForValuesWithoutTable(selectedDateEditText, callPickerSignForDateDF, DATES_VALUE);
+    }
+
+    protected void startViewForResult(String query) {
+        Intent intent = new Intent(requireActivity(), EditDeleteDataActivity.class);
+        intent.putExtra(KEY_FOR_QUERY, query);
+        startActivity(intent);
     }
 
     private void setSearchCriteriaForValuesWithoutTable(EditText et, View.OnClickListener listener, int typeOfValue) {
         et.setOnClickListener(listener);
-        if (model.getCountOfAddedCriteria(typeOfValue) != 0) {
-            for (int i = 0; i < model.getCountOfAddedCriteria(typeOfValue); i++)
-                addViewToLayoutForCertainSearchCriteria(typeOfValue, model.getSelectedEqualSignFromList(typeOfValue, i), i);
+        if (mViewModel.getCountOfAddedCriteria(typeOfValue) != 0) {
+            for (int i = 0; i < mViewModel.getCountOfAddedCriteria(typeOfValue); i++)
+                addViewToLayoutForCertainSearchCriteria(typeOfValue, mViewModel.getSelectedEqualSignFromList(typeOfValue, i), i);
         }
+    }
+
+    protected void setTextToSearchButton(Button button) {
+        button.setText(R.string.search_item);
     }
 
     private void setOneDateCalendarToEditText(final EditText et, final TextView tv) {
         String sign = tv.getText().toString();
         if ("\u2a7e".equals(sign)) {
-            Observer<String> observerEditTextOfDateMoreSign = new Observer<String>() {
-                @Override
-                public void onChanged(String s) {
-                    et.setText(s);
-                }
-            };
-            model.getStringViewOfDateMoreSignLD().observe(getViewLifecycleOwner(), observerEditTextOfDateMoreSign);
+            Observer<String> observerEditTextOfDateMoreSign = et::setText;
+            mViewModel.getStringViewOfDateMoreSignLD().observe(getViewLifecycleOwner(), observerEditTextOfDateMoreSign);
         } else {
-            Observer<String> observerEditTextOfDateLessSign = new Observer<String>() {
-                @Override
-                public void onChanged(String s) {
-                    et.setText(s);
-                }
-            };
-            model.getStringViewOfDateLessSignLD().observe(getViewLifecycleOwner(), observerEditTextOfDateLessSign);
+            Observer<String> observerEditTextOfDateLessSign = et::setText;
+            mViewModel.getStringViewOfDateLessSignLD().observe(getViewLifecycleOwner(), observerEditTextOfDateLessSign);
         }
-        et.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
-                Long selection = model.getSelection(tv.getText().toString(), 0);
-                if (selection != null) builder.setSelection(selection);
-                MaterialDatePicker<Long> materialDatePicker = builder.build();
-                materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-                    @Override
-                    public void onPositiveButtonClick(Long selection) {
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTimeInMillis(selection);
-                        String date = getStringViewOfDate(calendar);
-                        model.setSelectedSignAndStringViewOfDate(tv.getText().toString(), date);
-                        model.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
-                                model.getPositionOfSign(DATES_VALUE, tv.getText().toString()), selection, null);
-                    }
-                });
-                materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");
-            }
+        et.setOnClickListener(v -> {
+            MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+            Long selection = mViewModel.getSelection(tv.getText().toString(), 0);
+            if (selection != null) builder.setSelection(selection);
+            MaterialDatePicker<Long> materialDatePicker = builder.build();
+            materialDatePicker.addOnPositiveButtonClickListener(selection1 -> {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(selection1);
+                String date = getStringViewOfDate(calendar);
+                mViewModel.setSelectedSignAndStringViewOfDate(tv.getText().toString(), date);
+                mViewModel.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
+                        mViewModel.getPositionOfSign(DATES_VALUE, tv.getText().toString()), selection1, null);
+            });
+            materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");
         });
     }
 
@@ -268,12 +223,12 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
                 String stringViewOfNumber = s.toString();
                 if (stringViewOfNumber.length() > 0) {
                     Float floatViewOfNumber = Float.parseFloat(stringViewOfNumber);
-                    model.setSelectedSignAndStringViewOfNumber(key, stringViewOfNumber);
-                    model.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
+                    mViewModel.setSelectedSignAndStringViewOfNumber(key, stringViewOfNumber);
+                    mViewModel.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
                             position, floatViewOfNumber, null);
                 } else {
-                    model.deleteStringViewOfNumber(key);
-                    model.deleteSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE, key);
+                    mViewModel.deleteStringViewOfNumber(key);
+                    mViewModel.deleteSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE, key);
                 }
             }
         };
@@ -283,38 +238,31 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
 
     private void setDialogFragmentWithListOfValuesToEditText(final int selectedTypeOfValue, final EditText et, final TextView tv) {
         String sign = tv.getText().toString();
-        Observer<String> observerEditText = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                et.setText(s);
-            }
-        };
+        Observer<String> observerEditText = et::setText;
         switch (sign) {
             case "=":
-                if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) model.getStringViewOfDateEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
-                else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) model.getStringViewOfNumberEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
-                else model.getStringViewOfNoteEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) mViewModel.getStringViewOfDateEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) mViewModel.getStringViewOfNumberEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else mViewModel.getStringViewOfNoteEqualitySignLD().observe(getViewLifecycleOwner(), observerEditText);
                 break;
             case "\u2260":
-                if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) model.getStringViewOfDateInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
-                else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) model.getStringViewOfNumberInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
-                else model.getStringViewOfNoteInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) mViewModel.getStringViewOfDateInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) mViewModel.getStringViewOfNumberInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
+                else mViewModel.getStringViewOfNoteInequalitySignLD().observe(getViewLifecycleOwner(), observerEditText);
                 break;
             case ("\u2a7e" + " " + "\u2a7d"):
-                if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) model.getStringViewOfDateMoreAndLessSignsLD().observe(getViewLifecycleOwner(), observerEditText);
-                else model.getStringViewOfNumberMoreAndLessSignsLD().observe(getViewLifecycleOwner(), observerEditText);
+                if (selectedTypeOfValue == SearchCriteriaFragment.DATES_VALUE) mViewModel.getStringViewOfDateMoreAndLessSignsLD().observe(getViewLifecycleOwner(), observerEditText);
+                else mViewModel.getStringViewOfNumberMoreAndLessSignsLD().observe(getViewLifecycleOwner(), observerEditText);
                 break;
         }
         if (selectedTypeOfValue == SearchCriteriaFragment.NUMBERS_VALUE) {
             et.setClickable(false);
             et.setFocusable(false);
         }
-        et.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AddItemOfTypeOfValuesToListDF addItemOfTypeOfValuesToListDF = new AddItemOfTypeOfValuesToListDF(selectedTypeOfValue, tv.getText().toString());
-                addItemOfTypeOfValuesToListDF.show(requireActivity().getSupportFragmentManager(), "DialogFragmentWithOneDateCalendar");
-            }
+        et.setOnClickListener(v -> {
+            mViewModel.setCommonSelectedSign(sign);
+            AddItemOfTypeOfValuesToListDF addItemOfTypeOfValuesToListDF = new AddItemOfTypeOfValuesToListDF(selectedTypeOfValue, tv.getText().toString());
+            addItemOfTypeOfValuesToListDF.show(requireActivity().getSupportFragmentManager(), "DialogFragmentWithOneDateCalendar");
         });
     }
 
@@ -374,19 +322,16 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         helperArrayOfView[positionOfView].setLayoutParams(lp);
         helperArrayOfView[positionOfView].setVisibility(View.VISIBLE);
         final TextView tv = helperArrayOfView[positionOfView].findViewById(R.id.textView_for_equal_sign);
-        final String currentSign = model.getSelectedEqualSignFromList(selectedTypeOfValue, positionOfView);
+        final String currentSign = mViewModel.getSelectedEqualSignFromList(selectedTypeOfValue, positionOfView);
         tv.setText(currentSign);
-        tv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String currentSign = tv.getText().toString();
-                int positionOfSign = model.getPositionOfSign(selectedTypeOfValue, currentSign);
-                PickerSignsDF pickerSignsDF;
-                if (selectedTypeOfValue == DATES_VALUE)  pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, DATES_VALUE);
-                else if (selectedTypeOfValue == NUMBERS_VALUE) pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, NUMBERS_VALUE);
-                else pickerSignsDF = new PickerSignsDF(currentSign, positionOfSign,SearchCriteriaFragment.this, NOTES_VALUE);
-                pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickerSign");
-            }
+        tv.setOnClickListener(v -> {
+            String currentSign1 = tv.getText().toString();
+            int positionOfSign = mViewModel.getPositionOfSign(selectedTypeOfValue, currentSign1);
+            PickerSignsDF pickerSignsDF;
+            if (selectedTypeOfValue == DATES_VALUE)  pickerSignsDF = new PickerSignsDF(currentSign1, positionOfSign,SearchCriteriaFragment.this, DATES_VALUE);
+            else if (selectedTypeOfValue == NUMBERS_VALUE) pickerSignsDF = new PickerSignsDF(currentSign1, positionOfSign,SearchCriteriaFragment.this, NUMBERS_VALUE);
+            else pickerSignsDF = new PickerSignsDF(currentSign1, positionOfSign,SearchCriteriaFragment.this, NOTES_VALUE);
+            pickerSignsDF.show(requireActivity().getSupportFragmentManager(), "pickerSign");
         });
         final EditText et = helperArrayOfView[positionOfView].findViewById(R.id.editText_filled_value);
         if ("=".equals(currentSign) || "\u2260".equals(currentSign)) {
@@ -397,7 +342,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             if (selectedTypeOfValue == DATES_VALUE) et.setHint("Выбери даты");
             else et.setHint("Введи значения");
         }
-        et.setText(model.getStringViewOfSearchCriteria(selectedTypeOfValue, currentSign));
+        et.setText(mViewModel.getStringViewOfSearchCriteria(selectedTypeOfValue, currentSign));
         if (positionOfView < helperArrayOfView.length - 1)  {
            if (helperButton.getHeight() == 0) showAddButtonForValueCriteria(selectedTypeOfValue);
         } else helperButton.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
@@ -429,7 +374,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
                 throw new RuntimeException("Опечатка в константах. void changeLayoutForCertainSearchCriteria(int selectedTypeOfValue, int position)." +
                         "selectedTypeOfValue -" + selectedTypeOfValue);
         }
-        tv.setText(model.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue));
+        tv.setText(mViewModel.getSelectedEqualSignForSelectedTypeOfValue(selectedTypeOfValue));
     }
 
     @Override

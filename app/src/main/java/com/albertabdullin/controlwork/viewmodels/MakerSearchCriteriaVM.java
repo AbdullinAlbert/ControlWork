@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Process;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -24,7 +23,6 @@ import com.albertabdullin.controlwork.models.SortedEqualSignsList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,9 +50,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private List<SimpleEntityForDB> listOfSelectedPOW;
     private List<SimpleEntityForDB> transientListOfSelectedPOW;
     private List<SimpleEntityForDB> cacheForAdapterList;
-    private List<String> adapterListOfOneDateForEqualitySign;
-    private List<String> adapterListOfOneDateForInequalitySign;
-    private List<String> adapterListOfRangeOfDateForMoreAndLessSigns;
+    protected List<String> adapterListOfOneDateForEqualitySign;
+    protected List<String> adapterListOfOneDateForInequalitySign;
+    protected List<String> adapterListOfRangeOfDateForMoreAndLessSigns;
     private List<String> adapterListOfOneNumberForEqualitySign;
     private List<String> adapterListOfOneNumberForInequalitySign;
     private List<String> adapterListOfRangeOfNumbersForMoreAndLessSigns;
@@ -83,8 +81,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private MutableLiveData<String> placesOfWorkEditTextLD;
     private MutableLiveData<Boolean> selectedCheckBoxesLD;
     private MutableLiveData<Integer> selectedEqualSignRadioButtonLD;
-    private MutableLiveData<String> stringViewOfDateMoreSignLD;
-    private MutableLiveData<String> stringViewOfDateLessSignLD;
+    protected MutableLiveData<String> stringViewOfDateMoreSignLD;
+    protected MutableLiveData<String> stringViewOfDateLessSignLD;
     private MutableLiveData<String> stringViewOfDateEqualitySignLD;
     private MutableLiveData<String> stringViewOfDateInequalitySignLD;
     private MutableLiveData<String> stringViewOfDateMoreAndLessSignsLD;
@@ -109,13 +107,16 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private MutableLiveData<Boolean> deleteImageViewOnDialogMoreAndLessSignsNumberLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogEqualitySignNoteLD;
     private MutableLiveData<Boolean> deleteImageViewOnDialogInequalitySignNoteLD;
-    private Map<String, List<Long>> searchCriteriaForDate;
+    protected Map<String, List<Long>> searchCriteriaForDate;
     private Map<String, List<Float>> searchCriteriaForNumber;
     private Map<String, List<String>> searchCriteriaForNote;
     private String selectedEqualSignForDate;
     private String selectedEqualSignForNumber;
     private String selectedEqualSignForNote;
+    private String mCommonSelectedSign;
+    private String mQueryForSearch;
     private int mSelectedTable;
+    private int mSelectedTypeOfValue;
     private int positionOfUpdatedItemFromDateList;
     private int positionOfUpdatedItemFromNumberList;
     private int positionOfUpdatedItemFromNoteList;
@@ -611,7 +612,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     }
 
     private class SearchItemsThread extends Thread {
-        public static final String TAG_SEARCH_TREAD = "SearchItemsThread";
         private final BlockingQueue<String> store = new ArrayBlockingQueue<>(1);
         private String pattern, regEx, hPattern = "";
         private final AtomicBoolean isStopSearch = new AtomicBoolean(false);
@@ -740,6 +740,14 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         if (cacheForAdapterList != null) cacheForAdapterList.clear();
     }
 
+    public void setSelectedTypeOfValue(int selectedTypeOfValue) {
+        mSelectedTypeOfValue = selectedTypeOfValue;
+    }
+
+    public int getSelectedTypeOfValue() {
+        return mSelectedTypeOfValue;
+    }
+
     public SortedEqualSignsList getAvailableOrderedEqualSignsListForDate(int selectedTypeOfValue) {
         String[] arraysOfSigns = getApplication().getResources().getStringArray(R.array.full_equal_inequal_signs_array);
         switch (selectedTypeOfValue) {
@@ -824,6 +832,14 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                         "getAvailableOrderedEqualSignsList(int selectedTypeOfValue, String selectedEqualSign). selectedTypeOfValue - " + selectedTypeOfValue);
         }
         return new SortedEqualSignsList(hList);
+    }
+
+    public void setCommonSelectedSign(String selectedSign) {
+        mCommonSelectedSign = selectedSign;
+    }
+
+    public String getCommonSelectedSign() {
+        return mCommonSelectedSign;
     }
 
     public void setSelectedEqualSign(int selectedTypeOfValue, String selectedSign, int position) {
@@ -1223,11 +1239,16 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             store.remove(key);
     }
 
+    public boolean isSearchCriteriaForDateNull() {
+       return searchCriteriaForDate == null;
+    }
+
     public <T> void addSearchCriteria(int selectedTypeOfValue, Integer selectedPositionOfSign, T value1, T value2) {
         String key;
         switch(selectedTypeOfValue) {
             case SearchCriteriaFragment.DATES_VALUE:
-                key = selectedEqualSignsListForDate.get(selectedPositionOfSign).getSign();
+                if (selectedPositionOfSign == null) key = "\u2a7e" + " " + "\u2a7d";
+                else key = selectedEqualSignsListForDate.get(selectedPositionOfSign).getSign();
                 Long longValue1 = ((Long) value1) / 1000;
                 Long longValue2 = null;
                 if (value2 != null) longValue2 = ((Long) value2) / 1000;
@@ -1327,7 +1348,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         }
     }
 
-    private String getStringView(List<String> adapterList) {
+    protected String getStringView(List<String> adapterList) {
         StringBuilder sb = new StringBuilder();
         int lastIndex = adapterList.size();
         if (lastIndex != 0) {
@@ -1476,16 +1497,17 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     public void addItemToDateList(String sign, String date1, String date2) {
         switch (sign) {
             case "=":
-                adapterListOfOneDateForEqualitySign.add(date1);
+                getAdapterListOfCurrentSignForDate(sign).add(date1);
                 adapterListOfOneDateForEqualitySignLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
                 break;
             case "\u2260":
-                adapterListOfOneDateForInequalitySign.add(date1);
+                getAdapterListOfCurrentSignForDate(sign).add(date1);
                 adapterListOfOneDateForInequalitySignLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
                 break;
             case ("\u2a7e" + " " + "\u2a7d"):
-                adapterListOfRangeOfDateForMoreAndLessSigns.add(date1 + " - " + date2);
-                adapterListOfRangeOfDatesForMoreAndLessSignsLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
+                getAdapterListOfCurrentSignForDate(sign).add(date1 + " - " + date2);
+                if (adapterListOfRangeOfDatesForMoreAndLessSignsLD != null)
+                    adapterListOfRangeOfDatesForMoreAndLessSignsLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод addItemToDateList(String sign, String date1, String date2). sign -" + sign);
@@ -1558,7 +1580,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         mutableLiveData.setValue(AddItemOfTypeOfValuesToListDF.UPDATE_ITEM_FROM_LIST);
     }
 
-    public void changeItemToOneDateList(String sign, int position, String date1, String date2) {
+    public void changeItemInDateList(String sign, int position, String date1, String date2) {
         switch (sign) {
             case "=":
                 helperChangeItemToList(adapterListOfOneDateForEqualitySign, adapterListOfOneDateForEqualitySignLD,
@@ -1672,12 +1694,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
 
     private <T> void helperDSCValue(List<Integer> hListOfSelectedPositions, List<String> hListOfAdapter,
                                     String key, Map<String, List<T>> store) {
-        hListOfSelectedPositions.sort(new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o1.compareTo(o2);
-            }
-        });
+        hListOfSelectedPositions.sort(Integer::compareTo);
         if (("\u2a7e" + " " + "\u2a7d").equals(key)) {
             for (int i = hListOfSelectedPositions.size() - 1; i > -1; i--) {
                 int posInAdapter = hListOfSelectedPositions.get(i);
@@ -2047,7 +2064,11 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         return getApplication().getResources().getString(R.string.search_criteria_for_edit_delete_data);
     }
 
-    public String getQuery() {
+    protected String getOrderBy() {
+        return "";
+    }
+
+    public String createQuery() {
         boolean whereStatement = false;
         String query = getFirstPartOfQuery();
         StringBuilder sb = new StringBuilder(query);
@@ -2078,6 +2099,13 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         if (searchCriteriaForNote != null && searchCriteriaForNote.size() != 0) {
             sb.append(addSearchCriteriaOfNotesToQuery(whereStatement));
         }
-        return sb.toString();
+        sb.append(getOrderBy());
+        mQueryForSearch = sb.toString();
+        return mQueryForSearch;
     }
+
+    public String getQueryForSearch() {
+        return mQueryForSearch;
+    }
+
 }

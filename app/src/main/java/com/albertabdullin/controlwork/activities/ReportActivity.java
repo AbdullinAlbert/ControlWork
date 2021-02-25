@@ -3,10 +3,10 @@ package com.albertabdullin.controlwork.activities;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
@@ -16,40 +16,65 @@ import com.albertabdullin.controlwork.fragments.CommonDeleteDataDF;
 import com.albertabdullin.controlwork.fragments.DeleteDataButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.InsertDataButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.InsertDataPairButtonClickExecutor;
+import com.albertabdullin.controlwork.fragments.PreViewForReportFragment;
+import com.albertabdullin.controlwork.fragments.SearchCriteriaForReportFragment;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
+import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
+import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaReportVM;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCriteria;
+import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCriteriaReport;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.util.Calendar;
+import java.util.List;
 
-public class MakerSearchCriteriaActivity extends AppCompatActivity implements ProviderOfHolderFragmentState, DialogFragmentProvider, SearchCriteriaVMProvider {
+public class ReportActivity extends AppCompatActivity implements ProviderOfHolderFragmentState, DialogFragmentProvider, SearchCriteriaVMProvider {
 
     private MakerSearchCriteriaVM mViewModel;
-
-    private final Observer<String> mExceptionObserver = string -> Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
+    private SearchCriteriaForReportFragment mSearchCriteriaForReportFragment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_maker_search_criteria_activity);
-        mViewModel = new ViewModelProvider(this, new ViewModelFactoryMakerSearchCriteria(this.getApplication())).get(MakerSearchCriteriaVM.class);
-        if (mViewModel.getExceptionFromBackgroundThreadsLD().hasObservers()) mViewModel.getExceptionFromBackgroundThreadsLD().removeObservers(this);
-        mViewModel.getExceptionFromBackgroundThreadsLD().observe(this, mExceptionObserver);
+        setContentView(R.layout.activity_monthly_report);
+        mViewModel = new ViewModelProvider(this,
+                new ViewModelFactoryMakerSearchCriteriaReport(this.getApplication())).get(MakerSearchCriteriaReportVM.class);
+        PreViewForReportFragment preViewForReportFragment = (PreViewForReportFragment) getSupportFragmentManager()
+                .findFragmentByTag(getString(R.string.tag_for_preview_for_report_fragment));
+        mSearchCriteriaForReportFragment
+                = (SearchCriteriaForReportFragment) getSupportFragmentManager()
+                .findFragmentByTag(getString(R.string.search_criteria_for_monthly_report_fragment));
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        SearchCriteriaFragment searchCriteriaFragment = (SearchCriteriaFragment) getSupportFragmentManager().findFragmentByTag("maker_search_criteria_fragment");
-        if (searchCriteriaFragment == null) {
-            searchCriteriaFragment = new SearchCriteriaFragment();
-            transaction.add(R.id.container_for_maker_search_criteria_fragment, searchCriteriaFragment, "maker_search_criteria_fragment");
-        } else transaction.replace(R.id.container_for_maker_search_criteria_fragment, searchCriteriaFragment, "maker_search_criteria_fragment");
+        if (preViewForReportFragment != null) {
+            transaction.replace(R.id.container_for_monthly_report_fragments, preViewForReportFragment,
+                    getString(R.string.tag_for_preview_for_report_fragment));
+            return;
+        }
+        if (mSearchCriteriaForReportFragment != null) {
+            transaction.replace(R.id.container_for_monthly_report_fragments, mSearchCriteriaForReportFragment,
+                    getString(R.string.search_criteria_for_monthly_report_fragment));
+        } else {
+            mSearchCriteriaForReportFragment = new SearchCriteriaForReportFragment();
+            transaction.add(R.id.container_for_monthly_report_fragments, mSearchCriteriaForReportFragment,
+                    getString(R.string.search_criteria_for_monthly_report_fragment));
+        }
         transaction.commit();
     }
 
     @Override
     public DialogFragmentStateHolder getHolder() {
         return mViewModel;
+    }
+
+    public void setResultList(List<ComplexEntityForDB> resultList) {
+        mSearchCriteriaForReportFragment.setResultList(resultList);
+    }
+
+    public void launchCreatingReport() {
+        mSearchCriteriaForReportFragment.launchCreatingReport();
     }
 
     @Override
@@ -169,7 +194,7 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
                 mViewModel.addItemToNumberList(mViewModel.getCommonSelectedSign(), Float.toString(firstNumber),
                         Float.toString(secondNumber));
                 mViewModel.addSearchCriteria(SearchCriteriaFragment.NUMBERS_VALUE,
-                    mViewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mViewModel.getCommonSelectedSign()), firstNumber, secondNumber);
+                        mViewModel.getPositionOfSign(SearchCriteriaFragment.NUMBERS_VALUE, mViewModel.getCommonSelectedSign()), firstNumber, secondNumber);
             }
 
             @Override

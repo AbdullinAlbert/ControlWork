@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.SearchCriteriaVMProvider;
 import com.albertabdullin.controlwork.customView.SearchEditText;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForPickItems;
@@ -39,21 +40,21 @@ import java.util.List;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class PickerItemsDF extends DialogFragment {
-    private MakerSearchCriteriaVM model;
+    protected MakerSearchCriteriaVM mViewModel;
     private int selectedTable;
     private static final String EMPLOYEES_TITLE = "Список сотрудников";
     private static final String FIRMS_TITLE = "Список фирм";
     private static final String TYPES_TITLE = "Список типов работы";
     private static final String PLACES_TITLE = "Список мест работы";
     private static final String SAVED_TITLE_OF_TABLE = "saved_table";
-    List<SimpleEntityForDB> list = null;
+    private List<SimpleEntityForDB> list;
     private Toolbar toolbar;
     private EditText searchEditText;
     private final View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
-                model.setStateMenuItemSearchText(true);
+            if (hasFocus && !mViewModel.isStateMenuItemSearchTextActive()) {
+                mViewModel.setStateMenuItemSearchText(true);
                 InputMethodManager imm = (InputMethodManager)
                             requireActivity().getSystemService(INPUT_METHOD_SERVICE);
                     imm.toggleSoftInput(0, 0);
@@ -72,9 +73,9 @@ public class PickerItemsDF extends DialogFragment {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             String newText = s.toString();
-            if (newText.equals("")) model.sayToStopSearch(before);
-            else if (model.isSearchIsActive()) model.sendNewText(newText);
-            else model.startSearch(newText);
+            if (newText.equals("")) mViewModel.sayToStopSearch(before);
+            else if (mViewModel.isSearchIsActive()) mViewModel.sendNewText(newText);
+            else mViewModel.startSearch(newText);
         }
 
         @Override
@@ -92,9 +93,7 @@ public class PickerItemsDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new ViewModelProvider(requireActivity()).get(MakerSearchCriteriaVM.class);
         if (savedInstanceState != null) selectedTable = savedInstanceState.getInt(SAVED_TITLE_OF_TABLE);
-        list = model.getAdapterListOfEntities(selectedTable);
     }
 
     @NonNull
@@ -114,9 +113,11 @@ public class PickerItemsDF extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel = ((SearchCriteriaVMProvider)requireActivity()).getMakerSearchCriteriaVM();
+        list = mViewModel.getAdapterListOfEntities(selectedTable);
         toolbar = view.findViewById(R.id.title_for_search_criteria);
         String title = "";
-        final AdapterForPickItems adapter = new AdapterForPickItems(list, model, this, selectedTable);
+        final AdapterForPickItems adapter = new AdapterForPickItems(list, mViewModel, this, selectedTable);
         switch (selectedTable) {
             case SearchCriteriaFragment.SELECT_EMPLOYEES:
                 title = EMPLOYEES_TITLE;
@@ -136,16 +137,16 @@ public class PickerItemsDF extends DialogFragment {
         searchEditText = ((SearchEditText) toolbar.getMenu().getItem(0).getActionView()).getTextView();
         searchEditText.setOnFocusChangeListener(focusChangeListener);
         searchEditText.addTextChangedListener(textWatcherForSearchEditText);
-        boolean currentStateOfItem = model.getStateOfSelectAllMenuItem(selectedTable);
-        if (currentStateOfItem) model.setCurrentVisiblePositionOfOverFlowMenu(1);
-        else model.setCurrentVisiblePositionOfOverFlowMenu(2);
+        boolean currentStateOfItem = mViewModel.getStateOfSelectAllMenuItem(selectedTable);
+        if (currentStateOfItem) mViewModel.setCurrentVisiblePositionOfOverFlowMenu(1);
+        else mViewModel.setCurrentVisiblePositionOfOverFlowMenu(2);
         toolbar.getMenu().getItem(1).setVisible(currentStateOfItem);
         toolbar.getMenu().getItem(2).setVisible(!currentStateOfItem);
         toolbar.getMenu().getItem(0).setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 if (item.getItemId() == R.id.action_search) {
-                    toolbar.getMenu().getItem(model.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(false);
+                    toolbar.getMenu().getItem(mViewModel.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(false);
                     searchEditText.requestFocus();
                     return true;
                 } else return false;
@@ -154,78 +155,65 @@ public class PickerItemsDF extends DialogFragment {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 if (item.getItemId() == R.id.action_search) {
-                    toolbar.getMenu().getItem(model.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(true);
+                    toolbar.getMenu().getItem(mViewModel.getCurrentVisiblePositionOfOverFlowMenu()).setVisible(true);
                     searchEditText.setText("");
-                    model.closeSearchThread();
+                    mViewModel.closeSearchThread();
                     return true;
                 } else return false;
             }
         });
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_select_all_items:
-                        toolbar.getMenu().getItem(1).setVisible(false);
-                        toolbar.getMenu().getItem(2).setVisible(true);
-                        model.setCurrentVisiblePositionOfOverFlowMenu(2);
-                        model.selectAllCheckBoxes(selectedTable);
-                        return true;
-                    case R.id.action_clear_all_items:
-                        toolbar.getMenu().getItem(2).setVisible(false);
-                        toolbar.getMenu().getItem(1).setVisible(true);
-                        model.setCurrentVisiblePositionOfOverFlowMenu(1);
-                        model.clearSelectedCheckBoxes(selectedTable);
-                        return true;
-                    default:
-                        return false;
-                }
+        toolbar.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.action_select_all_items:
+                    toolbar.getMenu().getItem(1).setVisible(false);
+                    toolbar.getMenu().getItem(2).setVisible(true);
+                    mViewModel.setCurrentVisiblePositionOfOverFlowMenu(2);
+                    mViewModel.selectAllCheckBoxes(selectedTable);
+                    return true;
+                case R.id.action_clear_all_items:
+                    toolbar.getMenu().getItem(2).setVisible(false);
+                    toolbar.getMenu().getItem(1).setVisible(true);
+                    mViewModel.setCurrentVisiblePositionOfOverFlowMenu(1);
+                    mViewModel.clearSelectedCheckBoxes(selectedTable);
+                    return true;
+                default:
+                    return false;
             }
         });
         RecyclerView rv = view.findViewById(R.id.rv_for_selectable_items);
         rv.setAdapter(adapter);
-        Observer<Integer> rvObserver = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                if (selectedTable == integer) {
-                    adapter.notifyDataSetChanged();
-                }
+        Observer<Integer> rvObserver = integer -> {
+            if (selectedTable == integer) {
+                adapter.notifyDataSetChanged();
             }
         };
-        model.getEntitiesLiveData().observe(this, rvObserver);
-        model.showFullListOfItems(selectedTable);
+        mViewModel.getEntitiesLiveData().observe(this, rvObserver);
+        mViewModel.showFullListOfItems(selectedTable);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(requireActivity());
         rv.setLayoutManager(mLayoutManager);
         DividerItemDecoration divider = new DividerItemDecoration
                 (new android.view.ContextThemeWrapper(requireActivity(), R.style.AppTheme), mLayoutManager.getOrientation());
         rv.addItemDecoration(divider);
         Button cancelButton = view.findViewById(R.id.cancel_select_items_for_search);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model.clearTransientListOfSelectedItems(selectedTable);
-                returnValuesToDefault();
-
-            }
+        cancelButton.setOnClickListener(v -> {
+            mViewModel.clearTransientListOfSelectedItems(selectedTable);
+            returnValuesToDefault();
         });
         Button agreeButton = view.findViewById(R.id.agree_button_for_selected_items);
-        agreeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model.commitSelectedList(selectedTable);
-                returnValuesToDefault();
-            }
+        agreeButton.setOnClickListener(v -> {
+            mViewModel.commitSelectedList(selectedTable);
+            returnValuesToDefault();
         });
     }
 
     public void updateVisibilityOfItemsOfOverFlowMenu() {
-        if (!model.isSearchIsActive()) {
+        if (!mViewModel.isSearchIsActive()) {
             boolean visibility = toolbar.getMenu().getItem(1).isVisible();
             toolbar.getMenu().getItem(1).setVisible(!visibility);
             toolbar.getMenu().getItem(2).setVisible(visibility);
         }
-        if (model.getCurrentVisiblePositionOfOverFlowMenu() == 1) model.setCurrentVisiblePositionOfOverFlowMenu(2);
-        else model.setCurrentVisiblePositionOfOverFlowMenu(1);
+        if (mViewModel.getCurrentVisiblePositionOfOverFlowMenu() == 1) mViewModel.setCurrentVisiblePositionOfOverFlowMenu(2);
+        else mViewModel.setCurrentVisiblePositionOfOverFlowMenu(1);
     }
 
 
@@ -244,7 +232,7 @@ public class PickerItemsDF extends DialogFragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SAVED_TITLE_OF_TABLE, selectedTable);
-        model.setBlankCallTrue();
+        mViewModel.setBlankCallTrue();
     }
 
     private void hideKeyBoard(EditText editText) {
@@ -257,10 +245,10 @@ public class PickerItemsDF extends DialogFragment {
 
     private void returnValuesToDefault() {
         if (searchEditText.isFocused()) searchEditText.clearFocus();
-        model.setStateMenuItemSearchText(false);
-        if (model.isSearchIsActive()) {
-            model.sayToStopSearch(-1);
-            model.closeSearchThread();
+        mViewModel.setStateMenuItemSearchText(false);
+        if (mViewModel.isSearchIsActive()) {
+            mViewModel.sayToStopSearch(-1);
+            mViewModel.closeSearchThread();
         }
         Dialog dialog = getDialog();
         if (dialog != null) dialog.dismiss();

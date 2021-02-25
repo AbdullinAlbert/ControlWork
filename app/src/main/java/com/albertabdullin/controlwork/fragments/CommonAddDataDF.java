@@ -81,7 +81,6 @@ public class CommonAddDataDF extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ((ProviderOfHolderFragmentState) requireActivity()).getHolder();
         if (savedInstanceState != null) {
             mHint = savedInstanceState.getString(KEY_FOR_HINT);
             mLengthOfText = savedInstanceState.getInt(KEY_FOR_LENGTH);
@@ -107,6 +106,7 @@ public class CommonAddDataDF extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mViewModel = ((ProviderOfHolderFragmentState) requireActivity()).getHolder();
         mHelperTextView = view.findViewById(R.id.AddDataDFHelper_text);
         mEditTextAddNewData = view.findViewById(R.id.editTextNewData);
         mEditTextAddNewData.addTextChangedListener(countCharTW);
@@ -131,22 +131,16 @@ public class CommonAddDataDF extends DialogFragment {
         }
         Button bAdd = view.findViewById(R.id.add_df_button);
         Button bCancel = view.findViewById(R.id.cancel_df_button);
-        bAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mExecutor.executeYesButtonClick(((AppCompatActivity)requireActivity()),
-                        mEditTextAddNewData.getText().toString());
-                tryToHideKeyBoard();
-                requireDialog().dismiss();
-            }
+        bAdd.setOnClickListener(v -> {
+            mExecutor.executeYesButtonClick(((AppCompatActivity)requireActivity()),
+                    mEditTextAddNewData.getText().toString());
+            tryToHideKeyBoard();
+            requireDialog().dismiss();
         });
-        bCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mExecutor.executeNoButtonClick();
-                tryToHideKeyBoard();
-                requireDialog().dismiss();
-            }
+        bCancel.setOnClickListener(v -> {
+            mExecutor.executeNoButtonClick();
+            tryToHideKeyBoard();
+            requireDialog().dismiss();
         });
     }
 

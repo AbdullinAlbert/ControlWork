@@ -51,28 +51,5 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
-  <!--
-    <ImageView
-        android:id="@+id/button_for_clear_selected_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:clickable="false"
-        app:layout_constraintBottom_toBottomOf="@+id/title_for_select_items_toolbar"
-        app:layout_constraintEnd_toEndOf="@+id/title_for_select_items_toolbar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/baseline_clear_black_24"
-        android:contentDescription="@string/clear_all_items" />
-
-    <ImageView
-        android:id="@+id/button_for_select_all_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        app:layout_constraintBottom_toBottomOf="@+id/title_for_select_items_toolbar"
-        app:layout_constraintEnd_toEndOf="@+id/title_for_select_items_toolbar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/baseline_done_all_24"
-        android:contentDescription="@string/select_all_items" /> -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

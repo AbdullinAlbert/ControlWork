@@ -65,39 +65,39 @@ public class EditDeleteDataActivity extends AppCompatActivity implements Provide
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_delete_data);
         viewModel = new ViewModelProvider(this, new ViewModelFactoryEditDeleteData(this.getApplication())).get(EditDeleteDataVM.class);
-        failDelete = getResources().getString(R.string.fail_attempt_about_delete_data_from_db);
-        failLoadFromResultTable = getResources().getString(R.string.fail_attempt_about_load_data_from_result_table);
-        failLoadFromPrimaryTable = getResources().getString(R.string.fail_attempt_about_load_data_from_primary_table);
-        failUpdateInResultTable = getResources().getString(R.string.fail_attempt_about_update_data_in_result_table);
+        failDelete = getString(R.string.fail_attempt_about_delete_data_from_db);
+        failLoadFromResultTable = getString(R.string.fail_attempt_about_load_data_from_result_table);
+        failLoadFromPrimaryTable = getString(R.string.fail_attempt_about_load_data_from_primary_table);
+        failUpdateInResultTable = getString(R.string.fail_attempt_about_update_data_in_result_table);
         if (viewModel.getToastAboutSuccessUpdateDataLD().hasObservers())
             viewModel.getToastAboutSuccessUpdateDataLD().removeObserver(observerOfSuccessUpdateDataToast);
         viewModel.getToastAboutSuccessUpdateDataLD().observe(this, observerOfSuccessUpdateDataToast);
         DeleteDataFragment deleteDataFragment = (DeleteDataFragment)
-                getSupportFragmentManager().findFragmentByTag(getResources().getString(R.string.tag_for_delete_data_fragment));
+                getSupportFragmentManager().findFragmentByTag(getString(R.string.tag_for_delete_data_fragment));
         EditDataFragment editDataFragment = (EditDataFragment)
-                getSupportFragmentManager().findFragmentByTag(getResources().getString(R.string.tag_for_edit_data_fragment));
+                getSupportFragmentManager().findFragmentByTag(getString(R.string.tag_for_edit_data_fragment));
         ListDBItemsFragment listDBItemsFragment = (ListDBItemsFragment)
-                getSupportFragmentManager().findFragmentByTag(getResources().getString(R.string.tag_for_list_of_DB_items_fragment));
+                getSupportFragmentManager().findFragmentByTag(getString(R.string.tag_for_list_of_DB_items_fragment));
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if (listDBItemsFragment != null) {
             transaction.replace(R.id.container_for_edit_delete_data_fragment, listDBItemsFragment,
-                    getResources().getString(R.string.tag_for_list_of_DB_items_fragment));
+                    getString(R.string.tag_for_list_of_DB_items_fragment));
             transaction.commit();
             return;
         }
         if (editDataFragment != null) {
             transaction.replace(R.id.container_for_edit_delete_data_fragment, editDataFragment,
-                    getResources().getString(R.string.tag_for_edit_data_fragment));
+                    getString(R.string.tag_for_edit_data_fragment));
             transaction.commit();
             return;
         }
         if (deleteDataFragment != null) {
             transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
-                    getResources().getString(R.string.tag_for_delete_data_fragment));
+                    getString(R.string.tag_for_delete_data_fragment));
         } else {
             deleteDataFragment = new DeleteDataFragment();
             transaction.add(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
-                    getResources().getString(R.string.tag_for_delete_data_fragment));
+                    getString(R.string.tag_for_delete_data_fragment));
         }
         transaction.commit();
     }
