@@ -8,7 +8,7 @@ import java.util.Locale;
 
 public class DateConverter {
 
-    public static String convertLongToStringDate(Calendar c) {
+    public static String getStringViewOfDate(Calendar c) {
         int dayOfMonth, month = 1;
         dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         month += c.get(Calendar.MONTH);

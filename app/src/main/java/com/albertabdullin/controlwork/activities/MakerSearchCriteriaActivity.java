@@ -109,7 +109,7 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
         CommonDeleteDataDF commonDeleteDataDF = new CommonDeleteDataDF();
         int count = mViewModel.getListOfSelectedPositionForDeleteSign(mViewModel.getSelectedTypeOfValue(),
                 mViewModel.getCommonSelectedSign()).size();
-        String header = getResources().getString(R.string.header_of_delete_dialog_fragment) + " " + count;
+        String header = getResources().getString(R.string.selected_records_with_colon) + " " + count;
         commonDeleteDataDF.setHeader(header);
         if(count == 1) {
             String mainText = "Вы действительно хотите удалить ";
@@ -258,9 +258,9 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection.first);
-            String beginOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
+            String beginOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             calendar.setTimeInMillis(selection.second);
-            String endOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
+            String endOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             mViewModel.addItemToDateList(mViewModel.getCommonSelectedSign(), beginOfRangeDate, endOfRangeDate);
             mViewModel.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                     mViewModel.getPositionOfSign(SearchCriteriaFragment.DATES_VALUE, mViewModel.getCommonSelectedSign()),
@@ -279,9 +279,9 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection.first);
-            String beginOfRangeDate = DateConverter.convertLongToStringDate(calendar);
+            String beginOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             calendar.setTimeInMillis(selection.second);
-            String endOfRangeDate = DateConverter.convertLongToStringDate(calendar);
+            String endOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             mViewModel.changeItemInDateList(mViewModel.getCommonSelectedSign(), posOfDateRangeBegin / 2,
                     beginOfRangeDate, endOfRangeDate);
             mViewModel.changeSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
@@ -297,7 +297,7 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection);
-            String date = SearchCriteriaFragment.getStringViewOfDate(calendar);
+            String date = DateConverter.getStringViewOfDate(calendar);
             mViewModel.addItemToDateList(mViewModel.getCommonSelectedSign(), date, null);
             mViewModel.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                     mViewModel.getPositionOfSign(SearchCriteriaFragment.DATES_VALUE, mViewModel.getCommonSelectedSign()), selection, null);
@@ -313,7 +313,7 @@ public class MakerSearchCriteriaActivity extends AppCompatActivity implements Pr
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection);
-            String date = DateConverter.convertLongToStringDate(calendar);
+            String date = DateConverter.getStringViewOfDate(calendar);
             mViewModel.changeItemInDateList(mViewModel.getCommonSelectedSign(), selectedDate, date, null);
             mViewModel.changeSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                     mViewModel.getCommonSelectedSign(), selectedDate, selection, null);

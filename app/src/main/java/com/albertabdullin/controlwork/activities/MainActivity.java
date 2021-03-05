@@ -2,29 +2,36 @@ package com.albertabdullin.controlwork.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.albertabdullin.controlwork.*;
+import com.albertabdullin.controlwork.fragments.SearchCriteriaForReportFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 public class MainActivity extends AppCompatActivity {
-    private final AdapterView.OnItemClickListener ItemOfListView = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView parent, View v, int position, long id) {
-            switch ((int) id) {
-                case 0:
-                    fillNewData();
-                    break;
-                case 1:
-                    deleteOrChangeData();
-                    break;
-                case 2:
-                    monthlyReport();
-                    break;
-            }
+
+    public static final String KEY_FOR_REPORT_PERIOD = "key for report period";
+
+    private final AdapterView.OnItemClickListener ItemOfListView = (parent, v, position, id) -> {
+        switch ((int) id) {
+            case 0:
+                fillNewData();
+                break;
+            case 1:
+                deleteOrChangeData();
+                break;
+            case 2:
+                monthlyReport();
+                break;
+            case 3:
+                yearReport();
+                break;
+            case 4:
+                certainPeriodReport();
+                break;
         }
     };
     @Override
@@ -53,7 +60,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void monthlyReport() {
         Intent intent = new Intent(this, ReportActivity.class);
+        intent.putExtra(KEY_FOR_REPORT_PERIOD, SearchCriteriaForReportFragment.DateRange.MONTH);
         startActivity(intent);
     }
+
+    private void yearReport() {
+        Intent intent = new Intent(this, ReportActivity.class);
+        intent.putExtra(KEY_FOR_REPORT_PERIOD, SearchCriteriaForReportFragment.DateRange.YEAR);
+        startActivity(intent);
+    }
+
+    private void certainPeriodReport() {
+        Intent intent = new Intent(this, ReportActivity.class);
+        intent.putExtra(KEY_FOR_REPORT_PERIOD, SearchCriteriaForReportFragment.DateRange.CERTAIN_PERIOD);
+        startActivity(intent);
+    }
+
 }
 

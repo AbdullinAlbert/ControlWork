@@ -20,7 +20,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
 import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
-import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.fragments.ListDBItemsFragment;
@@ -214,12 +213,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     public List<Integer> getDeletedPositionsFromDB() {
         for (int i = 0; i < listOfDeletedRowsFromDB.size(); i++)
             listOfDeletedRowsFromDB.set(i, (listOfDeletedRowsFromDB.get(i) - 1));
-        Comparator<Integer> comparator = new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return (o1 - o2) * (-1);
-            }
-        };
+        Comparator<Integer> comparator = (o1, o2) -> (o1 - o2) * (-1);
         listOfDeletedRowsFromDB.sort(comparator);
         return listOfDeletedRowsFromDB;
     }

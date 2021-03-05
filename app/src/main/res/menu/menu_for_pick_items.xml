@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_search"
-        android:title="@string/search_item"
+        android:title="@string/search"
         android:icon="@drawable/baseline_search_24"
         app:showAsAction="always|collapseActionView"
         app:actionViewClass="com.albertabdullin.controlwork.customView.SearchEditText"  />
     <item
         android:id="@+id/action_select_all_items"
-        android:title="@string/select_all_items"
+        android:title="@string/select_all"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_clear_all_items"
-        android:title="@string/clear_all_items"
+        android:title="@string/clear"
         app:showAsAction="never" />
 </menu>

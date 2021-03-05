@@ -31,7 +31,7 @@
         android:id="@+id/cancel_select_items_for_search"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/button_cancel"
+        android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,7 +40,7 @@
     <Button
         android:id="@+id/agree_button_for_selected_items"
         android:layout_height="wrap_content"
-        android:text="@string/button_add_data"
+        android:text="@string/add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"

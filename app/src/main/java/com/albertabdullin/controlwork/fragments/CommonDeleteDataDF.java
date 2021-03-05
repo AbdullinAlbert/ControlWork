@@ -63,19 +63,13 @@ public class CommonDeleteDataDF extends DialogFragment {
         if (mMainText != null) tvMainText.setText(mMainText);
         Button bYES = view.findViewById(R.id.DeleteDFButtonYES);
         Button bNO = view.findViewById(R.id.DeleteDFButtonNO);
-        bYES.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDeleteDataButtonClickExecutor.executeYesButtonClick((AppCompatActivity) requireActivity());
-                requireDialog().dismiss();
-            }
+        bYES.setOnClickListener(v -> {
+            mDeleteDataButtonClickExecutor.executeYesButtonClick((AppCompatActivity) requireActivity());
+            requireDialog().dismiss();
         });
-        bNO.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDeleteDataButtonClickExecutor.executeNoButtonClick((AppCompatActivity) requireActivity());
-                requireDialog().dismiss();
-            }
+        bNO.setOnClickListener(v -> {
+            mDeleteDataButtonClickExecutor.executeNoButtonClick((AppCompatActivity) requireActivity());
+            requireDialog().dismiss();
         });
     }
 

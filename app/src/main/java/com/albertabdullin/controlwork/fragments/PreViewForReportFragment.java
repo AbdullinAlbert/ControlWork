@@ -25,17 +25,14 @@ public class PreViewForReportFragment extends DeleteDataFragment {
     protected void inflateToolbarMenu(Toolbar toolbar) {
         toolbar.inflateMenu(R.menu.create_report);
         MenuItem menuItem = toolbar.getMenu().getItem(0);
-        menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_create_report_item) {
-                    ((ReportActivity)requireActivity()).setResultList(mViewModel.getResultList());
-                    ((ReportActivity)requireActivity()).launchCreatingReport();
-                    requireActivity().onBackPressed();
-                    return true;
-                }
-                return false;
+        menuItem.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_create_report_item) {
+                ((ReportActivity)requireActivity()).setResultList(mViewModel.getResultList());
+                ((ReportActivity)requireActivity()).launchCreatingReport();
+                requireActivity().onBackPressed();
+                return true;
             }
+            return false;
         });
     }
 

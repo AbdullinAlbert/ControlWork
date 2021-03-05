@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.fragments.SearchCriteriaForReportFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.workManager.CreateReportWorker;
 
@@ -19,7 +20,9 @@ public class MakerSearchCriteriaReportVM extends MakerSearchCriteriaVM {
 
     private final WorkManager mWorkManager;
     private List<ComplexEntityForDB> mResultList;
+    private SearchCriteriaForReportFragment.DateRange mSelectedPeriod;
 
+    private boolean mHasAppPermission = false;
     private boolean needPreView = false;
 
     public MakerSearchCriteriaReportVM(@NonNull Application application) {
@@ -44,6 +47,7 @@ public class MakerSearchCriteriaReportVM extends MakerSearchCriteriaVM {
 
     private String getDateRangesString() {
         StringBuilder sb = new StringBuilder();
+        if (searchCriteriaForDate == null) return "";
         if (searchCriteriaForDate.containsKey("="))
             sb.append(createStringViewOfDate("=")).append(", ");
         if (searchCriteriaForDate.containsKey("\u2a7e" + " " + "\u2a7d"))
@@ -58,12 +62,17 @@ public class MakerSearchCriteriaReportVM extends MakerSearchCriteriaVM {
         return sb.toString();
     }
 
+    public void setHasAppPermission(boolean b) {
+        mHasAppPermission = b;
+    }
+
     private Data getDataForWorker() {
         Data.Builder builder = new Data.Builder();
         Map<String, Object> helperMap = new HashMap<>();
         helperMap.put(CreateReportWorker.KEY_FOR_RESULT_LIST, mResultList);
         return builder.putAll(helperMap)
             .putString(CreateReportWorker.KEY_FOR_DATE_RANGES, getDateRangesString())
+            .putBoolean(CreateReportWorker.KEY_FOR_PERMISSION, mHasAppPermission)
             .putString(CreateReportWorker.KEY_FOR_QUERY, getQueryForSearch()).build();
     }
 
@@ -72,6 +81,14 @@ public class MakerSearchCriteriaReportVM extends MakerSearchCriteriaVM {
                 .setInputData(getDataForWorker())
                 .build();
         mWorkManager.enqueue(workRequest);
+    }
+
+    public void setSelectedPeriod(SearchCriteriaForReportFragment.DateRange selectedPeriod) {
+        mSelectedPeriod = selectedPeriod;
+    }
+
+    public SearchCriteriaForReportFragment.DateRange getSelectedPeriod() {
+        return mSelectedPeriod;
     }
 
 }

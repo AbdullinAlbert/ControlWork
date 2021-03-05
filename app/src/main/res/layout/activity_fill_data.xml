@@ -30,13 +30,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/add_employer" />
+                android:text="@string/employee_with_colon" />
 
             <EditText
                 android:id="@+id/add_empl_editText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_for_add_empl"
+                android:hint="@string/pick_from_list_or_add_new"
                 android:importantForAutofill="no"
                 android:inputType="textPersonName"
                 android:focusable="false"
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_firm" />
+                android:text="@string/firm_with_colon" />
 
             <EditText
                 android:id="@+id/add_firm_editText"
@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_place_of_work" />
+                android:text="@string/place_of_work_with_colon" />
 
             <EditText
                 android:id="@+id/add_placeOfWork_editText"
@@ -107,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_type_of_work" />
+                android:text="@string/type_of_work_with_colon" />
 
             <EditText
                 android:id="@+id/add_typeOfWork_editText"
@@ -133,7 +133,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_date"
+                android:text="@string/date_with_colon"
                 android:labelFor="@id/add_date_editText"/>
 
             <EditText
@@ -151,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_result"
+                android:text="@string/result_with_colon"
                 android:labelFor="@id/add_result_editText"/>
 
             <EditText
@@ -177,7 +177,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_remark" />
+                android:text="@string/note_with_colon" />
 
             <EditText
                 android:id="@+id/add_note_editText"
@@ -200,7 +200,7 @@
                 android:layout_marginBottom="12dp"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:background="@color/colorPrimary"
-                android:text="@string/button_add_data"
+                android:text="@string/add"
                 style="?android:attr/borderlessButtonStyle"/>
         </LinearLayout>
     </ScrollView>

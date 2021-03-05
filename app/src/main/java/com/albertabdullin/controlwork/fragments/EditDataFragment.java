@@ -178,7 +178,7 @@ public class EditDataFragment extends Fragment implements BackPressListener {
                 public void onPositiveButtonClick(Long selection) {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(selection);
-                    String date = DateConverter.convertLongToStringDate(calendar);
+                    String date = DateConverter.getStringViewOfDate(calendar);
                     mViewModel.attemptToChangeValueOfDateData(date, selection);
                 }
             });
@@ -236,7 +236,7 @@ public class EditDataFragment extends Fragment implements BackPressListener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Toolbar toolbar = view.findViewById(R.id.toolbar_for_edit_data);
-        toolbar.setTitle(R.string.title_for_edit_data_fragment_toolbar);
+        toolbar.setTitle(R.string.changing_data);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

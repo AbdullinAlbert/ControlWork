@@ -1,12 +1,15 @@
 package com.albertabdullin.controlwork.fragments;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
@@ -19,12 +22,68 @@ import java.util.List;
 
 import static java.util.Calendar.DAY_OF_MONTH;
 
+
 public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
+
+    public enum DateRange {
+        MONTH, YEAR, CERTAIN_PERIOD;
+    }
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        ((MakerSearchCriteriaReportVM) mViewModel).setHasAppPermission(isGranted);
+        ((MakerSearchCriteriaReportVM) mViewModel).launchCreatingReport();
+    });
+
+    private class DateProvider {
+
+        String mStringDateBegin;
+        String mStringDateEnd;
+
+        DateProvider(DateRange dateRange) {
+            Calendar calendar = Calendar.getInstance();
+            switch (dateRange) {
+                case MONTH:
+                    mStringDateBegin = calendar.getActualMinimum(DAY_OF_MONTH) + ".";
+                    if (mStringDateBegin.length() == 2) mStringDateBegin = "0" + mStringDateBegin;
+                    mStringDateEnd = calendar.getActualMaximum(DAY_OF_MONTH) + ".";
+                    String monthAndYear = (calendar.get(Calendar.MONTH) + 1) + ".";
+                    if (monthAndYear.length() == 2) monthAndYear = "0" + monthAndYear;
+                    monthAndYear += calendar.get(Calendar.YEAR);
+                    mStringDateBegin += monthAndYear;
+                    mStringDateEnd += monthAndYear;
+                    break;
+                case YEAR:
+                    mStringDateBegin = "01.01." + calendar.get(Calendar.YEAR);
+                    mStringDateEnd = "31.12." + calendar.get(Calendar.YEAR);
+                    break;
+            }
+        }
+
+        long getLongDateBegin() {
+            long date;
+            try {
+               date = DateConverter.convertStringDateToLong(mStringDateBegin);
+            } catch (ParseException parseException) {
+                throw new RuntimeException(getString(R.string.cannot_convert_string_to_date) + ": " + parseException.getMessage());
+            }
+            return date;
+        }
+
+        long getLongDateEnd() {
+            long date;
+            try {
+                date = DateConverter.convertStringDateToLong(mStringDateEnd);
+            } catch (ParseException parseException) {
+                throw new RuntimeException(getString(R.string.cannot_convert_string_to_date) + ": " + parseException.getMessage());
+            }
+            return date;
+        }
+    }
 
     @Override
     protected void setTitleForToolBar(Toolbar toolbar) {
         toolbar.setTitle(R.string.search_criteria_for_report);
-        toolbar.setSubtitle(getString(R.string.current_month));
+        toolbar.setSubtitle(getSubTitleText());
         toolbar.inflateMenu(R.menu.show_report_preview_menu);
         MenuItem menuItem = toolbar.getMenu().getItem(0);
         if (((MakerSearchCriteriaReportVM)mViewModel).isNeedPreView()) menuItem.setChecked(true);
@@ -39,35 +98,36 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
         });
     }
 
+    private String getSubTitleText() {
+        switch (((MakerSearchCriteriaReportVM)mViewModel).getSelectedPeriod()) {
+            case MONTH: return getString(R.string.current_month);
+            case YEAR: return getString(R.string.current_year);
+            default: return getString(R.string.certain_period);
+        }
+    }
+
     @Override
     protected void setDateSearchCriteria() {
+        switch (((MakerSearchCriteriaReportVM)mViewModel).getSelectedPeriod()) {
+            case MONTH:
+                setDateSearchCriteriaForDefaultPeriod(DateRange.MONTH);
+                break;
+            case YEAR:
+                setDateSearchCriteriaForDefaultPeriod(DateRange.YEAR);
+                break;
+            case CERTAIN_PERIOD:
+                super.setDateSearchCriteria();
+        }
+
+    }
+
+    private void setDateSearchCriteriaForDefaultPeriod(DateRange dateRange) {
         selectedDateEditText.setClickable(false);
         selectedDateEditText.setFocusable(false);
         if (mViewModel.isSearchCriteriaForDateNull()) {
-            String dateWithoutDay;
-            String beginOfMonthDate;
-            String endOfMonthDate;
-            Calendar calendar = Calendar.getInstance();
-            beginOfMonthDate = calendar.getActualMinimum(DAY_OF_MONTH) + ".";
-            if (beginOfMonthDate.length() == 2) beginOfMonthDate = "0" + beginOfMonthDate;
-            endOfMonthDate = calendar.getActualMaximum(DAY_OF_MONTH) + ".";
-            dateWithoutDay = (calendar.get(Calendar.MONTH) + 1) + ".";
-            if (dateWithoutDay.length() == 2) dateWithoutDay = "0" + dateWithoutDay;
-            dateWithoutDay += calendar.get(Calendar.YEAR);
-            beginOfMonthDate = beginOfMonthDate + dateWithoutDay;
-            endOfMonthDate = endOfMonthDate + dateWithoutDay;
-            long beginOfMonth;
-            long endOfMonth;
-            try {
-                beginOfMonth = DateConverter.convertStringDateToLong(beginOfMonthDate);
-                endOfMonth = DateConverter.convertStringDateToLong(endOfMonthDate);
-            } catch (ParseException e) {
-                Toast.makeText(requireContext(), getString(R.string.cannot_convert_string_to_date) +
-                        ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                return;
-            }
-            mViewModel.addSearchCriteria(DATES_VALUE, null ,beginOfMonth, endOfMonth);
-            mViewModel.addItemToDateList(("\u2a7e" + " " + "\u2a7d"), beginOfMonthDate, endOfMonthDate);
+            DateProvider dateProvider = new DateProvider(dateRange);
+            mViewModel.addSearchCriteria(DATES_VALUE, null ,dateProvider.getLongDateBegin(), dateProvider.getLongDateEnd());
+            mViewModel.addItemToDateList(("\u2a7e" + " " + "\u2a7d"), dateProvider.mStringDateBegin, dateProvider.mStringDateEnd);
         }
         selectedDateEditText.setText(mViewModel.createStringViewOfDate("\u2a7e" + " " + "\u2a7d"));
     }
@@ -89,7 +149,10 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
     }
 
     public void launchCreatingReport() {
-        ((MakerSearchCriteriaReportVM) mViewModel).launchCreatingReport();
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            ((MakerSearchCriteriaReportVM) mViewModel).setHasAppPermission(true);
+            ((MakerSearchCriteriaReportVM) mViewModel).launchCreatingReport();
+        } else requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
     public void setResultList(List<ComplexEntityForDB> resultList) {

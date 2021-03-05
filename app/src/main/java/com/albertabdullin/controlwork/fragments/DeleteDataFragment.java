@@ -104,7 +104,7 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         mViewModel.setQuery(mQuery);
         toolbar = view.findViewById(R.id.toolbar_for_delete_data);
         inflateToolbarMenu(toolbar);
-        toolbar.setTitle(R.string.title_for_delete_data_fragment_toolbar);
+        toolbar.setTitle(R.string.search_result);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

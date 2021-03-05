@@ -123,22 +123,22 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         switch (getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1)) {
             case FillNewData_Activity.TABLE_OF_EMPLOYERS:
                 toolbar.setTitle("Список сотрудников");
-                hintForDialogFragment = getResources().getString(R.string.hint_firstname_secondname);
+                hintForDialogFragment = getResources().getString(R.string.employee_name_surname);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_EMPLOYERS);
                 break;
             case FillNewData_Activity.TABLE_OF_FIRMS:
                 toolbar.setTitle("Список фирм");
-                hintForDialogFragment = getResources().getString(R.string.hint_firm);
+                hintForDialogFragment = getResources().getString(R.string.firm_name);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_FIRMS);
                 break;
             case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
                 toolbar.setTitle("Список типов работы");
-                hintForDialogFragment = getResources().getString(R.string.hint_firm);
+                hintForDialogFragment = getResources().getString(R.string.firm_name);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_TYPES_OF_WORK);
                 break;
             case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
                 toolbar.setTitle("Список мест работы");
-                hintForDialogFragment = getResources().getString(R.string.hint_place_of_work);
+                hintForDialogFragment = getResources().getString(R.string.place_of_work);
                 model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_PLACES_OF_WORK);
                 break;
             default:

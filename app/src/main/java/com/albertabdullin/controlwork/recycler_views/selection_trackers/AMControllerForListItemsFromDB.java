@@ -60,7 +60,7 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                 return true;
             case (R.id.action_delete_item):
                 CommonDeleteDataDF commonDeleteDataDF = new CommonDeleteDataDF();
-                String header = activity.getResources().getString(R.string.header_of_delete_dialog_fragment) + " " + tracker.getSelection().size();
+                String header = activity.getResources().getString(R.string.selected_records_with_colon) + " " + tracker.getSelection().size();
                 commonDeleteDataDF.setHeader(header);
                 String mainText;
                 if(tracker.getSelection().size() == 1) {

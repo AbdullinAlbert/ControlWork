@@ -1,8 +1,12 @@
 package com.albertabdullin.controlwork.activities;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
@@ -24,7 +28,6 @@ import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaReportVM;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
-import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCriteria;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCriteriaReport;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
@@ -36,12 +39,16 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
     private MakerSearchCriteriaVM mViewModel;
     private SearchCriteriaForReportFragment mSearchCriteriaForReportFragment;
 
+    public static Handler handler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monthly_report);
         mViewModel = new ViewModelProvider(this,
                 new ViewModelFactoryMakerSearchCriteriaReport(this.getApplication())).get(MakerSearchCriteriaReportVM.class);
+        ((MakerSearchCriteriaReportVM)mViewModel).setSelectedPeriod(
+                (SearchCriteriaForReportFragment.DateRange) getIntent().getSerializableExtra(MainActivity.KEY_FOR_REPORT_PERIOD));
         PreViewForReportFragment preViewForReportFragment = (PreViewForReportFragment) getSupportFragmentManager()
                 .findFragmentByTag(getString(R.string.tag_for_preview_for_report_fragment));
         mSearchCriteriaForReportFragment
@@ -134,7 +141,7 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         CommonDeleteDataDF commonDeleteDataDF = new CommonDeleteDataDF();
         int count = mViewModel.getListOfSelectedPositionForDeleteSign(mViewModel.getSelectedTypeOfValue(),
                 mViewModel.getCommonSelectedSign()).size();
-        String header = getResources().getString(R.string.header_of_delete_dialog_fragment) + " " + count;
+        String header = getResources().getString(R.string.selected_records_with_colon) + " " + count;
         commonDeleteDataDF.setHeader(header);
         if(count == 1) {
             String mainText = "Вы действительно хотите удалить ";
@@ -283,9 +290,9 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection.first);
-            String beginOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
+            String beginOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             calendar.setTimeInMillis(selection.second);
-            String endOfRangeDate = SearchCriteriaFragment.getStringViewOfDate(calendar);
+            String endOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             mViewModel.addItemToDateList(mViewModel.getCommonSelectedSign(), beginOfRangeDate, endOfRangeDate);
             mViewModel.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                     mViewModel.getPositionOfSign(SearchCriteriaFragment.DATES_VALUE, mViewModel.getCommonSelectedSign()),
@@ -304,9 +311,9 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection.first);
-            String beginOfRangeDate = DateConverter.convertLongToStringDate(calendar);
+            String beginOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             calendar.setTimeInMillis(selection.second);
-            String endOfRangeDate = DateConverter.convertLongToStringDate(calendar);
+            String endOfRangeDate = DateConverter.getStringViewOfDate(calendar);
             mViewModel.changeItemInDateList(mViewModel.getCommonSelectedSign(), posOfDateRangeBegin / 2,
                     beginOfRangeDate, endOfRangeDate);
             mViewModel.changeSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
@@ -322,7 +329,7 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection);
-            String date = SearchCriteriaFragment.getStringViewOfDate(calendar);
+            String date = DateConverter.getStringViewOfDate(calendar);
             mViewModel.addItemToDateList(mViewModel.getCommonSelectedSign(), date, null);
             mViewModel.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                     mViewModel.getPositionOfSign(SearchCriteriaFragment.DATES_VALUE, mViewModel.getCommonSelectedSign()), selection, null);
@@ -338,7 +345,7 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         materialDatePicker.addOnPositiveButtonClickListener(selection -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(selection);
-            String date = DateConverter.convertLongToStringDate(calendar);
+            String date = DateConverter.getStringViewOfDate(calendar);
             mViewModel.changeItemInDateList(mViewModel.getCommonSelectedSign(), selectedDate, date, null);
             mViewModel.changeSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                     mViewModel.getCommonSelectedSign(), selectedDate, selection, null);

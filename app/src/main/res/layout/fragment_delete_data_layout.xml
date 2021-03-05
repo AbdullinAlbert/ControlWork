@@ -42,7 +42,7 @@
         android:id="@+id/textView_for_number_column"
         android:layout_width="0dp"
         android:layout_height="30dp"
-        android:text="@string/column_name_of_number"
+        android:text="@string/number"
         android:textAlignment="center"
         android:gravity="center"
         android:textSize="16sp"
@@ -55,7 +55,7 @@
         android:id="@+id/textView_for_date_column"
         android:layout_width="0dp"
         android:layout_height="30dp"
-        android:text="@string/column_name_of_date"
+        android:text="@string/date"
         android:textAlignment="center"
         android:gravity="center"
         android:textSize="16sp"
@@ -68,7 +68,7 @@
         android:id="@+id/textView_for_result_column"
         android:layout_width="0dp"
         android:layout_height="30dp"
-        android:text="@string/column_name_of_res"
+        android:text="@string/result"
         android:textAlignment="center"
         android:gravity="center"
         android:textSize="16sp"
@@ -81,7 +81,7 @@
         android:id="@+id/textView_for_note_column"
         android:layout_width="0dp"
         android:layout_height="30dp"
-        android:text="@string/column_name_of_note"
+        android:text="@string/note"
         android:textAlignment="center"
         android:gravity="center"
         android:textSize="16sp"
@@ -95,7 +95,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="@string/add_employer"
+        android:text="@string/employee_with_colon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_for_delete_data" />
 
@@ -117,7 +117,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="@string/add_firm"
+        android:text="@string/firm_with_colon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editText_for_employer" />
 
@@ -139,7 +139,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="@string/add_place_of_work"
+        android:text="@string/place_of_work_with_colon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editText_for_firm" />
 
@@ -161,7 +161,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="@string/add_type_of_work"
+        android:text="@string/type_of_work_with_colon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editText_for_place_of_work" />
 

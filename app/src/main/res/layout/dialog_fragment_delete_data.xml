@@ -17,7 +17,7 @@
         android:id="@+id/DeleteDFQuestion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/warning_about_delete"
+        android:text="@string/are_you_really_want_to_delete_them"
         android:padding="8dp"
         android:textSize="20sp"
         android:backgroundTint="@android:color/black"/>

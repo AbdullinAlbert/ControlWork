@@ -21,7 +21,7 @@
         android:id="@+id/ok_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ok_button"
+        android:text="@string/ok"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         style="?android:attr/borderlessButtonStyle"/>
@@ -60,6 +60,6 @@
         app:layout_constraintEnd_toEndOf="@+id/toolbar"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/baseline_delete_black_24"
-        android:contentDescription="@string/delete_item" />
+        android:contentDescription="@string/delete" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,14 +18,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
 import com.albertabdullin.controlwork.activities.SearchCriteriaVMProvider;
+import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+
 
 import java.util.Calendar;
 
@@ -55,38 +55,24 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     private View[] viewsForNumbers;
     private View[] viewsForNotes;
 
-    View.OnClickListener callPickerEmployersDF = v -> {
-        openPickerItems(SELECT_EMPLOYEES);
-    };
+    View.OnClickListener callPickerEmployersDF = v -> openPickerItems(SELECT_EMPLOYEES);
 
-    View.OnClickListener callPickerFirmsDF = v -> {
-        openPickerItems(SELECT_FIRMS);
-    };
+    View.OnClickListener callPickerFirmsDF = v -> openPickerItems(SELECT_FIRMS);
 
-    View.OnClickListener callPickerTOWDF = v -> {
-        openPickerItems(SELECT_TYPES);
-    };
+    View.OnClickListener callPickerTOWDF = v -> openPickerItems(SELECT_TYPES);
 
-    View.OnClickListener callPickerPOWDF = v -> {
-        openPickerItems(SELECT_PLACES);
-    };
+    View.OnClickListener callPickerPOWDF = v -> openPickerItems(SELECT_PLACES);
 
     protected void openPickerItems(int selectedTable) {
         PickerItemsDF pickerItemsDF = new PickerItemsDF(selectedTable);
         pickerItemsDF.show(requireActivity().getSupportFragmentManager(), "newData");
     }
 
-    View.OnClickListener callPickerSignForDateDF = v -> {
-        openPickerSigns(DATES_VALUE);
-    };
+    View.OnClickListener callPickerSignForDateDF = v -> openPickerSigns(DATES_VALUE);
 
-    View.OnClickListener callPickerSignForNumberDF = v -> {
-        openPickerSigns(NUMBERS_VALUE);
-    };
+    View.OnClickListener callPickerSignForNumberDF = v -> openPickerSigns(NUMBERS_VALUE);
 
-    View.OnClickListener callPickerSignForNoteDF = v -> {
-        openPickerSigns(NOTES_VALUE);
-    };
+    View.OnClickListener callPickerSignForNoteDF = v -> openPickerSigns(NOTES_VALUE);
 
     protected void openPickerSigns(int selectedValue) {
         PickerSignsDF pickerSignsDF = new PickerSignsDF(SearchCriteriaFragment.this, selectedValue);
@@ -177,7 +163,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     }
 
     protected void setTextToSearchButton(Button button) {
-        button.setText(R.string.search_item);
+        button.setText(R.string.search);
     }
 
     private void setOneDateCalendarToEditText(final EditText et, final TextView tv) {
@@ -197,7 +183,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             materialDatePicker.addOnPositiveButtonClickListener(selection1 -> {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(selection1);
-                String date = getStringViewOfDate(calendar);
+                String date = DateConverter.getStringViewOfDate(calendar);
                 mViewModel.setSelectedSignAndStringViewOfDate(tv.getText().toString(), date);
                 mViewModel.addSearchCriteria(SearchCriteriaFragment.DATES_VALUE,
                         mViewModel.getPositionOfSign(DATES_VALUE, tv.getText().toString()), selection1, null);
@@ -413,19 +399,6 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             helperEditText.setVisibility(View.VISIBLE);
             helperButton.setLayoutParams(new LinearLayout.LayoutParams(0,0));
         } else if (helperButton.getHeight() == 0) showAddButtonForValueCriteria(selectedTypeOfValue);
-    }
-
-    public static String getStringViewOfDate(Calendar c) {
-        int dayOfMonth, month = 1;
-        dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-        month += c.get(Calendar.MONTH);
-        StringBuilder sb = new StringBuilder();
-        if (dayOfMonth < 10) sb.append("0");
-        sb.append(dayOfMonth).append(".");
-        if (month < 10) sb.append("0");
-        sb.append(month).append(".");
-        sb.append(c.get(Calendar.YEAR));
-        return sb.toString();
     }
 
     private void showAddButtonForValueCriteria(int typeOfValue) {
