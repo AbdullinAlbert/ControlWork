@@ -38,19 +38,13 @@ public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsF
             id = v.findViewById(R.id.item_id);
             imageView = v.findViewById(R.id.imageView_for_list);
             imageView.setVisibility(View.INVISIBLE);
-            description.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if ((getBindingAdapterPosition() != RecyclerView.NO_POSITION) && actionMode == null)
-                        notifyRVObserver(getBindingAdapterPosition());
-                }
+            description.setOnClickListener(v1 -> {
+                if ((getBindingAdapterPosition() != RecyclerView.NO_POSITION) && actionMode == null)
+                    notifyRVObserver(getBindingAdapterPosition());
             });
-            description.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (getBindingAdapterPosition() != RecyclerView.NO_POSITION) return true;
-                    else return false;
-                }
+            description.setOnLongClickListener(v12 -> {
+                if (getBindingAdapterPosition() != RecyclerView.NO_POSITION) return true;
+                else return false;
             });
         }
 

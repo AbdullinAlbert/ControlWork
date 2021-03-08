@@ -60,9 +60,14 @@
     <string name="changing_data">Изменение данных</string>
     <string name="selected_records_with_colon">Выбрано записей:</string>
     <string name="fail_attempt_about_delete_data_from_db">Не получилось удалить данные из БД. Покажи ошибку разработчику</string>
+    <string name="errors_in_db_working">Ошибки в работе БД.</string>
+    <string name="fail_attempt_about_delete__all_selected_data_from_db">Не получилось удалить из БД все выбранные элементы списка. Покажи ошибку разработчику</string>
     <string name="fail_attempt_about_load_data_from_result_table">Не удалось получить данные из таблицы ResultTable. Покажи ошибку разработчику</string>
     <string name="fail_attempt_about_load_data_from_primary_table">Не удалось получить данные из одной из первичных таблиц. Покажи ошибку разработчику</string>
     <string name="fail_attempt_about_update_data_in_result_table">Не удалось обновить данные в таблице. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_load_data_from_table">Не удалось загрузить данные из БД. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_write_data_to_table">Не удалось записать данные в БД. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_update_data_within_table">Не удалось обновить данные в БД. Покажи ошибку разработчику</string>
     <string name="tag_for_delete_data_fragment">deleteDataFragment tag</string>
     <string name="tag_for_edit_data_fragment">editDataFragment tag</string>
     <string name="tag_for_preview_for_report_fragment">preViewForReportFragment tag</string>

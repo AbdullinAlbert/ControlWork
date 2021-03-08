@@ -1,5 +1,18 @@
 package com.albertabdullin.controlwork.activities;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,74 +26,35 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.Toast;
-
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.customView.SearchEditText;
 import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
 import com.albertabdullin.controlwork.fragments.InsertDataButtonClickExecutor;
+import com.albertabdullin.controlwork.models.SimpleEntityForDB;
+import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
+import com.albertabdullin.controlwork.recycler_views.RecyclerViewObserver;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.AMControllerForListItemsFromDB;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemKeyProvider;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBListItemLookUP;
-import com.albertabdullin.controlwork.recycler_views.AdapterForItemsFromDB;
-import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
 import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
-import com.albertabdullin.controlwork.recycler_views.RecyclerViewObserver;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryListItems;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.List;
-
 public class ListOfDBItemsActivity extends AppCompatActivity implements RecyclerViewObserver, ProviderOfHolderFragmentState {
-    public static final int ADD = 0;
-    public static final int DELETE = 1;
-    public static final int UPDATE = 2;
-    public static final int LOAD = 3;
-    public static final int SEARCH_IS_DONE = 4;
-    public static final int OK = 5;
-    public static final int NOT_OK = 6;
+
     private AdapterForItemsFromDB adapterForItemsFromDB;
-    private static ListOfItemsVM model;
+    private ListOfItemsVM mViewModel;
     private SelectionTracker<SimpleEntityForDB> selectionTracker;
     private ActionMode actionMode = null;
     private FloatingActionButton fab;
     private String hintForDialogFragment;
 
-    public static Handler handler = new Handler(Looper.getMainLooper()) {
-        public void handleMessage (Message msg) {
-            switch (msg.what) {
-                case ADD:
-                    model.notifyAboutAddItem();
-                    break;
-                case DELETE:
-                    model.notifyAboutDeleteItem(msg.arg1 == OK);
-                    break;
-                case UPDATE:
-                    model.notifyAboutUpdateItem(msg.arg1 == OK);
-                    break;
-                case LOAD:
-                    model.notifyAboutLoadItems();
-                    break;
-                case SEARCH_IS_DONE:
-                    model.updateSearchAdapterList();
-                    break;
-            }
-        }
+    public enum adapterState {
+        LOAD, UPDATE, DELETE, ADD
+    }
 
-    };
+    public static Handler handler = new Handler(Looper.getMainLooper());
 
     private final SelectionTracker.SelectionObserver<SimpleEntityForDB> selectionObserver = new SelectionTracker.SelectionObserver<SimpleEntityForDB>() {
         @Override
@@ -108,9 +82,9 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     public void onClick(SimpleEntityForDB eDB) {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(FillNewData_Activity.ITEM_FROM_DB, eDB);
-        resultIntent.putExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, model.getNumberOfNeededTable());
+        resultIntent.putExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, mViewModel.getNumberOfNeededTable());
         setResult(RESULT_OK, resultIntent);
-        model.closeSearchThread();
+        mViewModel.closeSearchThread();
         finish();
     }
 
@@ -118,28 +92,28 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_items);
-        model = new ViewModelProvider(this, new ViewModelFactoryListItems(this.getApplication())).get(ListOfItemsVM.class);
+        mViewModel = new ViewModelProvider(this, new ViewModelFactoryListItems(this.getApplication())).get(ListOfItemsVM.class);
         Toolbar toolbar = findViewById(R.id.toolbar_list_of_emp);
         switch (getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1)) {
             case FillNewData_Activity.TABLE_OF_EMPLOYERS:
                 toolbar.setTitle("Список сотрудников");
                 hintForDialogFragment = getResources().getString(R.string.employee_name_surname);
-                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_EMPLOYERS);
+                mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_EMPLOYERS);
                 break;
             case FillNewData_Activity.TABLE_OF_FIRMS:
                 toolbar.setTitle("Список фирм");
                 hintForDialogFragment = getResources().getString(R.string.firm_name);
-                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_FIRMS);
+                mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_FIRMS);
                 break;
             case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
                 toolbar.setTitle("Список типов работы");
                 hintForDialogFragment = getResources().getString(R.string.firm_name);
-                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_TYPES_OF_WORK);
+                mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_TYPES_OF_WORK);
                 break;
             case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
                 toolbar.setTitle("Список мест работы");
                 hintForDialogFragment = getResources().getString(R.string.place_of_work);
-                model.setCurrentDBTable(FillNewData_Activity.TABLE_OF_PLACES_OF_WORK);
+                mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_PLACES_OF_WORK);
                 break;
             default:
                 Toast toast = Toast.makeText(getApplication(), "App works incorrect", Toast.LENGTH_SHORT);
@@ -150,43 +124,26 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
         RecyclerView recyclerView = findViewById(R.id.list_of_emp);
-        Observer<List<SimpleEntityForDB>> observerRV = new Observer<List<SimpleEntityForDB>>() {
-            @Override
-            public void onChanged(List<SimpleEntityForDB> changedList) {
-                //если пустой список элементов
-                if(model.getAdapterListOfEntitiesVM().size() == 0) {
-                    model.getAdapterListOfEntitiesVM().addAll(changedList);
+        adapterForItemsFromDB = new AdapterForItemsFromDB(mViewModel.getAdapterListOfEntitiesVM());
+        adapterForItemsFromDB.setRVObserver(this);
+        recyclerView.setAdapter(adapterForItemsFromDB);
+        Observer<adapterState> observerRV = state -> {
+            switch (state) {
+                case LOAD:
                     adapterForItemsFromDB.notifyDataSetChanged();
-                //если добавлены новые элементы в список
-                } else if (model.getAdapterListOfEntitiesVM().size() < changedList.size()) {
-                    for (int i = model.getAdapterListOfEntitiesVM().size(); i < changedList.size(); i++) {
-                        model.getAdapterListOfEntitiesVM().add(changedList.get(i));
-                        adapterForItemsFromDB.notifyItemInserted(model.getAdapterListOfEntitiesVM().size() - 1);
-                    }
-                //если были удалены элементы из списка
-                } else if (model.getAdapterListOfEntitiesVM().size() > changedList.size()) {
-                    if ((double)changedList.size() / (double) model.getAdapterListOfEntitiesVM().size() > 0.6) {
-                        List<Integer> deletedPositions = model.getListOfDeletedPositions();
-                        for (int i = 0; i < deletedPositions.size(); i++) {
-                            int p = deletedPositions.get(i) - i;
-                            model.getAdapterListOfEntitiesVM().remove(p);
-                            adapterForItemsFromDB.notifyItemRemoved(p);
-                        }
-                    } else {
-                        model.getAdapterListOfEntitiesVM().retainAll(changedList);
-                        adapterForItemsFromDB.notifyDataSetChanged();
-                    }
-
-                } //если изменили какой-либо из элементов
-                else if (model.getAdapterListOfEntitiesVM().size() == changedList.size()) {
-                    adapterForItemsFromDB.notifyItemChanged(model.getUpdatedItemPosition());
-                }
+                    break;
+                case ADD:
+                    adapterForItemsFromDB.notifyItemInserted(mViewModel.getAdapterListOfEntitiesVM().size() - 1);
+                    break;
+                case UPDATE:
+                    adapterForItemsFromDB.notifyItemChanged(mViewModel.getUpdatedItemPosition());
+                    break;
+                case DELETE:
+                    for (int index : mViewModel.getListOfDeletedPositions())
+                        adapterForItemsFromDB.notifyItemRemoved(index);
             }
         };
-        adapterForItemsFromDB = new AdapterForItemsFromDB(model.getAdapterListOfEntitiesVM());
-        adapterForItemsFromDB.setRVObserver(this);
-        model.getLiveData().observe(this, observerRV);
-        recyclerView.setAdapter(adapterForItemsFromDB);
+        mViewModel.getLiveData().observe(this, observerRV);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(divider);
@@ -202,30 +159,27 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         selectionTracker.addObserver(selectionObserver);
         adapterForItemsFromDB.setSelectionTracker(selectionTracker);
         fab = findViewById(R.id.floatingActionButton);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
-                        .setHint(hintForDialogFragment)
-                        .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
-                        .setLengthOfText(30)
-                        .setExecutor(new InsertDataButtonClickExecutor() {
-                            @Override
-                            public void executeYesButtonClick(AppCompatActivity activity, String text) {
-                                if (text.length() != 0)
-                                    ((ListOfDBItemsActivity)activity).model.addItem(text);
-                                else {
-                                    Toast toast = Toast.makeText(ListOfDBItemsActivity.this,
-                                            "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
-                                    toast.show();
-                                }
+        fab.setOnClickListener(v -> {
+            CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                    .setHint(hintForDialogFragment)
+                    .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
+                    .setLengthOfText(30)
+                    .setExecutor(new InsertDataButtonClickExecutor() {
+                        @Override
+                        public void executeYesButtonClick(AppCompatActivity activity, String text) {
+                            if (text.length() != 0)
+                                ((ListOfDBItemsActivity)activity).mViewModel.addItem(text);
+                            else {
+                                Toast toast = Toast.makeText(ListOfDBItemsActivity.this,
+                                        "Нельзя добавлять пустые строки", Toast.LENGTH_SHORT);
+                                toast.show();
                             }
-                            @Override
-                            public void executeNoButtonClick() {
-                            }
-                        });
-                commonAddDataDF.show(getSupportFragmentManager(), "newData");
-            }
+                        }
+                        @Override
+                        public void executeNoButtonClick() {
+                        }
+                    });
+            commonAddDataDF.show(getSupportFragmentManager(), "newData");
         });
     }
 
@@ -233,7 +187,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         selectionTracker.onSaveInstanceState(outState);
-        model.setBlankCallTrue();
+        mViewModel.setBlankCallTrue();
     }
 
     @Override
@@ -249,10 +203,10 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String newText = s.toString();
-                model.setItemSearchText(newText);
-                if (newText.equals("")) model.sayToStopSearch(before);
-                else if (model.isSearchIsActive()) model.sendNewText(newText);
-                else model.startSearch(newText);
+                mViewModel.setItemSearchText(newText);
+                if (newText.equals("")) mViewModel.sayToStopSearch(before);
+                else if (mViewModel.isSearchIsActive()) mViewModel.sendNewText(newText);
+                else mViewModel.startSearch(newText);
             }
 
             @Override
@@ -260,18 +214,15 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
 
             }
         };
-        View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && !model.isStateMenuItemSearchTextActive()) {
-                    model.setStateMenuItemSearchText(true);
-                    InputMethodManager imm = (InputMethodManager)
-                            getSystemService(INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(0, 0);
+        View.OnFocusChangeListener focusChangeListener = (v, hasFocus) -> {
+            if (hasFocus && !mViewModel.isStateMenuItemSearchTextActive()) {
+                mViewModel.setStateMenuItemSearchText(true);
+                InputMethodManager imm = (InputMethodManager)
+                        getSystemService(INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(0, 0);
 
-                }else if (!hasFocus) {
-                    hideKeyBoard((EditText) v);
-                }
+            }else if (!hasFocus) {
+                hideKeyBoard((EditText) v);
             }
         };
         EditText searchEditText = ((SearchEditText)menuItem.getActionView()).getTextView();
@@ -280,15 +231,15 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         MenuItem.OnActionExpandListener actionExpandListener = new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                model.setStateMenuItemSearchText(true);
+                mViewModel.setStateMenuItemSearchText(true);
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                model.sayToStopSearch(-1);
-                model.closeSearchThread();
-                model.setStateMenuItemSearchText(false);
+                mViewModel.sayToStopSearch(-1);
+                mViewModel.closeSearchThread();
+                mViewModel.setStateMenuItemSearchText(false);
                 fab.show();
                 return true;
             }
@@ -300,7 +251,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (model.isStateMenuItemSearchTextActive()) {
+        if (mViewModel.isStateMenuItemSearchTextActive()) {
             menu.performIdentifierAction(R.id.action_search, 0);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -311,7 +262,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         switch (item.getItemId()) {
             case R.id.action_search:
                 EditText searchEditText = ((SearchEditText)item.getActionView()).getTextView();
-                searchEditText.setText(model.getItemSearchText());
+                searchEditText.setText(mViewModel.getItemSearchText());
                 searchEditText.requestFocus();
                 fab.hide();
                 break;
@@ -341,6 +292,6 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
 
     @Override
     public DialogFragmentStateHolder getHolder() {
-        return model;
+        return mViewModel;
     }
 }
