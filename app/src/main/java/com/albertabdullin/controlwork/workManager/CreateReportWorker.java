@@ -337,16 +337,13 @@ public class CreateReportWorker extends Worker {
     public Result doWork() {
         mDateRanges = getInputData().getString(KEY_FOR_DATE_RANGES);
         mHasPermission = getInputData().getBoolean(KEY_FOR_PERMISSION, false);
-        mResultList = (List<ComplexEntityForDB>) getInputData().getKeyValueMap().get(KEY_FOR_RESULT_LIST);
-        if (mResultList == null) {
-            try {
-                mResultList = getResultList(getInputData().getString(KEY_FOR_QUERY));
-            } catch (RuntimeException e) {
-                Log.e(TAG, "failure when get data from db", e);
+        try {
+            mResultList = getResultList(getInputData().getString(KEY_FOR_QUERY));
+        } catch (RuntimeException e) {
+            ReportActivity.handler.post(() ->
                 Toast.makeText(getApplicationContext(), getApplicationContext().getText(R.string.fail_attempt_about_delete_data_from_db) + ": "
-                + e.getMessage(), Toast.LENGTH_SHORT).show();
+                + e.getMessage(), Toast.LENGTH_SHORT).show());
                 return Result.failure();
-            }
         }
         Map<Integer, List<ComplexEntityForDB>> employeeToResultWorkMap = new TreeMap<>(mResultList.stream()
                 .collect(Collectors.groupingBy(ComplexEntityForDB::getEmployerID)));

@@ -93,12 +93,7 @@ public class ListDBItemsFragment  extends Fragment implements RecyclerViewObserv
         super.onViewCreated(view, savedInstanceState);
         final Toolbar toolbar = view.findViewById(R.id.toolbar_for_db_items_list);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            helperMethodForCloseFragment(null);
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> helperMethodForCloseFragment(null));
         switch (mViewModel.getSelectedTable()) {
             case EMPLOYEES:
                 toolbar.setTitle(R.string.list_of_employees);
@@ -138,31 +133,18 @@ public class ListDBItemsFragment  extends Fragment implements RecyclerViewObserv
         });
 
         final ProgressBar progressBar = view.findViewById(R.id.progressBar_for_list_of_primary_table);
-        Observer<Integer> observerOfProgressBarVisible = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                progressBar.setVisibility(integer);
-            }
-        };
+        Observer<Integer> observerOfProgressBarVisible = integer -> progressBar.setVisibility(integer);
         mViewModel.getVisibleOfProgressBarForPrimaryTableListLD().observe(getViewLifecycleOwner(), observerOfProgressBarVisible);
         final AdapterForItemsFromDB adapter = new AdapterForItemsFromDB(mViewModel.getCurrentListForPrimaryTable());
         adapter.setRVObserver(this);
-        Observer<DeleteDataFragment.StateOfRecyclerView> observerOfRecyclerViewState = new Observer<DeleteDataFragment.StateOfRecyclerView>() {
-            @Override
-            public void onChanged(DeleteDataFragment.StateOfRecyclerView stateOfRecyclerView) {
-                if (stateOfRecyclerView == DeleteDataFragment.StateOfRecyclerView.LOAD) {
-                    adapter.notifyDataSetChanged();
-                }
+        Observer<DeleteDataFragment.StateOfRecyclerView> observerOfRecyclerViewState = stateOfRecyclerView -> {
+            if (stateOfRecyclerView == DeleteDataFragment.StateOfRecyclerView.LOAD) {
+                adapter.notifyDataSetChanged();
             }
         };
         mViewModel.getStateOfRVForPrimaryTableLD().observe(getViewLifecycleOwner(), observerOfRecyclerViewState);
         final RecyclerView recyclerView = view.findViewById(R.id.recyclerView_for_list_of_primary_table);
-        Observer<Integer> observerOfRecyclerViewVisible = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                recyclerView.setVisibility(integer);
-            }
-        };
+        Observer<Integer> observerOfRecyclerViewVisible = recyclerView::setVisibility;
         mViewModel.getVisibleOfRVForPrimaryTableLD().observe(getViewLifecycleOwner(), observerOfRecyclerViewVisible);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));

@@ -106,72 +106,43 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         inflateToolbarMenu(toolbar);
         toolbar.setTitle(R.string.search_result);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { requireActivity().onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         final EditText employeeEditText = view.findViewById(R.id.editText_for_employer);
         final EditText firmEditText = view.findViewById(R.id.editText_for_firm);
         final EditText typeOfWorkEditText = view.findViewById(R.id.editText_for_type_of_work);
         final EditText placeOfWorkEditText = view.findViewById(R.id.editText_for_place_of_work);
-        Observer<String> observerOfEmployeeET = new Observer<String>() {
-            @Override
-            public void onChanged(String s) { employeeEditText.setText(s);
-            }
-        };
-        Observer<String> observerOfFirmET = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                firmEditText.setText(s);
-            }
-        };
-        Observer<String> observerOfToWET = new Observer<String>() {
-            @Override
-            public void onChanged(String s) { typeOfWorkEditText.setText(s);
-            }
-        };
-        Observer<String> observerOfPoWET = new Observer<String>() {
-            @Override
-            public void onChanged(String s) { placeOfWorkEditText.setText(s);
-            }
-        };
+        Observer<String> observerOfEmployeeET = employeeEditText::setText;
+        Observer<String> observerOfFirmET = firmEditText::setText;
+        Observer<String> observerOfToWET = typeOfWorkEditText::setText;
+        Observer<String> observerOfPoWET = placeOfWorkEditText::setText;
         mViewModel.getEmployeeEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfEmployeeET);
         mViewModel.getFirmEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfFirmET);
         mViewModel.getTOWEditTextLD().observe(getViewLifecycleOwner(), observerOfToWET);
         mViewModel.getPOWEditTextLD().observe(getViewLifecycleOwner(), observerOfPoWET);
         final ProgressBar progressBar = view.findViewById(R.id.progressBar);
-        Observer<Integer> observerOfProgressBar = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) { progressBar.setVisibility(integer); }
-        };
+        Observer<Integer> observerOfProgressBar = progressBar::setVisibility;
         mViewModel.getVisibleOfProgressBarLD().observe(getViewLifecycleOwner(), observerOfProgressBar);
         mAdapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, getViewLifecycleOwner(), this);
         recyclerView = view.findViewById(R.id.recyclerView3);
         recyclerView.setVisibility(View.INVISIBLE);
-        Observer<Integer> observerOFVisibleRecyclerView = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                recyclerView.setVisibility(integer);
-            }
-        };
+        Observer<Integer> observerOFVisibleRecyclerView = integer -> recyclerView.setVisibility(integer);
         mViewModel.getVisibleOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOFVisibleRecyclerView);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity()));
         DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(divider);
-        Observer<DeleteDataFragment.StateOfRecyclerView> observerOfStateOfRV = new Observer<DeleteDataFragment.StateOfRecyclerView>() {
-            @Override
-            public void onChanged(DeleteDataFragment.StateOfRecyclerView stateOfRecyclerView) {
-                switch (stateOfRecyclerView) {
-                    case LOAD:
-                        mAdapter.initializeArrayOfViews();
-                        mAdapter.notifyDataSetChanged();
-                        break;
-                    case DELETE:
-                        for (int i: mViewModel.getDeletedPositionsFromDB()) mAdapter.notifyItemRemoved(i);
-                        break;
-                }
+        Observer<DeleteDataFragment.StateOfRecyclerView> observerOfStateOfRV = stateOfRecyclerView -> {
+            switch (stateOfRecyclerView) {
+                case LOAD:
+                    mAdapter.initializeArrayOfViews();
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                case DELETE:
+                    for (int i: mViewModel.getDeletedPositionsFromDB()) {
+                        mViewModel.getResultList().remove(i);
+                        mAdapter.notifyItemRemoved(i);
+                    }
+                    break;
             }
         };
         mViewModel.getStateOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOfStateOfRV);
@@ -221,26 +192,18 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         toolbar.inflateMenu(R.menu.stable_appbar_result_list_items);
         final MenuItem menuItem = toolbar.getMenu().getItem(0);
         menuItem.setVisible(false);
-        Observer<Boolean> observerOfEditMenuItem = new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                menuItem.setVisible(aBoolean);
-            }
-        };
+        Observer<Boolean> observerOfEditMenuItem = menuItem::setVisible;
         mViewModel.getVisibleOfEditMenuItem().observe(getViewLifecycleOwner(), observerOfEditMenuItem);
-        menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_edit) {
-                    FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                    EditDataFragment deleteDataFragment = new EditDataFragment();
-                    transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
-                            getResources().getString(R.string.tag_for_edit_data_fragment)).
-                            addToBackStack(null).commit();
-                    return true;
-                }
-                return false;
+        menuItem.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_edit) {
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                EditDataFragment deleteDataFragment = new EditDataFragment();
+                transaction.replace(R.id.container_for_edit_delete_data_fragment, deleteDataFragment,
+                        getResources().getString(R.string.tag_for_edit_data_fragment)).
+                        addToBackStack(null).commit();
+                return true;
             }
+            return false;
         });
     }
 

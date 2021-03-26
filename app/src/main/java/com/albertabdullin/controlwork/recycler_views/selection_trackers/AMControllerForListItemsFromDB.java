@@ -89,7 +89,7 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                 CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
                         .setHint(activity.getHintForDialogFragment())
                         .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
-                        .setLengthOfText(30)
+                        .setLengthOfText(activity.getResources().getInteger(R.integer.max_length_of_string_value))
                         .setExecutor(new InsertDataButtonClickExecutor() {
                             @Override
                             public void executeYesButtonClick(AppCompatActivity activity, String text) {

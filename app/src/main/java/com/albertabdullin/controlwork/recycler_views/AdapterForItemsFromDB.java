@@ -17,6 +17,7 @@ import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.EntityForDBListItemDetails;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AdapterForItemsFromDB extends RecyclerView.Adapter<AdapterForItemsFromDB.MyViewHolder> implements RecyclerViewObservable{

@@ -72,9 +72,8 @@ public class AMControllerForResultListItemsFromDB implements ActionMode.Callback
                 commonDeleteDataDF.setExecutor(new DeleteDataButtonClickExecutor() {
                     @Override
                     public void executeYesButtonClick(AppCompatActivity appCompatActivity) {
-                        DeleteDataFragment deleteDataFragment =
-                                (DeleteDataFragment) appCompatActivity
-                                        .getSupportFragmentManager().findFragmentByTag("delete_result_of_search_criteria_fragment");
+                        DeleteDataFragment deleteDataFragment = (DeleteDataFragment) appCompatActivity
+                            .getSupportFragmentManager().findFragmentByTag(appCompatActivity.getString(R.string.tag_for_delete_data_fragment));
                         SelectionTracker<ComplexEntityForDB> localTracker = deleteDataFragment.getSelectionTracker();
                         Iterator<ComplexEntityForDB> iterator = localTracker.getSelection().iterator();
                         List<ComplexEntityForDB> deletedItemsList = new ArrayList<>();

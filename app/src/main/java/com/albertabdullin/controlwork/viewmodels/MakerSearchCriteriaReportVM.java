@@ -19,25 +19,13 @@ import java.util.Map;
 public class MakerSearchCriteriaReportVM extends MakerSearchCriteriaVM {
 
     private final WorkManager mWorkManager;
-    private List<ComplexEntityForDB> mResultList;
     private SearchCriteriaForReportFragment.DateRange mSelectedPeriod;
 
     private boolean mHasAppPermission = false;
-    private boolean needPreView = false;
 
     public MakerSearchCriteriaReportVM(@NonNull Application application) {
         super(application);
         mWorkManager = WorkManager.getInstance(application);
-    }
-
-    public boolean isNeedPreView() {
-        return needPreView;
-    }
-
-    public void setNeedPreView(boolean b) { needPreView = b; }
-
-    public void setResultList(List<ComplexEntityForDB> resultList) {
-        mResultList = resultList;
     }
 
     @Override
@@ -68,10 +56,7 @@ public class MakerSearchCriteriaReportVM extends MakerSearchCriteriaVM {
 
     private Data getDataForWorker() {
         Data.Builder builder = new Data.Builder();
-        Map<String, Object> helperMap = new HashMap<>();
-        helperMap.put(CreateReportWorker.KEY_FOR_RESULT_LIST, mResultList);
-        return builder.putAll(helperMap)
-            .putString(CreateReportWorker.KEY_FOR_DATE_RANGES, getDateRangesString())
+        return builder.putString(CreateReportWorker.KEY_FOR_DATE_RANGES, getDateRangesString())
             .putBoolean(CreateReportWorker.KEY_FOR_PERMISSION, mHasAppPermission)
             .putString(CreateReportWorker.KEY_FOR_QUERY, getQueryForSearch()).build();
     }

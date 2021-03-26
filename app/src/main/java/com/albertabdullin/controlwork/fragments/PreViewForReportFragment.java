@@ -27,7 +27,6 @@ public class PreViewForReportFragment extends DeleteDataFragment {
         MenuItem menuItem = toolbar.getMenu().getItem(0);
         menuItem.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_create_report_item) {
-                ((ReportActivity)requireActivity()).setResultList(mViewModel.getResultList());
                 ((ReportActivity)requireActivity()).launchCreatingReport();
                 requireActivity().onBackPressed();
                 return true;

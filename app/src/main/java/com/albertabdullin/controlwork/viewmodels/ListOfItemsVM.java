@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
+import android.os.Process;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -46,7 +46,7 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     private String currentNameOfTable;
     private String currentNameOfColumn;
     private int numberOfNeededTable;
-    private Executor executor;
+    private Executor mExecutor;
 
     private class AddItemsThread extends Thread {
         private final String item;
@@ -114,31 +114,13 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
                 return;
             }
             if (count == list.size()) {
-                for (int i = 0; i < list.size(); i++) adapterListOfEntitiesVM.remove(list.get(i));
                 listOfDeletedPositions.sort(comparator);
                 entities.postValue(ListOfDBItemsActivity.adapterState.DELETE);
             } else {
-                adapterListOfEntitiesVM.clear();
-                try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-                     SQLiteDatabase db = cwdbHelper.getReadableDatabase();
-                     Cursor cursor = db.query(currentNameOfTable,
-                             new String[] {"_id", currentNameOfColumn},
-                             null, null, null, null, null)) {
-                    if (cursor.moveToFirst()) {
-                        do {
-                            SimpleEntityForDB eDB = new SimpleEntityForDB();
-                            eDB.setId(cursor.getInt(0));
-                            eDB.setDescription(cursor.getString(1));
-                            adapterListOfEntitiesVM.add(eDB);
-                        } while (cursor.moveToNext());
-                    }
-                } catch (SQLiteException e) {
-                    ListOfDBItemsActivity.handler.post(() -> Toast.makeText(getApplication(), getApplication().getString(R.string.errors_in_db_working) + " "
-                            + getApplication().getString(R.string.fail_attempt_about_delete__all_selected_data_from_db), Toast.LENGTH_SHORT).show());
-                    return;
-                }
                 ListOfDBItemsActivity.handler.post(() -> Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_delete__all_selected_data_from_db), Toast.LENGTH_SHORT).show());
-                entities.postValue(ListOfDBItemsActivity.adapterState.LOAD);
+                LoadItemsThread loadItemsThread = new LoadItemsThread();
+                loadItemsThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                mExecutor.execute(loadItemsThread);
             }
         }
     }
@@ -182,6 +164,7 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     private class LoadItemsThread extends Thread {
         @Override
         public void run() {
+            if (adapterListOfEntitiesVM.size() != 0) adapterListOfEntitiesVM.clear();
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
                  SQLiteDatabase db = cwdbHelper.getReadableDatabase();
                  Cursor cursor = db.query(currentNameOfTable,
@@ -213,7 +196,6 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     }
 
     private class SearchItemsThread extends Thread {
-        public static final String TAG_SEARCH_TREAD = "SearchItemsThread";
         private final BlockingQueue<String> store = new ArrayBlockingQueue<>(1);
         private String pattern, regEx, hPattern = "";
         private final AtomicBoolean isStopSearch = new AtomicBoolean(false);
@@ -224,9 +206,19 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
             try {
                 store.put(pattern);
             } catch (InterruptedException e) {
-                Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
+                stateOfRecyclerViewRecovery(e);
+                interrupt();
             }
             cacheForAdapterList = new ArrayList<>(adapterListOfEntitiesVM);
+        }
+
+        private void stateOfRecyclerViewRecovery(Exception e) {
+            ListOfDBItemsActivity.handler.post(() ->
+                    Toast.makeText(getApplication(), getApplication().getString(R.string.thread_for_search_has_been_interrupted) + ": " +
+                            e.getMessage(), Toast.LENGTH_SHORT).show());
+            adapterListOfEntitiesVM.clear();
+            adapterListOfEntitiesVM.addAll(cacheForAdapterList);
+            entities.postValue(ListOfDBItemsActivity.adapterState.LOAD);
         }
 
         public void setNewPattern(String newPattern) {
@@ -234,10 +226,11 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
             try {
                 store.put(newPattern);
             } catch (InterruptedException e) {
-                Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
-                //Вернуть полный список элементов в List адаптера
+                stateOfRecyclerViewRecovery(e);
+                interrupt();
             }
         }
+
 
         public void stopSearch() {
             isStopSearch.set(true);
@@ -284,8 +277,8 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
                 try {
                     pattern = store.take();
                 } catch (InterruptedException e) {
-                    Log.e(TAG_SEARCH_TREAD, "Поток прервался: " + e.toString());
-                    //Вернуть полный список элементов в List адаптера
+                    stateOfRecyclerViewRecovery(e);
+                    interrupt();
                 }
                 if (pattern.equals("")) break;
                 regEx = "(?i)" + pattern;
@@ -333,8 +326,8 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     public LiveData<ListOfDBItemsActivity.adapterState> getLiveData() {
         if(entities == null) {
             entities = new MutableLiveData<>();
-            executor = Executors.newSingleThreadExecutor();
-            executor.execute(new LoadItemsThread());
+            mExecutor = Executors.newSingleThreadExecutor();
+            mExecutor.execute(new LoadItemsThread());
         }
         return entities;
     }
@@ -384,21 +377,21 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
     }
 
     public void addItem(String s) {
-        executor.execute(new AddItemsThread(s));
+        mExecutor.execute(new AddItemsThread(s));
     }
 
     public void deleteItem(List<SimpleEntityForDB> list)  {
-        executor.execute(new DeleteItemThread(list));
+        mExecutor.execute(new DeleteItemThread(list));
     }
 
     public void updateItem(SimpleEntityForDB eDB, String newDescription) {
-        executor.execute(new UpdateItemThread(eDB, newDescription));
+        mExecutor.execute(new UpdateItemThread(eDB, newDescription));
     }
 
     public void startSearch(String pattern) {
         if (searchItemsThread == null || !searchItemsThread.isAlive())
             searchItemsThread = new SearchItemsThread(pattern);
-        executor.execute(searchItemsThread);
+        mExecutor.execute(searchItemsThread);
     }
 
     public boolean isSearchIsActive() {

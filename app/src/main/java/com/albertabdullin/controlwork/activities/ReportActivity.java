@@ -76,10 +76,6 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         return mViewModel;
     }
 
-    public void setResultList(List<ComplexEntityForDB> resultList) {
-        mSearchCriteriaForReportFragment.setResultList(resultList);
-    }
-
     public void launchCreatingReport() {
         mSearchCriteriaForReportFragment.launchCreatingReport();
     }

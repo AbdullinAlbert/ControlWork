@@ -68,11 +68,15 @@
     <string name="fail_attempt_about_load_data_from_table">Не удалось загрузить данные из БД. Покажи ошибку разработчику</string>
     <string name="fail_attempt_about_write_data_to_table">Не удалось записать данные в БД. Покажи ошибку разработчику</string>
     <string name="fail_attempt_about_update_data_within_table">Не удалось обновить данные в БД. Покажи ошибку разработчику</string>
+    <string name="fail_attempt_about_get_data_from_table">Не удалось получить данные из таблицы</string>
     <string name="tag_for_delete_data_fragment">deleteDataFragment tag</string>
     <string name="tag_for_edit_data_fragment">editDataFragment tag</string>
+    <string name="error_check_data_for_correct">Ошибка. Проверь корректность вводимых данных</string>
+    <string name="adding_data_process_is_active">Идёт процесс добавления данных</string>
     <string name="tag_for_preview_for_report_fragment">preViewForReportFragment tag</string>
     <string name="search_criteria_for_monthly_report_fragment">searchCriteriaForMonthlyReportFragment tag</string>
     <string name="data_has_been_updated">Данные обновлены</string>
+    <string name="data_has_been_added">Данные успешно добавлены</string>
     <string name="tag_for_list_of_DB_items_fragment">listDBItemsFragment tag</string>
     <string name="cannot_convert_string_to_date">Не получается конвертировать строку в дату. Покажи ошибку разработчику</string>
     <string name="thread_for_search_has_been_interrupted">Поток для поиска был прерван. Покажи ошибку разработчику</string>
@@ -86,7 +90,7 @@
     <string name="search_criteria">Критерии поиска</string>
     <string name="search_criteria_for_report">Критерии поиска для отчёта</string>
     <string name="current_month">за текущий месяц</string>
-    <string name="show_report_preview_before_creating">Посмотреть результаты поиска</string>
+    <string name="report_preview">Предпросмотр отчёта</string>
     <string name="current_year">за текущий год</string>
     <string name="certain_period">за указанный период</string>
     <string name="create_report">Создать отчёт</string>
@@ -94,4 +98,7 @@
     <string name="writing_file_error">Не получилось записать данные в PDF-файл. Покажи ошибку разработчику:</string>
     <string name="the_report_has_been_created_successfully">Отчёт успешно создан</string>
     <string name="the_report_has_not_been_created">Ошибка при создании отчёта. Расскажи об этом разработчику</string>
+    <string name="correct_data_check">Проверка корректности данных</string>
+    <string name="incorrect_data_in_result_row">Некорректные данные в строке Результат</string>
+    <string name="thread_for_check_data_was_interrupted">Поток на проверку данных был прерван. Покажи ошибку разработчику</string>
 </resources>

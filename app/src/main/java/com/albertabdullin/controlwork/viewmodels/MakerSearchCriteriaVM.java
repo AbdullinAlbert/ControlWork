@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Process;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -13,6 +14,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.MakerSearchCriteriaActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.AddItemOfTypeOfValuesToListDF;
 import com.albertabdullin.controlwork.fragments.PickerSignsDF;
@@ -73,7 +75,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private SortedEqualSignsList availableOrderedEqualSignsListForNote;
     private List<OrderedSign> selectedEqualSignsListForNote;
     private Map<String, String> stringViewOfNumber;
-    private MutableLiveData<String> exceptionFromBackgroundThreadsLD;
     private MutableLiveData<Integer> entitiesLD;
     private MutableLiveData<String> employeesEditTextLD;
     private MutableLiveData<String> firmsEditTextLD;
@@ -153,8 +154,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                     } while (cursor.moveToNext());
                 }
             } catch (SQLiteException e) {
-                exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.fail_attempt_about_load_data_from_primary_table)
-                + ": " + e.getMessage());
+                MakerSearchCriteriaActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_load_data_from_primary_table)
+                                + ": " + e.getMessage(), Toast.LENGTH_SHORT));
                 return;
             }
             entitiesLD.postValue(mSelectedTable);
@@ -164,11 +166,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     public LiveData<Integer> getEntitiesLiveData() {
         if (entitiesLD == null) entitiesLD = new MutableLiveData<>();
         return entitiesLD;
-    }
-
-    public LiveData<String> getExceptionFromBackgroundThreadsLD() {
-        if (exceptionFromBackgroundThreadsLD == null) exceptionFromBackgroundThreadsLD = new MutableLiveData<>();
-        return exceptionFromBackgroundThreadsLD;
     }
 
     public LiveData<String> getEmployeesEditTextLD() {
@@ -622,7 +619,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             try {
                 store.put(pattern);
             } catch (InterruptedException e) {
-                exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.thread_for_search_has_been_interrupted) + ": " + e.getMessage());
+                MakerSearchCriteriaActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.thread_for_search_has_been_interrupted)
+                                + ": " + e.getMessage(), Toast.LENGTH_SHORT));
                 interrupt();
             }
             cacheForAdapterList = new ArrayList<>(getAdapterListOfEntities(mSelectedTable));
@@ -633,7 +632,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             try {
                 store.put(newPattern);
             } catch (InterruptedException e) {
-                exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.thread_for_search_has_been_interrupted) + ": " + e.getMessage());
+                MakerSearchCriteriaActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.thread_for_search_has_been_interrupted)
+                                + ": " + e.getMessage(), Toast.LENGTH_SHORT));
                 interrupt();
             }
         }
@@ -683,7 +684,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 try {
                     pattern = store.take();
                 } catch (InterruptedException e) {
-                    exceptionFromBackgroundThreadsLD.postValue(getApplication().getResources().getString(R.string.thread_for_search_has_been_interrupted) + ": " + e.getMessage());
+                    MakerSearchCriteriaActivity.mHandler.post(() ->
+                            Toast.makeText(getApplication(), getApplication().getString(R.string.thread_for_search_has_been_interrupted)
+                                    + ": " + e.getMessage(), Toast.LENGTH_SHORT));
                     return;
                 }
                 if (pattern.equals("")) break;

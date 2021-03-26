@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Message;
 import android.os.Process;
 import android.text.Editable;
 import android.util.Log;
@@ -18,8 +17,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
-import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.fragments.ListDBItemsFragment;
@@ -28,13 +27,14 @@ import com.albertabdullin.controlwork.models.PairOfItemPositions;
 import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,9 +89,10 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private boolean pressedBackButton = false;
     private boolean stateMenuItemSearchText = false;
     private boolean isBlankCall = true;
-    private List<Integer> listOfDeletedRowsFromDB;
+    private List<Integer> listOfDeletedPositions;
     private Set<Integer> itemsOfST;
     private boolean isActivatedDF = false;
+    private Executor mExecutor;
 
     public EditDeleteDataVM(@NonNull Application application) {
         super(application);
@@ -110,6 +111,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private class LoadItemsThreadFromResultTable extends Thread {
         @Override
         public void run() {
+            if (listForWorkWithResultTableItems.size() != 0) listForWorkWithResultTableItems.clear();
             SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
             try (SQLiteDatabase db = cwdbHelper.getReadableDatabase();
                  Cursor cursor = db.rawQuery(mQuery, null, null)) {
@@ -133,8 +135,10 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     } while (cursor.moveToNext());
                 }
             } catch (SQLiteException e) {
-                Message message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.FAIL_ABOUT_LOAD_DATA_FROM_RESULT_TABLE);
-                EditDeleteDataActivity.mHandler.sendMessage(message);
+                EditDeleteDataActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_load_data_from_table) + ": " +
+                                e.getMessage(), Toast.LENGTH_SHORT).show());
+                return;
             }
             visibleOfProgressBarForResultList.postValue(View.GONE);
             visibleOfRecyclerView.postValue(View.VISIBLE);
@@ -153,13 +157,15 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     public void startSearchInResultTable() {
+        if (mExecutor == null) mExecutor = Executors.newSingleThreadExecutor();
         loadItemsThreadFromResultTable = new LoadItemsThreadFromResultTable();
         loadItemsThreadFromResultTable.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        loadItemsThreadFromResultTable.start();
+        mExecutor.execute(loadItemsThreadFromResultTable);
     }
 
     private class DeleteItemThread extends Thread {
         private final List<ComplexEntityForDB> list;
+        private final List<String> IDList = new ArrayList<>();
 
         public DeleteItemThread(List<ComplexEntityForDB> list) {
             this.list = list;
@@ -176,28 +182,35 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         @Override
         public void run() {
             int count;
-            if (listOfDeletedRowsFromDB == null) listOfDeletedRowsFromDB = new ArrayList<>();
-            if (listOfDeletedRowsFromDB.size() > 0) listOfDeletedRowsFromDB.clear();
-            for (int i = 0; i < list.size(); i++) listOfDeletedRowsFromDB.add(Integer.parseInt(list.get(i).getID()));
-            String[] arguments = listOfDeletedRowsFromDB.toString().replaceAll("[\\[\\]]", "").split(", ");
-            String whereClause = makeWhereClause(listOfDeletedRowsFromDB.size());
+            if (listOfDeletedPositions == null) listOfDeletedPositions = new ArrayList<>();
+            if (listOfDeletedPositions.size() > 0) listOfDeletedPositions.clear();
+            for (ComplexEntityForDB entity : list) {
+                IDList.add(entity.getID());
+                listOfDeletedPositions.add(listForWorkWithResultTableItems.indexOf(entity));
+            }
+            String[] arguments = IDList.toString().replaceAll("[\\[\\]]", "").split(", ");
+            String whereClause = makeWhereClause(listOfDeletedPositions.size());
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
                  SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
                 count = db.delete(CWDBHelper.TABLE_NAME_RESULT, whereClause, arguments);
             } catch (SQLiteException e) {
-                Toast toast = Toast.makeText(getApplication(), "Something went wrong: DB can't delete data", Toast.LENGTH_SHORT);
-                toast.show();
+                EditDeleteDataActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_delete_data_from_db) + ": " +
+                                e.getMessage(), Toast.LENGTH_SHORT).show());
                 return;
             }
             if (count == list.size()) {
-                listForWorkWithResultTableItems.removeAll(list);
-                stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.DELETE);
+                listOfDeletedPositions.sort((o1, o2) -> (o1 - o2) * (-1));
                 visibleOfProgressBarForResultList.postValue(View.GONE);
                 visibleOfRecyclerView.postValue(View.VISIBLE);
+                stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.DELETE);
             }
             else {
-                Message message = EditDeleteDataActivity.mHandler.obtainMessage(EditDeleteDataActivity.FAIL_ABOUT_DELETE_DATA_FROM_DB);
-                EditDeleteDataActivity.mHandler.sendMessage(message);
+                EditDeleteDataActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_delete__all_selected_data_from_db), Toast.LENGTH_SHORT).show());
+                LoadItemsThreadFromResultTable loadItemsThreadFromResultTable = new LoadItemsThreadFromResultTable();
+                loadItemsThreadFromResultTable.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                mExecutor.execute(loadItemsThreadFromResultTable);
             }
         }
     }
@@ -207,15 +220,11 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         visibleOfProgressBarForResultList.setValue(View.VISIBLE);
         DeleteItemThread deleteItemThread = new DeleteItemThread(list);
         deleteItemThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        deleteItemThread.start();
+        mExecutor.execute(deleteItemThread);
     }
 
     public List<Integer> getDeletedPositionsFromDB() {
-        for (int i = 0; i < listOfDeletedRowsFromDB.size(); i++)
-            listOfDeletedRowsFromDB.set(i, (listOfDeletedRowsFromDB.get(i) - 1));
-        Comparator<Integer> comparator = (o1, o2) -> (o1 - o2) * (-1);
-        listOfDeletedRowsFromDB.sort(comparator);
-        return listOfDeletedRowsFromDB;
+        return listOfDeletedPositions;
     }
 
     public LiveData<DeleteDataFragment.StateOfRecyclerView> getStateOfRecyclerViewLD() {
@@ -548,7 +557,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                 }
         }
         loadItemsFromPrimaryTableThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        loadItemsFromPrimaryTableThread.start();
+        mExecutor.execute(loadItemsFromPrimaryTableThread);
     }
 
     public List<SimpleEntityForDB> getCurrentListForPrimaryTable() {
@@ -739,14 +748,17 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
             if (itemForChangeDataInDB.getNote() != null)
                 cv.put(CWDBHelper.T_RESULT_C_NOTE, itemForChangeDataInDB.getNote());
             int idKey;
+            String resID = listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getID();
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
                  SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
                 idKey = db.update(CWDBHelper.TABLE_NAME_RESULT,
                         cv,
                         "_id = ?",
-                        new String[] { Integer.toString(pairOfItemPositions.getNewPos()) });
+                        new String[] { resID });
             } catch (SQLiteException e) {
-                ListOfDBItemsActivity.handler.sendEmptyMessage(EditDeleteDataActivity.FAIL_ABOUT_UPDATE_DATA_IN_RESULT_TABLE);
+                EditDeleteDataActivity.mHandler.post(() ->
+                        Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_update_data_in_result_table) + " " +
+                                e.getMessage(), Toast.LENGTH_SHORT).show());
                 return;
             }
             if(idKey != 0) {
@@ -779,8 +791,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     shortLinkToObject.setNote(itemForChangeDataInDB.getNote());
                 stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.UPDATE);
                 toastAboutSuccessUpdateData.postValue(true);
-            }
-            else EditDeleteDataActivity.mHandler.sendEmptyMessage(EditDeleteDataActivity.FAIL_ABOUT_UPDATE_DATA_IN_RESULT_TABLE);
+            } else EditDeleteDataActivity.mHandler.post(() ->
+                    Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_update_data_in_result_table),
+                            Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -788,7 +801,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         stateOfSaveChangedDataButton.setValue(false);
         UpdateItemThread updateItemThread = new UpdateItemThread();
         updateItemThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        updateItemThread.start();
+        mExecutor.execute(updateItemThread);
     }
 
     public void setStateMenuItemSearchText(boolean b) {
@@ -897,7 +910,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     public void startSearchInResultTable(String pattern) {
         searchItemsThread = new SearchItemsThread(pattern);
         searchItemsThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        searchItemsThread.start();
+        mExecutor.execute(searchItemsThread);
     }
 
     public boolean isSearchIsActive() {

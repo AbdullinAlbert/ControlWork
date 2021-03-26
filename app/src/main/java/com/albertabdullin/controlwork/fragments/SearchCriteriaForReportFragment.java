@@ -85,13 +85,13 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
         toolbar.setTitle(R.string.search_criteria_for_report);
         toolbar.setSubtitle(getSubTitleText());
         toolbar.inflateMenu(R.menu.show_report_preview_menu);
-        MenuItem menuItem = toolbar.getMenu().getItem(0);
-        if (((MakerSearchCriteriaReportVM)mViewModel).isNeedPreView()) menuItem.setChecked(true);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.show_report_preview) {
-                boolean b = ((MakerSearchCriteriaReportVM)mViewModel).isNeedPreView();
-                item.setChecked(!b);
-                ((MakerSearchCriteriaReportVM)mViewModel).setNeedPreView(!b);
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                PreViewForReportFragment preViewForReportFragment = new PreViewForReportFragment(mViewModel.createQuery());
+                transaction.replace(R.id.container_for_monthly_report_fragments, preViewForReportFragment,
+                        getResources().getString(R.string.tag_for_preview_for_report_fragment)).
+                        addToBackStack(null).commit();
                 return true;
             }
             return false;
@@ -139,13 +139,7 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
 
     @Override
     protected void startViewForResult(String query) {
-        if (((MakerSearchCriteriaReportVM) mViewModel).isNeedPreView()) {
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            PreViewForReportFragment preViewForReportFragment = new PreViewForReportFragment(query);
-            transaction.replace(R.id.container_for_monthly_report_fragments, preViewForReportFragment,
-                    getResources().getString(R.string.tag_for_preview_for_report_fragment)).
-                    addToBackStack(null).commit();
-        } else launchCreatingReport();
+        launchCreatingReport();
     }
 
     public void launchCreatingReport() {
@@ -153,10 +147,6 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
             ((MakerSearchCriteriaReportVM) mViewModel).setHasAppPermission(true);
             ((MakerSearchCriteriaReportVM) mViewModel).launchCreatingReport();
         } else requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-    }
-
-    public void setResultList(List<ComplexEntityForDB> resultList) {
-        ((MakerSearchCriteriaReportVM) mViewModel).setResultList(resultList);
     }
 
 }

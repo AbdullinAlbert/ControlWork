@@ -139,8 +139,10 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
                     adapterForItemsFromDB.notifyItemChanged(mViewModel.getUpdatedItemPosition());
                     break;
                 case DELETE:
-                    for (int index : mViewModel.getListOfDeletedPositions())
+                    for (int index : mViewModel.getListOfDeletedPositions()) {
+                        mViewModel.getAdapterListOfEntitiesVM().remove(index);
                         adapterForItemsFromDB.notifyItemRemoved(index);
+                    }
             }
         };
         mViewModel.getLiveData().observe(this, observerRV);
@@ -163,7 +165,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
             CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
                     .setHint(hintForDialogFragment)
                     .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
-                    .setLengthOfText(30)
+                    .setLengthOfText(getResources().getInteger(R.integer.max_length_of_string_value))
                     .setExecutor(new InsertDataButtonClickExecutor() {
                         @Override
                         public void executeYesButtonClick(AppCompatActivity activity, String text) {
@@ -176,8 +178,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
                             }
                         }
                         @Override
-                        public void executeNoButtonClick() {
-                        }
+                        public void executeNoButtonClick() { }
                     });
             commonAddDataDF.show(getSupportFragmentManager(), "newData");
         });

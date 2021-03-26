@@ -6,9 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,152 +14,88 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_EMPLOYERS;
+import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_FIRMS;
+import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_PLACES_OF_WORK;
+import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_TYPES_OF_WORK;
 
 public class AddNewDataVM extends AndroidViewModel {
     private MutableLiveData<String> employerEditTextLD;
     private MutableLiveData<String> firmEditTextLD;
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
-    private MutableLiveData<Integer> warningEditTextLD;
-    private MutableLiveData<Integer> warningTextViewLD;
+    private MutableLiveData<Boolean> warningEditTextForEmployeeLD;
+    private MutableLiveData<Boolean> warningTextViewForEmployeeLD;
+    private MutableLiveData<Boolean> warningEditTextForFirmLD;
+    private MutableLiveData<Boolean> warningTextViewForFirmLD;
+    private MutableLiveData<Boolean> warningEditTextForToWLD;
+    private MutableLiveData<Boolean> warningTextViewForToWLD;
+    private MutableLiveData<Boolean> warningEditTextForPoWLD;
+    private MutableLiveData<Boolean> warningTextViewForPoWLD;
+    private MutableLiveData<Boolean> warningEditTextForResultLD;
+    private MutableLiveData<Boolean> warningTextViewForResultLD;
     private MutableLiveData<Boolean> prepareAddButtonLD;
     private MutableLiveData<String> changeTextAddButtonLD;
-    private boolean correctEmployerData;
-    private String employerString;
+    private volatile boolean correctEmployerData;
     private int employerId = -1;
-    private boolean correctFirmData;
-    private String firmString;
+    private volatile boolean correctFirmData;
     private int firmId = -1;
-    private boolean correctPoWData;
-    private String powString;
+    private volatile boolean correctPoWData;
     private int powId = -1;
-    private boolean correctToWData;
-    private String towString;
+    private volatile boolean correctToWData;
     private int towId = -1;
-    private boolean correctResultValueData;
+    private volatile boolean correctResultValueData;
     private Long dateForSql;
     private Float resultValueFloat;
     private String resultValueString = "";
     private boolean firstLaunch = true;
     private String note = "";
-    public static final int INCORRECT_EMPLOYEE_ET = 0;
-    public static final int INCORRECT_FIRM_ET = 1;
-    public static final int INCORRECT_TYPE_ET = 2;
-    public static final int INCORRECT_PLACE_ET = 3;
-    public static final int INCORRECT_RES_VALUE_ET = 4;
-    private class getFirstEmployerThread extends Thread {
-        public static final String LOAD_ITEMS_TAG = "FirstEmployerThread";
-        @Override
-        public void run() {
-            boolean ok = true;
-            Message message;
-            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-                 SQLiteDatabase db = cwdbHelper.getReadableDatabase(); Cursor cursor = db.query(CWDBHelper.TABLE_NAME_EMP,
-                    new String[]{"_id", CWDBHelper.T_EMP_C_FIO},
-                    "_id = ?",
-                    new String[]{"1"}, null, null, null)) {
-                if (cursor.moveToFirst()) {
-                    setEmployerId(cursor.getInt(0));
-                    employerString = cursor.getString(1);
-                } else ok = false;
-            } catch (SQLiteException e) {
-                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_EMP);
-            }
-            if (ok) {
-                message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_EMPLOYER_MESSAGE);
-                FillNewData_Activity.handler.sendMessage(message);
-            }
-        }
-    }
+    private Executor executor;
 
-    private class getFirstFirmThread extends Thread {
-        public static final String LOAD_ITEMS_TAG = "FirstFirmThread";
+    private class FirstItemGetterThread extends Thread {
+        private final String mTableName;
+
+        FirstItemGetterThread(String tableName) {
+            mTableName = tableName;
+        }
+
         @Override
         public void run() {
-            boolean ok = true;
-            Message message;
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
                  SQLiteDatabase db = cwdbHelper.getReadableDatabase();
-                 Cursor cursor = db.query(CWDBHelper.TABLE_NAME_FIRM,
-                    new String[]{"_id", CWDBHelper.T_FIRM_C_DESCRIPTION},
-                    "_id = ?",
-                    new String[]{"1"}, null, null, null)) {
+                 Cursor cursor = db.rawQuery("SELECT * FROM " + mTableName  + " LIMIT 1", null, null)) {
                 if (cursor.moveToFirst()) {
-                    setFirmId(cursor.getInt(0));
-                    firmString = cursor.getString(1);
-                } else ok = false;
-            } catch (SQLiteException e) {
-                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_FIRM);
-            }
-            if (ok) {
-                message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_FIRM_MESSAGE);
-                FillNewData_Activity.handler.sendMessage(message);
-            }
-        }
-    }
+                    switch (mTableName) {
+                        case CWDBHelper.TABLE_NAME_EMP:
+                            setEmployerId(cursor.getInt(0));
+                            employerEditTextLD.postValue(cursor.getString(1));
+                            break;
+                        case CWDBHelper.TABLE_NAME_FIRM:
+                            setFirmId(cursor.getInt(0));
+                            firmEditTextLD.postValue(cursor.getString(1));
+                            break;
+                    }
 
-    private class getFirstPoWThread extends Thread {
-        public static final String LOAD_ITEMS_TAG = "FirstPoWThread";
-        @Override
-        public void run() {
-            boolean ok = true;
-            Message message;
-            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
-                 Cursor cursor = db.query(CWDBHelper.TABLE_NAME_PLACE_OF_WORK,
-                    new String[]{"_id", CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION},
-                    "_id = ?",
-                    new String[]{"1"}, null, null, null)) {
-                if (cursor.moveToFirst()) {
-                    setPowId(cursor.getInt(0));
-                    powString = cursor.getString(1);
-                } else ok = false;
+                }
             } catch (SQLiteException e) {
-                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_PLACE_OF_WORK);
-            }
-            if (ok) {
-                message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_POW_MESSAGE);
-                FillNewData_Activity.handler.sendMessage(message);
-            }
-        }
-    }
-
-    private class getFirstToWThread extends Thread {
-        public static final String LOAD_ITEMS_TAG = "FirstToWThread";
-        @Override
-        public void run() {
-            boolean ok = true;
-            Message message;
-            try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
-                 SQLiteDatabase db = cwdbHelper.getReadableDatabase();
-                 Cursor cursor = db.query(CWDBHelper.TABLE_NAME_TYPE_OF_WORK,
-                    new String[]{"_id", CWDBHelper.T_TYPE_OF_WORK_C_DESCRIPTION},
-                    "_id = ?",
-                    new String[]{"1"}, null, null, null)) {
-                if (cursor.moveToFirst()) {
-                    setTowId(cursor.getInt(0));
-                    towString = cursor.getString(1);
-                } else ok = false;
-            } catch (SQLiteException e) {
-                Log.e(LOAD_ITEMS_TAG, "не получилось прочесть данные из таблицы " + CWDBHelper.TABLE_NAME_TYPE_OF_WORK);
-            }
-            if (ok) {
-                message = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.GET_TOW_MESSAGE);
-                FillNewData_Activity.handler.sendMessage(message);
+                FillNewData_Activity.handler.post(() ->
+                        Toast.makeText(getApplication(), R.string.fail_attempt_about_load_data_from_primary_table, Toast.LENGTH_SHORT).show());
             }
         }
     }
 
     private class AddResultDataThread extends Thread {
-        public static final String ADD_DATA_THREAD = "AddResultDataThread";
         @Override
         public void run() {
-            Message msg;
-            long resultOfInsert = -1;
+            long resultOfInsert;
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
                  SQLiteDatabase db = cwdbHelper.getWritableDatabase()) {
                 ContentValues cv = new ContentValues();
@@ -174,11 +108,13 @@ public class AddNewDataVM extends AndroidViewModel {
                 cv.put(CWDBHelper.T_RESULT_C_NOTE, note);
                 resultOfInsert = db.insert(CWDBHelper.TABLE_NAME_RESULT, null, cv);
             } catch (SQLiteException e) {
-                Log.e(ADD_DATA_THREAD, "не получилось добавить данные");
+                FillNewData_Activity.handler.post(() -> Toast.makeText(getApplication(), R.string.fail_attempt_about_write_data_to_table, Toast.LENGTH_SHORT).show());
+                return;
             }
-            if (resultOfInsert != -1) msg = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.ADD_DATA_TO_BD, 1, 0);
-            else msg = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.ADD_DATA_TO_BD, 0, 0);
-            FillNewData_Activity.handler.sendMessage(msg);
+            if (resultOfInsert != -1) prepareAddButtonLD.postValue(true);
+            int message = resultOfInsert != -1 ? R.string.data_has_been_added : R.string.fail_attempt_about_write_data_to_table;
+            FillNewData_Activity.handler.post(() ->
+                    Toast.makeText(getApplication(), message, Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -186,7 +122,6 @@ public class AddNewDataVM extends AndroidViewModel {
     private class CheckCorrectDataHeadThread extends Thread {
         CountDownLatch latch = new CountDownLatch(4);
         private boolean isItemExist(String tableName, int id) {
-            String TAG = "Check item for exist";
             boolean ok = false;
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
                  SQLiteDatabase db = cwdbHelper.getReadableDatabase();
@@ -196,15 +131,18 @@ public class AddNewDataVM extends AndroidViewModel {
                     new String[]{Integer.toString(id)}, null, null, null)) {
                 if (cursor.moveToFirst()) ok = true;
             } catch (SQLiteException e) {
-                Log.e(TAG, "не получилось прочесть данные из таблицы " + tableName);
+                FillNewData_Activity.handler.post(() ->
+                        Toast.makeText(getApplication(), R.string.fail_attempt_about_get_data_from_table + " " + tableName, Toast.LENGTH_SHORT).show());
+                ok = false;
             }
             return ok;
         }
 
         private class CheckExistDataFromTableThread extends Thread {
-            private CountDownLatch latch;
-            private String tableName;
-            private int id;
+            private final CountDownLatch latch;
+            private final String tableName;
+            private final int id;
+
             public CheckExistDataFromTableThread(CountDownLatch latch, String tableName, int id) {
                 this.latch = latch;
                 this.tableName = tableName;
@@ -230,34 +168,74 @@ public class AddNewDataVM extends AndroidViewModel {
             }
         }
 
+        private void readResultOfCheck() {
+            if (correctEmployerData && correctFirmData && correctToWData
+                    && correctPoWData && correctResultValueData) {
+                changeTextAddButtonLD.postValue(getApplication().getString(R.string.adding_data_process_is_active));
+                AddResultDataThread addResultDataThread = new AddResultDataThread();
+                addResultDataThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                executor.execute(addResultDataThread);
+            }
+            else {
+                if (!correctEmployerData) {
+                    warningEditTextForEmployeeLD.postValue(true);
+                    warningTextViewForEmployeeLD.postValue(true);
+                }
+                if (!correctFirmData) {
+                    warningEditTextForFirmLD.postValue(true);
+                    warningTextViewForFirmLD.postValue(true);
+                }
+                if (!correctToWData) {
+                    warningEditTextForToWLD.postValue(true);
+                    warningTextViewForToWLD.postValue(true);
+                }
+                if (!correctPoWData) {
+                    warningEditTextForPoWLD.postValue(true);
+                    warningTextViewForPoWLD.postValue(true);
+                }
+                if (!correctResultValueData) {
+                    warningEditTextForResultLD.postValue(true);
+                    warningTextViewForResultLD.postValue(true);
+                }
+                prepareAddButtonLD.postValue(false);
+                FillNewData_Activity.handler.post(() ->
+                    Toast.makeText(getApplication(), R.string.error_check_data_for_correct, Toast.LENGTH_SHORT));
+            }
+        }
+
+
         @Override
         public void run() {
             CheckExistDataFromTableThread t1 =
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_EMP, employerId);
-            t1.start();
+            t1.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            executor.execute(t1);
             CheckExistDataFromTableThread t2 =
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_FIRM, firmId);
-            t2.start();
+            t2.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            executor.execute(t2);
             CheckExistDataFromTableThread t3 =
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_TYPE_OF_WORK, towId);
-            t3.start();
+            t3.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            executor.execute(t3);
             CheckExistDataFromTableThread t4 =
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_PLACE_OF_WORK, powId);
-            t4.start();
+            t4.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            executor.execute(t4);
             try {
                 resultValueFloat = Float.parseFloat(resultValueString);
                 correctResultValueData = true;
             } catch (NumberFormatException e) {
-                Log.e("CheckCorrectDataHeadThread", "не удалость сделать преобразование данных в тип float");
                 correctResultValueData = false;
             }
             try {
                 latch.await();
             } catch (InterruptedException e) {
-                Log.e("CheckCorrectDataHeadThread", "поток был прерван во время ожидания защелкой");
+                FillNewData_Activity.handler.post(() ->
+                        Toast.makeText(getApplication(), R.string.thread_for_check_data_was_interrupted, Toast.LENGTH_SHORT).show());
+                return;
             }
-            Message msg = FillNewData_Activity.handler.obtainMessage(FillNewData_Activity.NOTIFY_ABOUT_CHECK_DATA_FROM_DB);
-            FillNewData_Activity.handler.sendMessage(msg);
+            readResultOfCheck();
         }
      }
 
@@ -285,14 +263,54 @@ public class AddNewDataVM extends AndroidViewModel {
         return typeOfWorkEditTextLD;
     }
 
-    public LiveData<Integer> getWarningEmployerETLD() {
-        if (warningEditTextLD == null) warningEditTextLD = new MutableLiveData<>();
-        return warningEditTextLD;
+    public LiveData<Boolean> getWarningEmployerETLD() {
+        if (warningEditTextForEmployeeLD == null) warningEditTextForEmployeeLD = new MutableLiveData<>();
+        return warningEditTextForEmployeeLD;
     }
 
-    public LiveData<Integer> getWarningEmployerTVLD() {
-        if (warningTextViewLD == null) warningTextViewLD = new MutableLiveData<>();
-        return warningTextViewLD;
+    public LiveData<Boolean> getWarningEmployerTVLD() {
+        if (warningTextViewForEmployeeLD == null) warningTextViewForEmployeeLD = new MutableLiveData<>();
+        return warningTextViewForEmployeeLD;
+    }
+
+    public LiveData<Boolean> getWarningFirmETLD() {
+        if (warningEditTextForFirmLD == null) warningEditTextForFirmLD = new MutableLiveData<>();
+        return warningEditTextForFirmLD;
+    }
+
+    public LiveData<Boolean> getWarningFirmTVLD() {
+        if (warningTextViewForFirmLD == null) warningTextViewForFirmLD = new MutableLiveData<>();
+        return warningTextViewForFirmLD;
+    }
+
+    public LiveData<Boolean> getWarningTypeOfWorkETLD() {
+        if (warningEditTextForToWLD == null) warningEditTextForToWLD = new MutableLiveData<>();
+        return warningEditTextForToWLD;
+    }
+
+    public LiveData<Boolean> getWarningTypeOfWorkTVLD() {
+        if (warningTextViewForToWLD == null) warningTextViewForToWLD = new MutableLiveData<>();
+        return warningTextViewForToWLD;
+    }
+
+    public LiveData<Boolean> getWarningPlaceOfWorkETLD() {
+        if (warningEditTextForPoWLD == null) warningEditTextForPoWLD = new MutableLiveData<>();
+        return warningEditTextForPoWLD;
+    }
+
+    public LiveData<Boolean> getWarningPlaceOfWorkTVLD() {
+        if (warningTextViewForPoWLD == null) warningTextViewForPoWLD = new MutableLiveData<>();
+        return warningTextViewForPoWLD;
+    }
+
+    public LiveData<Boolean> getWarningResultETLD() {
+        if (warningEditTextForResultLD == null) warningEditTextForResultLD = new MutableLiveData<>();
+        return warningEditTextForResultLD;
+    }
+
+    public LiveData<Boolean> getWarningResultTVLD() {
+        if (warningTextViewForResultLD == null) warningTextViewForResultLD = new MutableLiveData<>();
+        return warningTextViewForResultLD;
     }
 
     public LiveData<Boolean> getPrepareAddButton() {
@@ -305,44 +323,14 @@ public class AddNewDataVM extends AndroidViewModel {
         return changeTextAddButtonLD;
     }
 
-    public void startGetEmployerThread() {
-        getFirstEmployerThread firstEmployerThread = new getFirstEmployerThread();
-        firstEmployerThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        firstEmployerThread.start();
-    }
-
-    public void setEmployerEditText() {
-        employerEditTextLD.setValue(employerString);
-    }
-
-    public void startGetFirmThread() {
-        getFirstFirmThread firstFirmThread = new getFirstFirmThread();
-        firstFirmThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        firstFirmThread.start();
-    }
-
-    public void setFirmEditText() {
-        firmEditTextLD.setValue(firmString);
-    }
-
-    public void startGetPoWThread() {
-        getFirstPoWThread firstPoWThread = new getFirstPoWThread();
-        firstPoWThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        firstPoWThread.start();
-    }
-
-    public void setPlaceOfWorkEditText() {
-        placeOfWorkEditTextLD.setValue(powString);
-    }
-
-    public void startGetToWThread() {
-        getFirstToWThread firstToWThread = new getFirstToWThread();
-        firstToWThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        firstToWThread.start();
-    }
-
-    public void setTypeOfWorkEditText() {
-        typeOfWorkEditTextLD.setValue(towString);
+    public void getFirstItemsFromDBTables() {
+        if (executor == null) executor = Executors.newFixedThreadPool(2);
+        FirstItemGetterThread getFirstEmployer = new FirstItemGetterThread(CWDBHelper.TABLE_NAME_EMP);
+        getFirstEmployer.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        FirstItemGetterThread getFirstFirm = new FirstItemGetterThread(CWDBHelper.TABLE_NAME_FIRM);
+        getFirstFirm.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        executor.execute(getFirstEmployer);
+        executor.execute(getFirstFirm);
     }
 
     public void setEmployerId(int i) { employerId = i; }
@@ -379,9 +367,7 @@ public class AddNewDataVM extends AndroidViewModel {
         return correctToWData;
     }
 
-    public boolean isCorrectPoWData() {
-        return correctPoWData;
-    }
+    public boolean isCorrectPoWData() { return correctPoWData; }
 
     public boolean isCorrectResultValueData() {
         return correctResultValueData;
@@ -394,55 +380,28 @@ public class AddNewDataVM extends AndroidViewModel {
     public void startToCheckCorrectData() {
         CheckCorrectDataHeadThread thread = new CheckCorrectDataHeadThread();
         thread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
+        executor.execute(thread);
     }
 
-    public void readResultOfCheck() {
-        if (correctEmployerData && correctFirmData && correctToWData
-                && correctPoWData && correctResultValueData) {
-            changeTextAddButtonLD.setValue("Идёт процесс добавления данных");
-            addResultData();
+    public void deleteEmphasizeFromEditTextAndTextView(int tableName) {
+        switch (tableName) {
+            case TABLE_OF_EMPLOYERS:
+                warningEditTextForEmployeeLD.setValue(false);
+                warningTextViewForEmployeeLD.setValue(false);
+                break;
+            case TABLE_OF_FIRMS:
+                warningEditTextForFirmLD.setValue(false);
+                warningTextViewForFirmLD.setValue(false);
+                break;
+            case TABLE_OF_PLACES_OF_WORK:
+                warningEditTextForPoWLD.setValue(false);
+                warningTextViewForPoWLD.setValue(false);
+                break;
+            case TABLE_OF_TYPES_OF_WORK:
+                warningEditTextForToWLD.setValue(false);
+                warningTextViewForToWLD.setValue(false);
+                break;
         }
-        else {
-            if (!correctEmployerData) {
-                warningEditTextLD.setValue(INCORRECT_EMPLOYEE_ET);
-                warningTextViewLD.setValue(INCORRECT_EMPLOYEE_ET);
-            }
-            if (!correctFirmData) {
-                warningEditTextLD.setValue(INCORRECT_FIRM_ET);
-                warningTextViewLD.setValue(INCORRECT_FIRM_ET);
-            }
-            if (!correctToWData) {
-                warningEditTextLD.setValue(INCORRECT_TYPE_ET);
-                warningTextViewLD.setValue(INCORRECT_TYPE_ET);
-            }
-            if (!correctPoWData) {
-                warningEditTextLD.setValue(INCORRECT_PLACE_ET);
-                warningTextViewLD.setValue(INCORRECT_PLACE_ET);
-            }
-            if (!correctResultValueData) {
-                warningEditTextLD.setValue(INCORRECT_RES_VALUE_ET);
-                warningTextViewLD.setValue(INCORRECT_RES_VALUE_ET);
-            }
-            prepareAddButtonLD.setValue(false);
-            Toast toast = Toast.makeText(getApplication(), "Ошибка. Проверь корректность вводимых данных", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-    }
-
-    private void addResultData() {
-        AddResultDataThread addResultDataThread = new AddResultDataThread();
-        addResultDataThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        addResultDataThread.start();
-    }
-
-    public void notifyAboutCompleteOperation(boolean res) {
-        prepareAddButtonLD.setValue(true);
-        String s;
-        if (res) s = "Данные успешно добавлены";
-        else s = "Не получилось добавить данные. Сообщи об этом разработчику";
-        Toast toast = Toast.makeText(getApplication(), s, Toast.LENGTH_SHORT);
-        toast.show();
     }
 
 }

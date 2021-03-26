@@ -173,25 +173,17 @@ public class EditDataFragment extends Fragment implements BackPressListener {
                 return;
             }
             MaterialDatePicker<Long> materialDatePicker = builder.build();
-            materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-                @Override
-                public void onPositiveButtonClick(Long selection) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(selection);
-                    String date = DateConverter.getStringViewOfDate(calendar);
-                    mViewModel.attemptToChangeValueOfDateData(date, selection);
-                }
+            materialDatePicker.addOnPositiveButtonClickListener(selection -> {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(selection);
+                String date = DateConverter.getStringViewOfDate(calendar);
+                mViewModel.attemptToChangeValueOfDateData(date, selection);
             });
             materialDatePicker.show(requireActivity().getSupportFragmentManager(), "date_picker");
         }
     };
 
-    private final View.OnClickListener buttonClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mViewModel.tryToSaveChangedData();
-        }
-    };
+    private final View.OnClickListener buttonClickListener = (v) -> mViewModel.tryToSaveChangedData();
 
     private final TextWatcher watcherForResult = new TextWatcher() {
         @Override
@@ -238,11 +230,7 @@ public class EditDataFragment extends Fragment implements BackPressListener {
         Toolbar toolbar = view.findViewById(R.id.toolbar_for_edit_data);
         toolbar.setTitle(R.string.changing_data);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { requireActivity().onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         employeeEditText = view.findViewById(R.id.edit_empl_editText);
         employeeEditText.setOnClickListener(employeeClickListener);
         firmEditText = view.findViewById(R.id.edit_firm_editText);
