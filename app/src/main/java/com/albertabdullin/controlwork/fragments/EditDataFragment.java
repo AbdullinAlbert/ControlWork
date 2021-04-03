@@ -27,7 +27,6 @@ import com.albertabdullin.controlwork.activities.NotifierOfBackPressed;
 import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
 import java.util.Calendar;
 
@@ -263,7 +262,7 @@ public class EditDataFragment extends Fragment implements BackPressListener {
     private void startListDBItemsFragment() {
         FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
         ListDBItemsFragment listDBItemsFragment = new ListDBItemsFragment();
-        transaction.replace(R.id.container_for_edit_delete_data_fragment, listDBItemsFragment,
+        transaction.replace(R.id.container_for_table_result_fragment, listDBItemsFragment,
                 getResources().getString(R.string.tag_for_list_of_DB_items_fragment)).
                 addToBackStack(null).commit();
     }

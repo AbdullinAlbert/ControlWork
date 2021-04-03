@@ -32,6 +32,7 @@
     <string name="employee_name_surname">ФИО сотруднка</string>
     <string name="firm_name">Название фирмы</string>
     <string name="type_of_work">Тип работы</string>
+    <string name="type">Тип</string>
     <string name="place_of_work">Место работы</string>
     <string name="add">Добавить</string>
     <string name="rename">Переименовать</string>
@@ -71,6 +72,8 @@
     <string name="fail_attempt_about_get_data_from_table">Не удалось получить данные из таблицы</string>
     <string name="tag_for_delete_data_fragment">deleteDataFragment tag</string>
     <string name="tag_for_edit_data_fragment">editDataFragment tag</string>
+    <string name="tag_report_preview_fragment">reportPreViewFragment tag</string>
+    <string name="tag_for_delete_data_from_result_table_fragment">deleteDataFromResultTableFragment tag</string>
     <string name="error_check_data_for_correct">Ошибка. Проверь корректность вводимых данных</string>
     <string name="adding_data_process_is_active">Идёт процесс добавления данных</string>
     <string name="tag_for_preview_for_report_fragment">preViewForReportFragment tag</string>

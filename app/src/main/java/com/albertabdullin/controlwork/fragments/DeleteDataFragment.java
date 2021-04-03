@@ -32,23 +32,18 @@ import com.albertabdullin.controlwork.recycler_views.selection_trackers.DBResult
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.ItemFromResultListKeyProvider;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
 
-public class DeleteDataFragment extends Fragment implements BackPressListener {
+public class DeleteDataFragment extends Fragment implements BackPressListener{
 
+    protected EditDeleteDataVM mViewModel;
+    private String mQuery;
     private SelectionTracker<ComplexEntityForDB> mTracker;
     private ActionMode mActionMode;
     private AdapterForResultListFromQuery mAdapter;
-    protected EditDeleteDataVM mViewModel;
     private RecyclerView recyclerView;
-    private Toolbar toolbar;
-    private String mQuery;
 
-    private final String KEY_FOR_QUERY = "key for mQuery";
-
-    public DeleteDataFragment(String query) {
-        mQuery = query;
+    public enum StateOfRecyclerView {
+        LOAD, DELETE
     }
-
-    public DeleteDataFragment() { }
 
     private final SelectionTracker.SelectionObserver<ComplexEntityForDB> selectionObserver =
             new SelectionTracker.SelectionObserver<ComplexEntityForDB>() {
@@ -70,26 +65,25 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
                 }
             };
 
+
+    private final String KEY_FOR_QUERY = "key for mQuery";
+
     @Override
     public void OnBackPress() {
         mViewModel.tryToStopLoadDataFromResultTableThread();
-    }
-
-    public enum StateOfRecyclerView {
-        LOAD, DELETE, UPDATE;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = new ViewModelProvider(requireActivity()).get(EditDeleteDataVM.class);
-        addingListenerToBackPressedNotifier();
+        ((NotifierOfBackPressed)requireActivity()).addListener(this);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_delete_data_layout, container, false);
+        return inflater.inflate(R.layout.delete_data_from_result_table, container, false);
     }
 
     @Override
@@ -102,7 +96,7 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
                 mQuery = savedInstanceState.getString(KEY_FOR_QUERY);
         }
         mViewModel.setQuery(mQuery);
-        toolbar = view.findViewById(R.id.toolbar_for_delete_data);
+        Toolbar toolbar = view.findViewById(R.id.toolbar_for_delete_data);
         inflateToolbarMenu(toolbar);
         toolbar.setTitle(R.string.search_result);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
@@ -110,20 +104,20 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         final EditText employeeEditText = view.findViewById(R.id.editText_for_employer);
         final EditText firmEditText = view.findViewById(R.id.editText_for_firm);
         final EditText typeOfWorkEditText = view.findViewById(R.id.editText_for_type_of_work);
-        final EditText placeOfWorkEditText = view.findViewById(R.id.editText_for_place_of_work);
+        final EditText noteEditText = view.findViewById(R.id.editText_for_note);
         Observer<String> observerOfEmployeeET = employeeEditText::setText;
         Observer<String> observerOfFirmET = firmEditText::setText;
         Observer<String> observerOfToWET = typeOfWorkEditText::setText;
-        Observer<String> observerOfPoWET = placeOfWorkEditText::setText;
+        Observer<String> observerOfNoteET = noteEditText::setText;
         mViewModel.getEmployeeEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfEmployeeET);
         mViewModel.getFirmEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfFirmET);
-        mViewModel.getTOWEditTextLD().observe(getViewLifecycleOwner(), observerOfToWET);
-        mViewModel.getPOWEditTextLD().observe(getViewLifecycleOwner(), observerOfPoWET);
+        mViewModel.getToWEditTextForResultListLD().observe(getViewLifecycleOwner(), observerOfToWET);
+        mViewModel.getNoteEditTextLD().observe(getViewLifecycleOwner(), observerOfNoteET);
         final ProgressBar progressBar = view.findViewById(R.id.progressBar);
         Observer<Integer> observerOfProgressBar = progressBar::setVisibility;
         mViewModel.getVisibleOfProgressBarLD().observe(getViewLifecycleOwner(), observerOfProgressBar);
         mAdapter = new AdapterForResultListFromQuery(mViewModel.getResultList(), mViewModel, getViewLifecycleOwner(), this);
-        recyclerView = view.findViewById(R.id.recyclerView3);
+        recyclerView = view.findViewById(R.id.recyclerView_for_result_table);
         recyclerView.setVisibility(View.INVISIBLE);
         Observer<Integer> observerOFVisibleRecyclerView = integer -> recyclerView.setVisibility(integer);
         mViewModel.getVisibleOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOFVisibleRecyclerView);
@@ -147,32 +141,13 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         };
         mViewModel.getStateOfRecyclerViewLD().observe(getViewLifecycleOwner(), observerOfStateOfRV);
         mViewModel.initializeResultList();
-        initializeSelectionTracker();
-        if (savedInstanceState != null && mTracker != null) {
+        initSelectionTracker();
+        if (savedInstanceState != null) {
             mTracker.onRestoreInstanceState(savedInstanceState);
         }
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(KEY_FOR_QUERY, mQuery);
-        if (mTracker != null) mTracker.onSaveInstanceState(outState);
-        mViewModel.setNullToOldItemPosition();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (requireActivity() instanceof NotifierOfBackPressed)
-            ((NotifierOfBackPressed)requireActivity()).removeListener();
-    }
-
-    public SelectionTracker<ComplexEntityForDB> getSelectionTracker() {
-        return mTracker;
-    }
-
-    protected void initializeSelectionTracker() {
+    protected void initSelectionTracker() {
         mTracker = new SelectionTracker.Builder<>(
                 "resultListItems",
                 recyclerView,
@@ -182,10 +157,6 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
         ).build();
         mTracker.addObserver(selectionObserver);
         mAdapter.setSelectionTracker(mTracker);
-    }
-
-    protected void addingListenerToBackPressedNotifier() {
-        ((NotifierOfBackPressed)requireActivity()).addListener(this);
     }
 
     protected void inflateToolbarMenu(Toolbar toolbar) {
@@ -205,6 +176,25 @@ public class DeleteDataFragment extends Fragment implements BackPressListener {
             }
             return false;
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_FOR_QUERY, mQuery);
+        mTracker.onSaveInstanceState(outState);
+        mViewModel.setNullToOldItemPosition();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (requireActivity() instanceof NotifierOfBackPressed)
+            ((NotifierOfBackPressed)requireActivity()).removeListener();
+    }
+
+    public SelectionTracker<ComplexEntityForDB> getSelectionTracker() {
+        return mTracker;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.albertabdullin.controlwork.recycler_views;
 
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,7 @@ import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
+import androidx.fragment.app.Fragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.PairOfItemPositions;
 import com.albertabdullin.controlwork.recycler_views.selection_trackers.EntityFromDBResultListItemDetails;
@@ -25,16 +27,15 @@ import java.util.List;
 import static com.albertabdullin.controlwork.R.color.colorAccent;
 
 public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterForResultListFromQuery.MyViewHolder> {
-    private final List<ComplexEntityForDB> mListOfRecyclerView;
-    private View[] arrayOfViews;
-    private final EditDeleteDataVM mViewModel;
-    private final LifecycleOwner mLifeCycleOwner;
-    private final DeleteDataFragment mParentFragment;
-    private SelectionTracker<ComplexEntityForDB> mSelectionTracker;
+    protected final List<ComplexEntityForDB> mListOfRecyclerView;
+    protected View[] arrayOfViews;
+    protected final EditDeleteDataVM mViewModel;
+    protected final LifecycleOwner mLifeCycleOwner;
+    protected final Fragment mParentFragment;
+    protected SelectionTracker<ComplexEntityForDB> mSelectionTracker;
 
     public AdapterForResultListFromQuery(List<ComplexEntityForDB> list, EditDeleteDataVM viewModel,
-                                         LifecycleOwner lifecycleOwner,
-                                         DeleteDataFragment parentFragment) {
+                                         LifecycleOwner lifecycleOwner, Fragment parentFragment) {
         mListOfRecyclerView = list;
         mViewModel = viewModel;
         mLifeCycleOwner = lifecycleOwner;
@@ -43,35 +44,32 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private final View view;
-        private final TextView id;
         private final TextView date;
         private final TextView result;
-        private final TextView note;
-        private final View.OnClickListener clickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.notifyEditTexts(getAbsoluteAdapterPosition());
-                mViewModel.changeColorOfPreviousSelectedItem(
-                        new PairOfItemPositions(getAbsoluteAdapterPosition()));
-            }
+        private final TextView type_of_result;
+        private final TextView place_of_work;
+        private final View.OnClickListener clickListener = v -> {
+            mViewModel.notifyEditTexts(getAbsoluteAdapterPosition());
+            mViewModel.changeColorOfPreviousSelectedItem(
+                    new PairOfItemPositions(getAbsoluteAdapterPosition()));
         };
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             view = itemView;
             view.setOnClickListener(clickListener);
-            id = view.findViewById(R.id.cell_for_number);
-            date = view.findViewById(R.id.cell_for_date);
-            result = view.findViewById(R.id.cell_for_result);
-            note = view.findViewById(R.id.cell_for_note);
+            type_of_result = itemView.findViewById(R.id.cell_for_type_of_result);
+            date = itemView.findViewById(R.id.cell_for_date);
+            result = itemView.findViewById(R.id.cell_for_result);
+            place_of_work = itemView.findViewById(R.id.cell_for_place_of_work);
         }
 
         public View getView() {
             return view;
         }
 
-        public TextView getId() {
-            return id;
+        public TextView getTypeOfResult() {
+            return type_of_result;
         }
 
         public TextView getDate() { return date; }
@@ -80,7 +78,7 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
             return result;
         }
 
-        public TextView getNote() { return note; }
+        public TextView getPoW() { return place_of_work; }
 
         public ItemDetailsLookup.ItemDetails<ComplexEntityForDB> getItemDetails() {
             return new EntityFromDBResultListItemDetails(mListOfRecyclerView.get(getBindingAdapterPosition()),
@@ -115,11 +113,14 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
                                 mViewModel.removeItemOfST(j);
                             }
                         }
-                    } else {
-                        arrayOfViews[bindingAdapterPos].setBackgroundColor(mParentFragment.getResources().getColor(R.color.backgroundColorOfActivity, null));
-                        mViewModel.removeItemOfST(bindingAdapterPos);
-                        view.setOnClickListener(clickListener);
                     }
+                }
+                if (arrayOfViews != null) {
+                    if (arrayOfViews[bindingAdapterPos] != null)
+                        arrayOfViews[bindingAdapterPos]
+                                .setBackgroundColor(mParentFragment.getResources().getColor(R.color.backgroundColorOfActivity, null));
+                    mViewModel.removeItemOfST(bindingAdapterPos);
+                    view.setOnClickListener(clickListener);
                 }
             }
         }
@@ -132,25 +133,30 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_of_result_list_for_rv, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_of_rv_result_list, parent, false);
         return new AdapterForResultListFromQuery.MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        if (mSelectionTracker != null)
-            holder.setActivatedState(mSelectionTracker.isSelected(mListOfRecyclerView.get(position)));
-        holder.getId().setText(mListOfRecyclerView.get(position).getID());
+        holder.getPoW().setText(mListOfRecyclerView.get(position).getPOWDescription());
         holder.getDate().setText(mListOfRecyclerView.get(position).getDate());
         holder.getResult().setText(mListOfRecyclerView.get(position).getResult());
-        holder.getNote().setText(mListOfRecyclerView.get(position).getNote());
         if (arrayOfViews != null) {
-            if (arrayOfViews[position] == null)
-                arrayOfViews[position] = holder.getView();
-            if (holder.getBindingAdapterPosition() == mViewModel.getPosOfSelectedItem()
-            || mViewModel.getPosOfSelectedItem() == -1)
+            arrayOfViews[position] = holder.getView();
+            if (holder.getBindingAdapterPosition() == mViewModel.getPosOfSelectedItem() || mViewModel.getPosOfSelectedItem() == -1)
                 changeColorOfItems();
+        }
+        if (mSelectionTracker != null && mViewModel.getItemsCountOfST() != -1) {
+            holder.setActivatedState(mSelectionTracker.isSelected(mListOfRecyclerView.get(position)));
+        } else {
+            if (position == mViewModel.getPosOfSelectedItem())
+                holder.getView().setBackgroundColor(mParentFragment.getResources().getColor(colorAccent, null));
+            if (position != mViewModel.getPosOfSelectedItem()) {
+                Drawable drawable = holder.getView().getBackground();
+                if (drawable instanceof ColorDrawable && ((ColorDrawable) drawable).getColor() == mParentFragment.getResources().getColor(colorAccent, null))
+                    holder.getView().setBackgroundColor(mParentFragment.getResources().getColor(R.color.backgroundColorOfActivity, null));
+            }
         }
     }
 
@@ -161,16 +167,13 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
 
     private void changeColorOfItems() {
         if (!mViewModel.getChangerColorOfViewHolder().hasObservers()) {
-            Observer<PairOfItemPositions> observerOfChangerColorRVItem = new Observer<PairOfItemPositions>() {
-                @Override
-                public void onChanged(PairOfItemPositions pair) {
-                    if (pair.getOldPos() != -1 && arrayOfViews[pair.getOldPos()] != null ) {
-                        arrayOfViews[pair.getOldPos()].
-                                setBackgroundColor(mParentFragment.getResources().getColor(R.color.backgroundColorOfActivity, null));
-                    }
-                    if (pair.getNewPos() != -1 && arrayOfViews[pair.getNewPos()] != null) {
-                        arrayOfViews[pair.getNewPos()].setBackgroundColor(mParentFragment.getResources().getColor(colorAccent, null));
-                    }
+            Observer<PairOfItemPositions> observerOfChangerColorRVItem = pair -> {
+                if (pair.getOldPos() != -1 && arrayOfViews[pair.getOldPos()] != null ) {
+                    arrayOfViews[pair.getOldPos()].
+                            setBackgroundColor(mParentFragment.getResources().getColor(R.color.backgroundColorOfActivity, null));
+                }
+                if (pair.getNewPos() != -1 && arrayOfViews[pair.getNewPos()] != null) {
+                    arrayOfViews[pair.getNewPos()].setBackgroundColor(mParentFragment.getResources().getColor(colorAccent, null));
                 }
             };
             mViewModel.getChangerColorOfViewHolder().observe(mLifeCycleOwner, observerOfChangerColorRVItem);
@@ -178,8 +181,7 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
     }
 
     public void initializeArrayOfViews() {
-        if (arrayOfViews == null)
-            arrayOfViews = new View[getItemCount()];
+        if (arrayOfViews == null) arrayOfViews = new View[getItemCount()];
     }
 
     public ComplexEntityForDB getElement(int position) {

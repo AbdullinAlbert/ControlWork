@@ -20,6 +20,9 @@ public class ComplexEntityForDB implements Parcelable {
     private long mLongPresentationOfDate;
     private String mResult;
     private String mNote;
+    private boolean mTypeResultEntity = false;
+    private Float mTypeResultSum;
+    private boolean mTypeOfWorkEntity = false;
 
     public ComplexEntityForDB() {}
 
@@ -157,6 +160,24 @@ public class ComplexEntityForDB implements Parcelable {
     public void setNote(String mNote) {
         this.mNote = mNote;
     }
+
+    public boolean isResultEntity() { return mTypeResultEntity; }
+
+    public void setResultEntity(boolean type) { mTypeResultEntity = type; }
+
+    public void setTypeResultSum(Float sum) { mTypeResultSum = sum; }
+
+    public String getStringViewOfTypeResultSum() {
+        String regExp = ".0$";
+        Pattern pattern = Pattern.compile(regExp);
+        Matcher matcher = pattern.matcher(mTypeResultSum.toString());
+        if (matcher.find()) return matcher.replaceFirst("");
+        else return mTypeResultSum.toString();
+    }
+
+    public boolean isTypeOfWorkEntity() { return mTypeOfWorkEntity; }
+
+    public void setTypeOfWorkEntity(boolean type) { mTypeOfWorkEntity = type; }
 
     @Override
     public int describeContents() {

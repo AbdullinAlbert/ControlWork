@@ -6,16 +6,17 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-public class ViewModelFactoryEditDeleteData implements ViewModelProvider.Factory {
-    private final Application mApplication;
+public class ViewModelFactoryForReport implements ViewModelProvider.Factory {
 
-    public ViewModelFactoryEditDeleteData(Application application) {
-        mApplication = application;
+    private final Application mAplication;
+
+    public ViewModelFactoryForReport(Application application) {
+        mAplication = application;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new EditDeleteDataVM(mApplication);
+        return (T) new ReportViewModel(mAplication);
     }
 }

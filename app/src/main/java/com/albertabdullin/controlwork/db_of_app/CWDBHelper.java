@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class CWDBHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "ControlOfWork";
     //Info about first BD's table "Employers"
     public static final String TABLE_NAME_EMP = "Employer";
@@ -43,7 +43,14 @@ public class CWDBHelper extends SQLiteOpenHelper {
                     T_TYPE_OF_WORK_C_DESCRIPTION + " TEXT);";
     private static final String SQL_DELETE_TYPE_OF_WORK_TABLE =
             "DROP TABLE IF EXISTS " + TABLE_NAME_TYPE_OF_WORK + ";";
-    //Info about first BD's table "ResultOfWork"
+    //info about DB's table "Type Of Result"
+    public static final String TABLE_NAME_RESULT_TYPE = "ResultType";
+    public static final String T_RESULT_TYPE_C_RESULT_TYPE = "ResultType";
+    private static final String SQL_CREATE_RESULT_TYPE_TABLE =
+            "CREATE TABLE " + TABLE_NAME_RESULT_TYPE + " ("+
+                    "_id" + " INTEGER PRIMARY KEY, " +
+                    T_RESULT_TYPE_C_RESULT_TYPE + " TEXT);";
+    //Info about first DB's table "ResultOfWork"
     public static final String TABLE_NAME_RESULT = "Result";
     public static final String T_RESULT_C_ID_EMPLOYER = "IDEmployer";
     public static final String T_RESULT_C_ID_FIRM = "IDFirm";
@@ -64,6 +71,7 @@ public class CWDBHelper extends SQLiteOpenHelper {
                     T_RESULT_C_NOTE + " TEXT);";
     private static final String SQL_DELETE_RESULT_TABLE =
             "DROP TABLE IF EXISTS " + TABLE_NAME_RESULT + ";";
+
     public CWDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -75,15 +83,14 @@ public class CWDBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_PLACE_OF_WORK_TABLE);
         db.execSQL(SQL_CREATE_TYPE_OF_WORK_TABLE);
         db.execSQL(SQL_CREATE_RESULT_TABLE);
+        db.execSQL(SQL_CREATE_RESULT_TYPE_TABLE);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_EMP_TABLE);
-        db.execSQL(SQL_DELETE_FIRM_TABLE);
-        db.execSQL(SQL_DELETE_PLACE_OF_WORK_TABLE);
-        db.execSQL(SQL_DELETE_TYPE_OF_WORK_TABLE);
-        db.execSQL(SQL_DELETE_RESULT_TABLE);
-        onCreate(db);
+        if (oldVersion == 1) {
+            db.execSQL(SQL_CREATE_RESULT_TYPE_TABLE);
+            db.execSQL("ALTER TABLE " + TABLE_NAME_RESULT + " ADD COLUMN idResultType INTEGER;" );
+        }
     }
 
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

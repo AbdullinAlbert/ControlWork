@@ -72,7 +72,7 @@ public class ListDBItemsFragment  extends Fragment implements RecyclerViewObserv
     }
 
     public enum TableNameForList {
-        EMPLOYEES, FIRMS, POW, TOW;
+        EMPLOYEES, FIRMS, POW, TOW
     }
 
     @Override

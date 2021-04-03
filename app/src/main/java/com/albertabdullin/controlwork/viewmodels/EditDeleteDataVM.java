@@ -57,8 +57,8 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private MutableLiveData<Integer> visibleOfTextViewResultValue;
     private MutableLiveData<String> employeeEditTextForResultListLD;
     private MutableLiveData<String> firmEditTextForResultListLD;
-    private MutableLiveData<String> placeOfWorkEditTextForResultListLD;
     private MutableLiveData<String> typeOfWorkEditTextForResultListLD;
+    private MutableLiveData<String> noteEditTextForResultListLD;
     private MutableLiveData<String> employeeEditTextForEditDataLD;
     private MutableLiveData<String> firmEditTextForEditDataLD;
     private MutableLiveData<String> placeOfWorkEditTextForEditDataLD;
@@ -247,14 +247,14 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         return firmEditTextForResultListLD;
     }
 
-    public LiveData<String> getPOWEditTextLD() {
-        if (placeOfWorkEditTextForResultListLD == null) placeOfWorkEditTextForResultListLD = new MutableLiveData<>();
-        return placeOfWorkEditTextForResultListLD;
-    }
-
-    public LiveData<String> getTOWEditTextLD() {
+    public LiveData<String> getToWEditTextForResultListLD() {
         if (typeOfWorkEditTextForResultListLD == null) typeOfWorkEditTextForResultListLD = new MutableLiveData<>();
         return typeOfWorkEditTextForResultListLD;
+    }
+
+    public LiveData<String> getNoteEditTextLD() {
+        if (noteEditTextForResultListLD == null) noteEditTextForResultListLD = new MutableLiveData<>();
+        return noteEditTextForResultListLD;
     }
 
     public LiveData<PairOfItemPositions> getChangerColorOfViewHolder() {
@@ -393,13 +393,13 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
             employeeEditTextForResultListLD.setValue("");
             firmEditTextForResultListLD.setValue("");
             typeOfWorkEditTextForResultListLD.setValue("");
-            placeOfWorkEditTextForResultListLD.setValue("");
+            noteEditTextForResultListLD.setValue("");
         } else {
             if (visibleOfEditMenuItem != null) visibleOfEditMenuItem.setValue(true);
             employeeEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getEmployerDescription());
             firmEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getFirmDescription());
             typeOfWorkEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getTOWDescription());
-            placeOfWorkEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getPOWDescription());
+            noteEditTextForResultListLD.setValue(listForWorkWithResultTableItems.get(i).getNote());
         }
     }
 
@@ -776,12 +776,10 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                 if (itemForChangeDataInDB.getPlaceOfWorkID() != 0) {
                     shortLinkToObject.setPlaceOfWorkID(itemForChangeDataInDB.getPlaceOfWorkID());
                     shortLinkToObject.setPOWDescription(itemForChangeDataInDB.getPOWDescription());
-                    placeOfWorkEditTextForResultListLD.postValue(itemForChangeDataInDB.getPOWDescription());
                 }
                 if (itemForChangeDataInDB.getTypeOfWorkID() != 0) {
                     shortLinkToObject.setTypeOfWorkID(itemForChangeDataInDB.getTypeOfWorkID());
                     shortLinkToObject.setTOWDescription(itemForChangeDataInDB.getTOWDescription());
-                    typeOfWorkEditTextForResultListLD.postValue(itemForChangeDataInDB.getTOWDescription());
                 }
                 if (itemForChangeDataInDB.getLongPresentationOfDate() != 0)
                     shortLinkToObject.setDate(itemForChangeDataInDB.getDate());
@@ -789,7 +787,6 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     shortLinkToObject.setResult(itemForChangeDataInDB.getResult());
                 if (itemForChangeDataInDB.getNote() != null)
                     shortLinkToObject.setNote(itemForChangeDataInDB.getNote());
-                stateOfRecyclerViewForResultList.postValue(DeleteDataFragment.StateOfRecyclerView.UPDATE);
                 toastAboutSuccessUpdateData.postValue(true);
             } else EditDeleteDataActivity.mHandler.post(() ->
                     Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_update_data_in_result_table),

@@ -2,7 +2,6 @@ package com.albertabdullin.controlwork.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.view.MenuItem;
 import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -12,13 +11,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaReportVM;
 
 import java.text.ParseException;
 import java.util.Calendar;
-import java.util.List;
 
 import static java.util.Calendar.DAY_OF_MONTH;
 
@@ -88,9 +85,9 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.show_report_preview) {
                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                PreViewForReportFragment preViewForReportFragment = new PreViewForReportFragment(mViewModel.createQuery());
-                transaction.replace(R.id.container_for_monthly_report_fragments, preViewForReportFragment,
-                        getResources().getString(R.string.tag_for_preview_for_report_fragment)).
+                ReportPreViewFragment reportPreViewFragment = new ReportPreViewFragment(mViewModel.createQuery());
+                transaction.replace(R.id.container_for_monthly_report_fragments, reportPreViewFragment,
+                        getResources().getString(R.string.tag_report_preview_fragment)).
                         addToBackStack(null).commit();
                 return true;
             }

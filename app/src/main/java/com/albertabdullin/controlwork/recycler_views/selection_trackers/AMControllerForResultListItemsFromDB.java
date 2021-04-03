@@ -9,16 +9,13 @@ import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
 import com.albertabdullin.controlwork.activities.EditDeleteDataActivity;
-import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.activities.ProviderOfHolderFragmentState;
 import com.albertabdullin.controlwork.fragments.CommonDeleteDataDF;
 import com.albertabdullin.controlwork.fragments.DeleteDataButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.DeleteDataFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
-import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.recycler_views.AdapterForResultListFromQuery;
 import com.albertabdullin.controlwork.viewmodels.EditDeleteDataVM;
-import com.albertabdullin.controlwork.viewmodels.ListOfItemsVM;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -84,9 +81,8 @@ public class AMControllerForResultListItemsFromDB implements ActionMode.Callback
                     }
 
                     @Override
-                    public void executeNoButtonClick(AppCompatActivity appCompatActivity) {
+                    public void executeNoButtonClick(AppCompatActivity appCompatActivity) { }
 
-                    }
                 });
                 commonDeleteDataDF.show(mActivity.getSupportFragmentManager(), "delete_data");
                 return true;

@@ -3,10 +3,8 @@ package com.albertabdullin.controlwork.activities;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
@@ -20,10 +18,9 @@ import com.albertabdullin.controlwork.fragments.CommonDeleteDataDF;
 import com.albertabdullin.controlwork.fragments.DeleteDataButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.InsertDataButtonClickExecutor;
 import com.albertabdullin.controlwork.fragments.InsertDataPairButtonClickExecutor;
-import com.albertabdullin.controlwork.fragments.PreViewForReportFragment;
+import com.albertabdullin.controlwork.fragments.ReportPreViewFragment;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaForReportFragment;
 import com.albertabdullin.controlwork.fragments.SearchCriteriaFragment;
-import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.DialogFragmentStateHolder;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaReportVM;
@@ -32,7 +29,6 @@ import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryMakerSearchCrit
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.util.Calendar;
-import java.util.List;
 
 public class ReportActivity extends AppCompatActivity implements ProviderOfHolderFragmentState, DialogFragmentProvider, SearchCriteriaVMProvider {
 
@@ -49,15 +45,14 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
                 new ViewModelFactoryMakerSearchCriteriaReport(this.getApplication())).get(MakerSearchCriteriaReportVM.class);
         ((MakerSearchCriteriaReportVM)mViewModel).setSelectedPeriod(
                 (SearchCriteriaForReportFragment.DateRange) getIntent().getSerializableExtra(MainActivity.KEY_FOR_REPORT_PERIOD));
-        PreViewForReportFragment preViewForReportFragment = (PreViewForReportFragment) getSupportFragmentManager()
-                .findFragmentByTag(getString(R.string.tag_for_preview_for_report_fragment));
-        mSearchCriteriaForReportFragment
-                = (SearchCriteriaForReportFragment) getSupportFragmentManager()
+        ReportPreViewFragment reportPreViewFragment = (ReportPreViewFragment) getSupportFragmentManager()
+                .findFragmentByTag(getString(R.string.tag_report_preview_fragment));
+        mSearchCriteriaForReportFragment = (SearchCriteriaForReportFragment) getSupportFragmentManager()
                 .findFragmentByTag(getString(R.string.search_criteria_for_monthly_report_fragment));
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        if (preViewForReportFragment != null) {
-            transaction.replace(R.id.container_for_monthly_report_fragments, preViewForReportFragment,
-                    getString(R.string.tag_for_preview_for_report_fragment));
+        if (reportPreViewFragment != null) {
+            transaction.replace(R.id.container_for_monthly_report_fragments, reportPreViewFragment,
+                    getString(R.string.tag_report_preview_fragment));
             return;
         }
         if (mSearchCriteriaForReportFragment != null) {
@@ -127,8 +122,7 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
                         }
                     }
                     @Override
-                    public void executeNoButtonClick() {
-                    }
+                    public void executeNoButtonClick() { }
                 });
     }
 
