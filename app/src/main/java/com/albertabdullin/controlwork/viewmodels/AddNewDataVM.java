@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_EMPLOYERS;
 import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_FIRMS;
 import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_PLACES_OF_WORK;
+import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_RESULT_TYPE;
 import static com.albertabdullin.controlwork.activities.FillNewData_Activity.TABLE_OF_TYPES_OF_WORK;
 
 public class AddNewDataVM extends AndroidViewModel {
@@ -32,6 +33,7 @@ public class AddNewDataVM extends AndroidViewModel {
     private MutableLiveData<String> firmEditTextLD;
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
+    private MutableLiveData<String> typeOfResultEditTextLD;
     private MutableLiveData<Boolean> warningEditTextForEmployeeLD;
     private MutableLiveData<Boolean> warningTextViewForEmployeeLD;
     private MutableLiveData<Boolean> warningEditTextForFirmLD;
@@ -42,6 +44,8 @@ public class AddNewDataVM extends AndroidViewModel {
     private MutableLiveData<Boolean> warningTextViewForPoWLD;
     private MutableLiveData<Boolean> warningEditTextForResultLD;
     private MutableLiveData<Boolean> warningTextViewForResultLD;
+    private MutableLiveData<Boolean> warningEditTextForResultTypeLD;
+    private MutableLiveData<Boolean> warningTextViewForResultTypeLD;
     private MutableLiveData<Boolean> prepareAddButtonLD;
     private MutableLiveData<String> changeTextAddButtonLD;
     private volatile boolean correctEmployerData;
@@ -52,6 +56,9 @@ public class AddNewDataVM extends AndroidViewModel {
     private int powId = -1;
     private volatile boolean correctToWData;
     private int towId = -1;
+    private volatile boolean correctResultTypeData;
+    private int resultTypeId = -1;
+
     private volatile boolean correctResultValueData;
     private Long dateForSql;
     private Float resultValueFloat;
@@ -106,12 +113,18 @@ public class AddNewDataVM extends AndroidViewModel {
                 cv.put(CWDBHelper.T_RESULT_C_DATE, dateForSql);
                 cv.put(CWDBHelper.T_RESULT_C_VALUE, resultValueFloat);
                 cv.put(CWDBHelper.T_RESULT_C_NOTE, note);
+                cv.put(CWDBHelper.T_RESULT_C_RESULT_TYPE, resultTypeId);
                 resultOfInsert = db.insert(CWDBHelper.TABLE_NAME_RESULT, null, cv);
             } catch (SQLiteException e) {
                 FillNewData_Activity.handler.post(() -> Toast.makeText(getApplication(), R.string.fail_attempt_about_write_data_to_table, Toast.LENGTH_SHORT).show());
                 return;
             }
-            if (resultOfInsert != -1) prepareAddButtonLD.postValue(true);
+            if (resultOfInsert != -1) {
+                prepareAddButtonLD.postValue(true);
+                placeOfWorkEditTextLD.postValue("");
+                typeOfWorkEditTextLD.postValue("");
+                typeOfResultEditTextLD.postValue("");
+            }
             int message = resultOfInsert != -1 ? R.string.data_has_been_added : R.string.fail_attempt_about_write_data_to_table;
             FillNewData_Activity.handler.post(() ->
                     Toast.makeText(getApplication(), message, Toast.LENGTH_SHORT).show());
@@ -120,7 +133,8 @@ public class AddNewDataVM extends AndroidViewModel {
 
 
     private class CheckCorrectDataHeadThread extends Thread {
-        CountDownLatch latch = new CountDownLatch(4);
+        CountDownLatch latch = new CountDownLatch(5);
+
         private boolean isItemExist(String tableName, int id) {
             boolean ok = false;
             try (SQLiteOpenHelper cwdbHelper = new CWDBHelper(getApplication());
@@ -163,6 +177,9 @@ public class AddNewDataVM extends AndroidViewModel {
                     case CWDBHelper.TABLE_NAME_PLACE_OF_WORK:
                         correctPoWData = isItemExist(tableName, id);
                         break;
+                    case CWDBHelper.TABLE_NAME_RESULT_TYPE:
+                        correctResultTypeData = isItemExist(tableName, id);
+                        break;
                 }
                 latch.countDown();
             }
@@ -170,7 +187,7 @@ public class AddNewDataVM extends AndroidViewModel {
 
         private void readResultOfCheck() {
             if (correctEmployerData && correctFirmData && correctToWData
-                    && correctPoWData && correctResultValueData) {
+                    && correctPoWData && correctResultValueData && correctResultTypeData) {
                 changeTextAddButtonLD.postValue(getApplication().getString(R.string.adding_data_process_is_active));
                 AddResultDataThread addResultDataThread = new AddResultDataThread();
                 addResultDataThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -197,6 +214,10 @@ public class AddNewDataVM extends AndroidViewModel {
                     warningEditTextForResultLD.postValue(true);
                     warningTextViewForResultLD.postValue(true);
                 }
+                if (!correctResultTypeData) {
+                    warningEditTextForResultTypeLD.postValue(true);
+                    warningTextViewForResultTypeLD.postValue(true);
+                }
                 prepareAddButtonLD.postValue(false);
                 FillNewData_Activity.handler.post(() ->
                     Toast.makeText(getApplication(), R.string.error_check_data_for_correct, Toast.LENGTH_SHORT));
@@ -222,6 +243,10 @@ public class AddNewDataVM extends AndroidViewModel {
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_PLACE_OF_WORK, powId);
             t4.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
             executor.execute(t4);
+            CheckExistDataFromTableThread t5 =
+                    new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_RESULT_TYPE, powId);
+            t4.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            executor.execute(t5);
             try {
                 resultValueFloat = Float.parseFloat(resultValueString);
                 correctResultValueData = true;
@@ -261,6 +286,11 @@ public class AddNewDataVM extends AndroidViewModel {
     public LiveData<String> getLiveDataToWText() {
         if (typeOfWorkEditTextLD == null) typeOfWorkEditTextLD = new MutableLiveData<>();
         return typeOfWorkEditTextLD;
+    }
+
+    public LiveData<String> getLiveDataResultTypeText() {
+        if (typeOfResultEditTextLD == null) typeOfResultEditTextLD = new MutableLiveData<>();
+        return typeOfResultEditTextLD;
     }
 
     public LiveData<Boolean> getWarningEmployerETLD() {
@@ -313,6 +343,16 @@ public class AddNewDataVM extends AndroidViewModel {
         return warningTextViewForResultLD;
     }
 
+    public LiveData<Boolean> getWarningResultTypeETLD() {
+        if (warningEditTextForResultTypeLD == null) warningEditTextForResultTypeLD = new MutableLiveData<>();
+        return warningEditTextForResultTypeLD;
+    }
+
+    public LiveData<Boolean> getWarningResultTypeTVLD() {
+        if (warningTextViewForResultTypeLD == null) warningTextViewForResultTypeLD = new MutableLiveData<>();
+        return warningTextViewForResultTypeLD;
+    }
+
     public LiveData<Boolean> getPrepareAddButton() {
         if (prepareAddButtonLD == null) prepareAddButtonLD = new MutableLiveData<>();
         return prepareAddButtonLD;
@@ -340,6 +380,8 @@ public class AddNewDataVM extends AndroidViewModel {
     public void setPowId(int i) { powId = i; }
 
     public void setTowId(int i) { towId = i; }
+
+    public void setResultTypeID(int i) { resultTypeId = i; }
 
     public void setNote(String s) { note = s; }
 
@@ -373,6 +415,8 @@ public class AddNewDataVM extends AndroidViewModel {
         return correctResultValueData;
     }
 
+    public boolean isCorrectResultTypeData() { return correctResultTypeData; }
+
     public void setCorrectResultValueDataTrue() {
         correctResultValueData = true;
     }
@@ -400,6 +444,10 @@ public class AddNewDataVM extends AndroidViewModel {
             case TABLE_OF_TYPES_OF_WORK:
                 warningEditTextForToWLD.setValue(false);
                 warningTextViewForToWLD.setValue(false);
+                break;
+            case TABLE_OF_RESULT_TYPE:
+                warningEditTextForResultTypeLD.setValue(false);
+                warningTextViewForResultTypeLD.setValue(false);
                 break;
         }
     }

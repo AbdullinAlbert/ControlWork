@@ -49,6 +49,7 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     private ActionMode actionMode = null;
     private FloatingActionButton fab;
     private String hintForDialogFragment;
+    private int mCurrentTable;
 
     public enum adapterState {
         LOAD, UPDATE, DELETE, ADD
@@ -94,26 +95,32 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
         setContentView(R.layout.activity_list_of_items);
         mViewModel = new ViewModelProvider(this, new ViewModelFactoryListItems(this.getApplication())).get(ListOfItemsVM.class);
         Toolbar toolbar = findViewById(R.id.toolbar_list_of_emp);
-        switch (getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1)) {
+        mCurrentTable = getIntent().getIntExtra(FillNewData_Activity.LAUNCH_DEFINITELY_DB_TABLE, -1);
+        switch (mCurrentTable) {
             case FillNewData_Activity.TABLE_OF_EMPLOYERS:
-                toolbar.setTitle("Список сотрудников");
+                toolbar.setTitle(R.string.list_of_employees);
                 hintForDialogFragment = getResources().getString(R.string.employee_name_surname);
                 mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_EMPLOYERS);
                 break;
             case FillNewData_Activity.TABLE_OF_FIRMS:
-                toolbar.setTitle("Список фирм");
+                toolbar.setTitle(R.string.list_of_firms);
                 hintForDialogFragment = getResources().getString(R.string.firm_name);
                 mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_FIRMS);
                 break;
             case FillNewData_Activity.TABLE_OF_TYPES_OF_WORK:
-                toolbar.setTitle("Список типов работы");
+                toolbar.setTitle(R.string.list_of_types_of_work);
                 hintForDialogFragment = getResources().getString(R.string.firm_name);
                 mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_TYPES_OF_WORK);
                 break;
             case FillNewData_Activity.TABLE_OF_PLACES_OF_WORK:
-                toolbar.setTitle("Список мест работы");
+                toolbar.setTitle(R.string.list_of_places_of_work);
                 hintForDialogFragment = getResources().getString(R.string.place_of_work);
                 mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_PLACES_OF_WORK);
+                break;
+            case FillNewData_Activity.TABLE_OF_RESULT_TYPE:
+                toolbar.setTitle(R.string.list_of_types_of_result);
+                hintForDialogFragment = getResources().getString(R.string.result_type);
+                mViewModel.setCurrentDBTable(FillNewData_Activity.TABLE_OF_RESULT_TYPE);
                 break;
             default:
                 Toast toast = Toast.makeText(getApplication(), "App works incorrect", Toast.LENGTH_SHORT);
@@ -165,7 +172,8 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
             CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
                     .setHint(hintForDialogFragment)
                     .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
-                    .setLengthOfText(getResources().getInteger(R.integer.max_length_of_string_value))
+                    .setLengthOfText(mCurrentTable == FillNewData_Activity.TABLE_OF_RESULT_TYPE ? getResources().getInteger(R.integer.length_of_string_value_for_result_type)
+                            : getResources().getInteger(R.integer.max_length_of_string_value))
                     .setExecutor(new InsertDataButtonClickExecutor() {
                         @Override
                         public void executeYesButtonClick(AppCompatActivity activity, String text) {
@@ -290,6 +298,8 @@ public class ListOfDBItemsActivity extends AppCompatActivity implements Recycler
     public SelectionTracker<SimpleEntityForDB> getSelectionTracker() {
         return selectionTracker;
     }
+
+    public int getCurrentTable() { return mCurrentTable; }
 
     @Override
     public DialogFragmentStateHolder getHolder() {

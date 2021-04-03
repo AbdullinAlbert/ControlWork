@@ -9,6 +9,7 @@ import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.selection.SelectionTracker;
 
 import com.albertabdullin.controlwork.R;
+import com.albertabdullin.controlwork.activities.FillNewData_Activity;
 import com.albertabdullin.controlwork.activities.ListOfDBItemsActivity;
 import com.albertabdullin.controlwork.activities.ProviderOfHolderFragmentState;
 import com.albertabdullin.controlwork.fragments.CommonAddDataDF;
@@ -89,7 +90,9 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                 CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
                         .setHint(activity.getHintForDialogFragment())
                         .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
-                        .setLengthOfText(activity.getResources().getInteger(R.integer.max_length_of_string_value))
+                        .setLengthOfText(activity.getCurrentTable() == FillNewData_Activity.TABLE_OF_RESULT_TYPE
+                                ? activity.getResources().getInteger(R.integer.length_of_string_value_for_result_type)
+                                : activity.getResources().getInteger(R.integer.max_length_of_string_value))
                         .setExecutor(new InsertDataButtonClickExecutor() {
                             @Override
                             public void executeYesButtonClick(AppCompatActivity activity, String text) {
@@ -109,8 +112,7 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                                 }
                             }
                             @Override
-                            public void executeNoButtonClick() {
-                            }
+                            public void executeNoButtonClick() { }
                         });
                 commonAddDataDF.show(activity.getSupportFragmentManager(), "newData");
                 return true;

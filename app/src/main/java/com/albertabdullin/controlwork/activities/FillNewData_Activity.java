@@ -1,11 +1,8 @@
 package com.albertabdullin.controlwork.activities;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -20,7 +17,6 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import android.os.Looper;
-import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -36,7 +32,6 @@ import com.albertabdullin.controlwork.models.SimpleEntityForDB;
 import com.albertabdullin.controlwork.viewmodels.AddNewDataVM;
 import com.albertabdullin.controlwork.viewmodels.ViewModelFactoryAddNewData;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
 import java.util.Calendar;
 
@@ -47,6 +42,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     private EditText addTypeOfWork;
     private EditText date;
     private EditText resultValue;
+    private EditText addTypeOfResult;
     private Button addButton;
     private EditText note;
     private AddNewDataVM mViewModel;
@@ -56,10 +52,11 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     public static final int TABLE_OF_FIRMS = 1;
     public static final int TABLE_OF_TYPES_OF_WORK = 2;
     public static final int TABLE_OF_PLACES_OF_WORK = 3;
+    public static final int TABLE_OF_RESULT_TYPE = 4;
 
     public static Handler handler = new Handler(Looper.getMainLooper());
 
-    ActivityResultLauncher launcherActivityForDB = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private final ActivityResultLauncher launcherActivityForDB = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
         (result) -> {
                 if(result.getResultCode() == Activity.RESULT_OK) {
                     Intent intent = result.getData();
@@ -90,11 +87,17 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
                             addPlaceOfWork.setText(eDB.getDescription());
                             mViewModel.setPowId(eDB.getID());
                             break;
+                        case TABLE_OF_RESULT_TYPE:
+                            if (!mViewModel.isCorrectResultTypeData()) mViewModel.deleteEmphasizeFromEditTextAndTextView(TABLE_OF_RESULT_TYPE);
+                            assert eDB != null;
+                            addTypeOfResult.setText(eDB.getDescription());
+                            mViewModel.setResultTypeID(eDB.getID());
+                            break;
                     }
                 }
         });
 
-    View.OnClickListener pickDate = (v) -> {
+    private final View.OnClickListener pickDate = (v) -> {
             MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
             MaterialDatePicker<Long> materialDatePicker = builder.build();
             materialDatePicker.addOnPositiveButtonClickListener(selection -> {
@@ -107,14 +110,14 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
             materialDatePicker.show(getSupportFragmentManager(), "date_picker");
     };
 
-    View.OnClickListener addDataListener = (v) -> {
+    private final View.OnClickListener addDataListener = (v) -> {
         mViewModel.startToCheckCorrectData();
         addButton.setText(getString(R.string.correct_data_check));
         addButton.setClickable(false);
         addButton.setForeground(null);
     };
 
-    TextWatcher twResultValue = new TextWatcher() {
+    private final TextWatcher twResultValue = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
@@ -134,7 +137,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         public void afterTextChanged(Editable s) { }
     };
 
-    TextWatcher twNote = new TextWatcher() {
+    private final TextWatcher twNote = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
@@ -147,55 +150,65 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         public void afterTextChanged(Editable s) {   }
     };
 
-    Observer<Boolean> observerIncorrectEmployeeET = (b) -> {
+    private final Observer<Boolean> observerIncorrectEmployeeET = (b) -> {
         if (b) emphasizeEditText(addEmpl);
         else deleteEmphasizeFromEditText(addEmpl);
     };
 
-    Observer<Boolean> observerIncorrectEmployeeTV = b -> {
+    private final Observer<Boolean> observerIncorrectEmployeeTV = b -> {
         if (b) emphasizeTextView(findViewById(R.id.incorrectEmployerFocus));
         else deleteEmphasizeFromTextView(findViewById(R.id.incorrectEmployerFocus));
     };
 
-    Observer<Boolean> observerIncorrectFirmET = (b) -> {
+    private final Observer<Boolean> observerIncorrectFirmET = (b) -> {
         if (b) emphasizeEditText(addFirm);
         else deleteEmphasizeFromEditText(addFirm);
     };
 
-    Observer<Boolean> observerIncorrectFirmTV = b -> {
+    private final Observer<Boolean> observerIncorrectFirmTV = b -> {
         if (b) emphasizeTextView(findViewById(R.id.incorrectFirmFocus));
         else deleteEmphasizeFromTextView(findViewById(R.id.incorrectFirmFocus));
     };
 
-    Observer<Boolean> observerIncorrectToWET = (b) -> {
+    private final Observer<Boolean> observerIncorrectToWET = (b) -> {
         if (b) emphasizeEditText(addTypeOfWork);
         else deleteEmphasizeFromEditText(addTypeOfWork);
 
     };
 
-    Observer<Boolean> observerIncorrectToWTV = b -> {
+    private final Observer<Boolean> observerIncorrectToWTV = b -> {
         if (b) emphasizeTextView(findViewById(R.id.incorrectToWFocus));
         else deleteEmphasizeFromTextView(findViewById(R.id.incorrectToWFocus));
     };
 
-    Observer<Boolean> observerIncorrectPoWET = (b) -> {
+    private final Observer<Boolean> observerIncorrectPoWET = (b) -> {
         if (b) emphasizeEditText(addPlaceOfWork);
         else deleteEmphasizeFromEditText(addPlaceOfWork);
     };
 
-    Observer<Boolean> observerIncorrectPoWTV = b -> {
+    private final Observer<Boolean> observerIncorrectPoWTV = b -> {
         if (b) emphasizeTextView(findViewById(R.id.incorrectPoWFocus));
         else deleteEmphasizeFromTextView(findViewById(R.id.incorrectPoWFocus));
     };
 
-    Observer<Boolean> observerIncorrectResultET = (b) -> {
+    private final Observer<Boolean> observerIncorrectResultET = (b) -> {
         if (b) emphasizeEditText(findViewById(R.id.add_result_editText));
         else deleteEmphasizeFromEditText(findViewById(R.id.add_result_editText));
     };
 
-    Observer<Boolean> observerIncorrectResultTV = b -> {
+    private final Observer<Boolean> observerIncorrectResultTV = b -> {
         if (b) emphasizeTextView(findViewById(R.id.incorrectResultValueFocus));
         else deleteEmphasizeFromTextView(findViewById(R.id.incorrectResultValueFocus));
+    };
+
+    private final Observer<Boolean> observerIncorrectResultTypeET = (b) -> {
+        if (b) emphasizeEditText(findViewById(R.id.add_result_type_editText));
+        else deleteEmphasizeFromEditText(findViewById(R.id.add_result_type_editText));
+    };
+
+    private final Observer<Boolean> observerIncorrectResultTypeTV = b -> {
+        if (b) emphasizeTextView(findViewById(R.id.incorrectResultTypeFocus));
+        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectResultTypeFocus));
     };
 
     private void deleteEmphasizeFromEditText(EditText editText) {
@@ -254,6 +267,8 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         tvPoW.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
         TextView tvRes = findViewById(R.id.incorrectResultValueFocus);
         tvRes.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+        TextView tvResType = findViewById(R.id.incorrectResultTypeFocus);
+        tvResType.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
         addEmpl = findViewById(R.id.add_empl_editText);
         addEmpl.setOnClickListener(v -> launchActivityForResult(TABLE_OF_EMPLOYERS));
         Observer<String> employerEditTextObserver = s -> addEmpl.setText(s);
@@ -274,6 +289,10 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         date.setOnClickListener(pickDate);
         resultValue = findViewById(R.id.add_result_editText);
         resultValue.addTextChangedListener(twResultValue);
+        addTypeOfResult = findViewById(R.id.add_result_type_editText);
+        addTypeOfResult.setOnClickListener(v -> launchActivityForResult(TABLE_OF_RESULT_TYPE));
+        Observer<String> resultTypeObserver = addTypeOfResult::setText;
+        mViewModel.getLiveDataResultTypeText().observe(this, resultTypeObserver);
         note = findViewById(R.id.add_note_editText);
         note.addTextChangedListener(twNote);
         addButton = findViewById(R.id.add_button);
@@ -288,6 +307,8 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         mViewModel.getWarningPlaceOfWorkTVLD().observe(this, observerIncorrectPoWTV);
         mViewModel.getWarningResultETLD().observe(this, observerIncorrectResultET);
         mViewModel.getWarningResultTVLD().observe(this, observerIncorrectResultTV);
+        mViewModel.getWarningResultTypeETLD().observe(this, observerIncorrectResultTypeET);
+        mViewModel.getWarningResultTypeTVLD().observe(this,  observerIncorrectResultTypeTV);
         mViewModel.getPrepareAddButton().observe(this, observerAddButtonForPrepare);
         mViewModel.getChangeTextAddButton().observe(this, observerAddButtonChangeText);
         if (mViewModel.isFirstLaunch()) {

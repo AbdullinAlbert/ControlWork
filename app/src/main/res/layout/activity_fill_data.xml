@@ -177,6 +177,33 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
+                android:text="@string/result_type_with_colon"
+                android:labelFor="@id/add_result_editText"/>
+
+            <EditText
+                android:id="@+id/add_result_type_editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_for_add_place_of_work"
+                android:inputType="text"
+                android:importantForAutofill="no"
+                android:focusable="false"
+                android:backgroundTint="@color/standardBlack" />
+
+            <TextView
+                android:id="@+id/incorrectResultTypeFocus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Некорректные данные"
+                android:textSize="8dp"
+                android:textColor="@color/highlightBorder" />
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/note_with_colon" />
 
             <EditText

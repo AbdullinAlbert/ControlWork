@@ -10,6 +10,7 @@
     <string name="type_of_work_with_colon">Тип работы:</string>
     <string name="date_with_colon">Дата:</string>
     <string name="result_with_colon">Результат:</string>
+    <string name="result_type_with_colon">Тип результата:</string>
     <string name="save_changes">Сохранить изменения</string>
     <string name="cancel">Отмена</string>
     <string name="incorrect_data">Некорректные данные</string>
@@ -21,6 +22,7 @@
     <string name="list_of_firms">Список фирм</string>
     <string name="list_of_places_of_work">Список мест работы</string>
     <string name="list_of_types_of_work">Список типов работы</string>
+    <string name="list_of_types_of_result">Список типов результата</string>
     <string name="hint_for_search_criteria">Пустое поле - поиск среди всех записей</string>
     <string name="hint_for_search_criteria_one_date"> Выбери дату </string>
     <string name="hint_for_search_criteria_one_number"> Выбери число</string>
@@ -33,6 +35,7 @@
     <string name="firm_name">Название фирмы</string>
     <string name="type_of_work">Тип работы</string>
     <string name="type">Тип</string>
+    <string name="result_type">Тип результата</string>
     <string name="place_of_work">Место работы</string>
     <string name="add">Добавить</string>
     <string name="rename">Переименовать</string>

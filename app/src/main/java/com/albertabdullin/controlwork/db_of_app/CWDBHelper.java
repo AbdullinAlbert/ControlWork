@@ -59,6 +59,7 @@ public class CWDBHelper extends SQLiteOpenHelper {
     public static final String T_RESULT_C_DATE = "Date";
     public static final String T_RESULT_C_VALUE = "Value";
     public static final String T_RESULT_C_NOTE = "Note";
+    public static final String T_RESULT_C_RESULT_TYPE = "idResultType";
     private static final String SQL_CREATE_RESULT_TABLE =
             "CREATE TABLE " + TABLE_NAME_RESULT + " (" +
                     "_id" + " INTEGER PRIMARY KEY, " +
@@ -89,7 +90,7 @@ public class CWDBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion == 1) {
             db.execSQL(SQL_CREATE_RESULT_TYPE_TABLE);
-            db.execSQL("ALTER TABLE " + TABLE_NAME_RESULT + " ADD COLUMN idResultType INTEGER;" );
+            db.execSQL("ALTER TABLE " + TABLE_NAME_RESULT + " ADD COLUMN " + T_RESULT_C_RESULT_TYPE + " INTEGER;" );
         }
     }
 

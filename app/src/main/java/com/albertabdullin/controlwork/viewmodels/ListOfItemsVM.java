@@ -320,6 +320,10 @@ public class ListOfItemsVM extends AndroidViewModel implements DialogFragmentSta
                 currentNameOfTable = CWDBHelper.TABLE_NAME_PLACE_OF_WORK;
                 currentNameOfColumn =CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION;
                 break;
+            case FillNewData_Activity.TABLE_OF_RESULT_TYPE:
+                currentNameOfTable = CWDBHelper.TABLE_NAME_RESULT_TYPE;
+                currentNameOfColumn =CWDBHelper.T_RESULT_TYPE_C_RESULT_TYPE;
+                break;
         }
     }
 
