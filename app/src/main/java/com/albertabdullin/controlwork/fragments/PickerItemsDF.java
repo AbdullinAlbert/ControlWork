@@ -46,6 +46,7 @@ public class PickerItemsDF extends DialogFragment {
     private static final String FIRMS_TITLE = "Список фирм";
     private static final String TYPES_TITLE = "Список типов работы";
     private static final String PLACES_TITLE = "Список мест работы";
+    private static final String TYPE_RESULT_TITLE = "Список типов результата";
     private static final String SAVED_TITLE_OF_TABLE = "saved_table";
     private List<SimpleEntityForDB> list;
     private Toolbar toolbar;
@@ -131,6 +132,8 @@ public class PickerItemsDF extends DialogFragment {
             case SearchCriteriaFragment.SELECT_PLACES:
                 title = PLACES_TITLE;
                 break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                title = TYPE_RESULT_TITLE;
         }
         toolbar.setTitle(title);
         toolbar.inflateMenu(R.menu.menu_for_pick_items);

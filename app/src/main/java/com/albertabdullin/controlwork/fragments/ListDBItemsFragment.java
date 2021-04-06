@@ -72,7 +72,7 @@ public class ListDBItemsFragment  extends Fragment implements RecyclerViewObserv
     }
 
     public enum TableNameForList {
-        EMPLOYEES, FIRMS, POW, TOW
+        EMPLOYEES, FIRMS, POW, TOW, RESULT_TYPES
     }
 
     @Override
@@ -107,6 +107,9 @@ public class ListDBItemsFragment  extends Fragment implements RecyclerViewObserv
             case TOW:
                 toolbar.setTitle(R.string.list_of_types_of_work);
                 break;
+            case RESULT_TYPES:
+                toolbar.setTitle(R.string.list_of_types_of_result);
+                break;
         }
         toolbar.inflateMenu(R.menu.stable_appbar_list_items);
         searchEditText = ((SearchEditText) toolbar.getMenu().getItem(0).getActionView()).getTextView();
@@ -133,7 +136,7 @@ public class ListDBItemsFragment  extends Fragment implements RecyclerViewObserv
         });
 
         final ProgressBar progressBar = view.findViewById(R.id.progressBar_for_list_of_primary_table);
-        Observer<Integer> observerOfProgressBarVisible = integer -> progressBar.setVisibility(integer);
+        Observer<Integer> observerOfProgressBarVisible = progressBar::setVisibility;
         mViewModel.getVisibleOfProgressBarForPrimaryTableListLD().observe(getViewLifecycleOwner(), observerOfProgressBarVisible);
         final AdapterForItemsFromDB adapter = new AdapterForItemsFromDB(mViewModel.getCurrentListForPrimaryTable());
         adapter.setRVObserver(this);

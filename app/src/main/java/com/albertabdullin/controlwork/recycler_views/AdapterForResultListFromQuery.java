@@ -142,6 +142,7 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
         holder.getPoW().setText(mListOfRecyclerView.get(position).getPOWDescription());
         holder.getDate().setText(mListOfRecyclerView.get(position).getDate());
         holder.getResult().setText(mListOfRecyclerView.get(position).getResult());
+        holder.getTypeOfResult().setText(mListOfRecyclerView.get(position).getStringViewOfResultType());
         if (arrayOfViews != null) {
             arrayOfViews[position] = holder.getView();
             if (holder.getBindingAdapterPosition() == mViewModel.getPosOfSelectedItem() || mViewModel.getPosOfSelectedItem() == -1)

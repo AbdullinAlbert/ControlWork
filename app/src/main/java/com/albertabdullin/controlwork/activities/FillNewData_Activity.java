@@ -202,8 +202,8 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectResultTypeET = (b) -> {
-        if (b) emphasizeEditText(findViewById(R.id.add_result_type_editText));
-        else deleteEmphasizeFromEditText(findViewById(R.id.add_result_type_editText));
+        if (b) emphasizeEditText(findViewById(R.id.result_type_editText));
+        else deleteEmphasizeFromEditText(findViewById(R.id.result_type_editText));
     };
 
     private final Observer<Boolean> observerIncorrectResultTypeTV = b -> {
@@ -289,7 +289,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         date.setOnClickListener(pickDate);
         resultValue = findViewById(R.id.add_result_editText);
         resultValue.addTextChangedListener(twResultValue);
-        addTypeOfResult = findViewById(R.id.add_result_type_editText);
+        addTypeOfResult = findViewById(R.id.result_type_editText);
         addTypeOfResult.setOnClickListener(v -> launchActivityForResult(TABLE_OF_RESULT_TYPE));
         Observer<String> resultTypeObserver = addTypeOfResult::setText;
         mViewModel.getLiveDataResultTypeText().observe(this, resultTypeObserver);

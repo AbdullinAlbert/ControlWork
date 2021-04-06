@@ -20,6 +20,8 @@ public class ComplexEntityForDB implements Parcelable {
     private long mLongPresentationOfDate;
     private String mResult;
     private String mNote;
+    private int mResultTypeID;
+    private String mStringViewOfResultType;
     private boolean mTypeResultEntity = false;
     private Float mTypeResultSum;
     private boolean mTypeOfWorkEntity = false;
@@ -37,8 +39,12 @@ public class ComplexEntityForDB implements Parcelable {
         mTypeOfWorkID = in.readInt();
         mTOWDescription = in.readString();
         mDate = in.readString();
+        mLongPresentationOfDate = in.readLong();
         mResult = in.readString();
         mNote = in.readString();
+        mResultTypeID = in.readInt();
+        mStringViewOfResultType = in.readString();
+        mTypeResultSum = in.readFloat();
     }
 
     public static final Creator<ComplexEntityForDB> CREATOR = new Creator<ComplexEntityForDB>() {
@@ -161,6 +167,14 @@ public class ComplexEntityForDB implements Parcelable {
         this.mNote = mNote;
     }
 
+    public void setResultTypeID(int resultTypeID) { mResultTypeID = resultTypeID; }
+
+    public int getResultTypeID() { return mResultTypeID; }
+
+    public void setStringViewOfResultType(String s) { mStringViewOfResultType = s; }
+
+    public String getStringViewOfResultType() { return mStringViewOfResultType; }
+
     public boolean isResultEntity() { return mTypeResultEntity; }
 
     public void setResultEntity(boolean type) { mTypeResultEntity = type; }
@@ -196,7 +210,11 @@ public class ComplexEntityForDB implements Parcelable {
         dest.writeInt(mTypeOfWorkID);
         dest.writeString(mTOWDescription);
         dest.writeString(mDate);
+        dest.writeLong(mLongPresentationOfDate);
         dest.writeString(mResult);
         dest.writeString(mNote);
+        dest.writeInt(mResultTypeID);
+        dest.writeString(mStringViewOfResultType);
+        dest.writeFloat(mTypeResultSum);
     }
 }

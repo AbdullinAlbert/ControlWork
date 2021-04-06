@@ -39,58 +39,26 @@ public class EditDataFragment extends Fragment implements BackPressListener {
     private EditText typeOfWorkEditText;
     private EditText dateEditText;
     private EditText resultEditText;
+    private EditText resultTypeEditText;
     private EditText noteEditText;
     private TextView incorrectResultValueTV;
     private Button saveChangedDataButton;
 
-    private final Observer<String> observerOfEmployeeEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            employeeEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfEmployeeEditText = s -> employeeEditText.setText(s);
 
-    private final Observer<String> observerOfFirmEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            firmEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfFirmEditText = s -> firmEditText.setText(s);
 
-    private final Observer<String> observerOfPoWEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            placeOfWorkEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfPoWEditText = s -> placeOfWorkEditText.setText(s);
 
-    private final Observer<String> observerOfToWEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            typeOfWorkEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfToWEditText = s -> typeOfWorkEditText.setText(s);
 
-    private final Observer<String> observerOfDateEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            dateEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfDateEditText = s -> dateEditText.setText(s);
 
-    private final Observer<String> observerOfResultEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            resultEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfResultEditText = s -> resultEditText.setText(s);
 
-    private final Observer<String> observerOfNoteEditText = new Observer<String>() {
-        @Override
-        public void onChanged(String s) {
-            noteEditText.setText(s);
-        }
-    };
+    private final Observer<String> observerOfNoteEditText = s -> noteEditText.setText(s);
+
+    private final Observer<String> observerOfResultTypeEditText = s -> resultTypeEditText.setText(s);
 
 
     private final Observer<Boolean> observerOfSaveChangedDataButton = new Observer<Boolean>() {
@@ -124,41 +92,21 @@ public class EditDataFragment extends Fragment implements BackPressListener {
         }
     };
 
-    private final View.OnClickListener employeeClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mViewModel.setSelectedTable(ListDBItemsFragment.TableNameForList.EMPLOYEES);
-            mViewModel.startLoadDataFromTable();
-            startListDBItemsFragment();
-        }
-    };
+    private final View.OnClickListener employeeClickListener = v -> preparingToShowPrimaryTableItems(ListDBItemsFragment.TableNameForList.EMPLOYEES);
 
-    private final View.OnClickListener firmClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mViewModel.setSelectedTable(ListDBItemsFragment.TableNameForList.FIRMS);
-            mViewModel.startLoadDataFromTable();
-            startListDBItemsFragment();
-        }
-    };
+    private final View.OnClickListener firmClickListener = v -> preparingToShowPrimaryTableItems(ListDBItemsFragment.TableNameForList.FIRMS);
 
-    private final View.OnClickListener placeOfWorkClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mViewModel.setSelectedTable(ListDBItemsFragment.TableNameForList.POW);
-            mViewModel.startLoadDataFromTable();
-            startListDBItemsFragment();
-        }
-    };
+    private final View.OnClickListener placeOfWorkClickListener = v -> preparingToShowPrimaryTableItems(ListDBItemsFragment.TableNameForList.POW);
 
-    private final View.OnClickListener typeOfWorkClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mViewModel.setSelectedTable(ListDBItemsFragment.TableNameForList.TOW);
-            mViewModel.startLoadDataFromTable();
-            startListDBItemsFragment();
-        }
-    };
+    private final View.OnClickListener typeOfWorkClickListener = v -> preparingToShowPrimaryTableItems(ListDBItemsFragment.TableNameForList.TOW);
+
+    private final View.OnClickListener resultTypeClickListener = v -> preparingToShowPrimaryTableItems(ListDBItemsFragment.TableNameForList.RESULT_TYPES);
+
+    private void preparingToShowPrimaryTableItems(ListDBItemsFragment.TableNameForList selectedTable) {
+        mViewModel.setSelectedTable(selectedTable);
+        mViewModel.startLoadDataFromTable();
+        startListDBItemsFragment();
+    }
 
     private final View.OnClickListener dateClickListener = new View.OnClickListener() {
         @Override
@@ -242,6 +190,8 @@ public class EditDataFragment extends Fragment implements BackPressListener {
         dateEditText.setOnClickListener(dateClickListener);
         resultEditText = view.findViewById(R.id.edit_result_editText);
         resultEditText.addTextChangedListener(watcherForResult);
+        resultTypeEditText = view.findViewById(R.id.result_type_editText);
+        resultTypeEditText.setOnClickListener(resultTypeClickListener);
         noteEditText = view.findViewById(R.id.edit_note_editText);
         noteEditText.addTextChangedListener(watcherForNote);
         incorrectResultValueTV = view.findViewById(R.id.incorrectResultValueFocus_for_edit_data);
@@ -254,6 +204,7 @@ public class EditDataFragment extends Fragment implements BackPressListener {
         mViewModel.getTypeOfWorkEditTextForEditDataLD().observe(getViewLifecycleOwner(), observerOfToWEditText);
         mViewModel.getDateEditTextForEditDataLD().observe(getViewLifecycleOwner(), observerOfDateEditText);
         mViewModel.getResultEditTextForEditDataLD().observe(getViewLifecycleOwner(), observerOfResultEditText);
+        mViewModel.getResultTypeEditTextForEditDataLD().observe(getViewLifecycleOwner(), observerOfResultTypeEditText);
         mViewModel.getNoteEditTextForEditDataLD().observe(getViewLifecycleOwner(), observerOfNoteEditText);
         mViewModel.getVisibleOfTextViewResultValueLD().observe(getViewLifecycleOwner(), observerOfTextViewOfResultValue);
         mViewModel.initItemForChangedDataInDB();
@@ -262,7 +213,7 @@ public class EditDataFragment extends Fragment implements BackPressListener {
     private void startListDBItemsFragment() {
         FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
         ListDBItemsFragment listDBItemsFragment = new ListDBItemsFragment();
-        transaction.replace(R.id.container_for_table_result_fragment, listDBItemsFragment,
+        transaction.replace(R.id.container_for_edit_delete_data_fragment, listDBItemsFragment,
                 getResources().getString(R.string.tag_for_list_of_DB_items_fragment)).
                 addToBackStack(null).commit();
     }

@@ -51,6 +51,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private List<SimpleEntityForDB> adapterListOfPOW;
     private List<SimpleEntityForDB> listOfSelectedPOW;
     private List<SimpleEntityForDB> transientListOfSelectedPOW;
+    private List<SimpleEntityForDB> adapterListOfResTypes;
+    private List<SimpleEntityForDB> listOfSelectedResTypes;
+    private List<SimpleEntityForDB> transientListOfSelectedResTypes;
     private List<SimpleEntityForDB> cacheForAdapterList;
     protected List<String> adapterListOfOneDateForEqualitySign;
     protected List<String> adapterListOfOneDateForInequalitySign;
@@ -80,6 +83,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     private MutableLiveData<String> firmsEditTextLD;
     private MutableLiveData<String> typesOfWorkEditTextLD;
     private MutableLiveData<String> placesOfWorkEditTextLD;
+    private MutableLiveData<String> resultTypesEditTextLD;
     private MutableLiveData<Boolean> selectedCheckBoxesLD;
     private MutableLiveData<Integer> selectedEqualSignRadioButtonLD;
     protected MutableLiveData<String> stringViewOfDateMoreSignLD;
@@ -186,6 +190,11 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     public LiveData<String> getPoWEditTextLD() {
         if (placesOfWorkEditTextLD == null) placesOfWorkEditTextLD = new MutableLiveData<>();
         return placesOfWorkEditTextLD;
+    }
+
+    public LiveData<String> getResultTypeEditTextLD() {
+        if (resultTypesEditTextLD == null) resultTypesEditTextLD = new MutableLiveData<>();
+        return resultTypesEditTextLD;
     }
 
     public LiveData<Boolean> getSelectedCheckBoxesLD() {
@@ -357,6 +366,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             case SearchCriteriaFragment.SELECT_PLACES:
                 if (transientListOfSelectedPOW == null) return true;
                 return transientListOfSelectedPOW.isEmpty();
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                if (transientListOfSelectedResTypes == null) return true;
+                return transientListOfSelectedResTypes.isEmpty();
             default:
                 throw new RuntimeException("опечатка в константах. boolean getStateOfSelectAllMenuItem(int selectedType). selectedType - " + selectedType);
         }
@@ -388,6 +400,11 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 tableName = CWDBHelper.TABLE_NAME_PLACE_OF_WORK;
                 columnName = CWDBHelper.T_PLACE_OF_WORK_C_DESCRIPTION;
                 break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                hList = adapterListOfResTypes;
+                tableName = CWDBHelper.TABLE_NAME_RESULT_TYPE;
+                columnName = CWDBHelper.T_RESULT_TYPE_C_RESULT_TYPE;
+                break;
             default:
                 throw new RuntimeException("опечатка в константах: showFullListOfItems(int selectedTable)");
         }
@@ -413,6 +430,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             case SearchCriteriaFragment.SELECT_PLACES:
                 if (adapterListOfPOW == null) adapterListOfPOW = new ArrayList<>();
                 return adapterListOfPOW;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                if (adapterListOfResTypes == null) adapterListOfResTypes = new ArrayList<>();
+                return adapterListOfResTypes;
             default: throw new RuntimeException("ошибка в константах: getAdapterListOfEntities(int selectableTable)");
         }
     }
@@ -435,6 +455,10 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 if (transientListOfSelectedPOW == null) transientListOfSelectedPOW = new ArrayList<>();
                 if (listOfSelectedPOW != null) transientListOfSelectedPOW.addAll(listOfSelectedPOW);
                 break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                if (transientListOfSelectedResTypes == null) transientListOfSelectedResTypes = new ArrayList<>();
+                if (listOfSelectedResTypes != null) transientListOfSelectedResTypes.addAll(listOfSelectedResTypes);
+                break;
             default:
                 throw new RuntimeException("ошибка в константах. Метод void prepareTransientListOfSelectedItems(int selectedTable). selectedTable - " + selectedTable);
         }
@@ -450,6 +474,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 return transientListOfSelectedTOW;
             case SearchCriteriaFragment.SELECT_PLACES:
                 return transientListOfSelectedPOW;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                return transientListOfSelectedResTypes;
             default:
                 throw new RuntimeException("ошибка в константах. Метод void getTransientListOfSelectedItems(int selectableTable). selectableTable - " + selectedTable);
         }
@@ -468,6 +494,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 break;
             case SearchCriteriaFragment.SELECT_PLACES:
                 if (transientListOfSelectedPOW != null) transientListOfSelectedPOW.clear();
+                break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                if (transientListOfSelectedResTypes != null) transientListOfSelectedResTypes.clear();
                 break;
             default:
                 throw new RuntimeException("ошибка в константах. Метод void clearTransientListOfSelectedItems(int selectableTable). selectableTable - " + selectableTable);
@@ -496,6 +525,11 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 commitSelectedList(listOfSelectedPOW, transientListOfSelectedPOW);
                 notifyViewAboutChanges(placesOfWorkEditTextLD, listOfSelectedPOW);
                 break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                if (listOfSelectedResTypes == null) listOfSelectedResTypes = new ArrayList<>();
+                commitSelectedList(listOfSelectedResTypes, transientListOfSelectedResTypes);
+                notifyViewAboutChanges(resultTypesEditTextLD, listOfSelectedResTypes);
+                break;
             default:
                 throw new RuntimeException("опечатка в константах: commitSelectedList(int selectableTable)");
         }
@@ -514,8 +548,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 sb.append(permanentList.get(i).getDescription()).append(", ");
             }
             sb.append(permanentList.get(permanentList.size() - 1).getDescription());
-            liveData.setValue(sb.toString());
         }
+        liveData.setValue(sb.toString());
     }
 
     public void addSelectedItem(int selectedTable, SimpleEntityForDB eDB) {
@@ -531,6 +565,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 break;
             case SearchCriteriaFragment.SELECT_PLACES:
                 if (!transientListOfSelectedPOW.contains(eDB)) transientListOfSelectedPOW.add(eDB);
+                break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                if (!transientListOfSelectedResTypes.contains(eDB)) transientListOfSelectedResTypes.add(eDB);
                 break;
             default:
                 throw new RuntimeException("опечатка в константах: addSelectedItem(int selectedTable, int selectedItem)");
@@ -551,6 +588,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             case SearchCriteriaFragment.SELECT_PLACES:
                 transientListOfSelectedPOW.remove(eDB);
                 break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                transientListOfSelectedResTypes.remove(eDB);
+                break;
             default:
                 throw new RuntimeException("опечатка в константах: removeSelectedItem(int selectedTable, int selectedItem)");
         }
@@ -569,6 +609,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 break;
             case SearchCriteriaFragment.SELECT_PLACES:
                 transientListOfSelectedPOW.clear();
+                break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                transientListOfSelectedResTypes.clear();
                 break;
             default:
                 throw new RuntimeException("опечатка в константах: clearSelectedCheckBoxes(int selectedTable)");
@@ -593,6 +636,10 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             case SearchCriteriaFragment.SELECT_PLACES:
                 transientListOfSelectedPOW.clear();
                 transientListOfSelectedPOW.addAll(adapterListOfPOW);
+                break;
+            case SearchCriteriaFragment.SELECT_RESULT_TYPES:
+                transientListOfSelectedResTypes.clear();
+                transientListOfSelectedResTypes.addAll(adapterListOfResTypes);
                 break;
             default:
                 throw new RuntimeException("опечатка в константах: clearSelectedCheckBoxes(int selectedTable)");
@@ -2089,6 +2136,10 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         }
         if (listOfSelectedPOW != null && listOfSelectedPOW.size() != 0) {
             sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_PLACE_OF_WORK + "._id", listOfSelectedPOW, whereStatement));
+            if (!whereStatement) whereStatement = true;
+        }
+        if (listOfSelectedResTypes != null && listOfSelectedResTypes.size() != 0) {
+            sb.append(addSearchCriteriaOfItemsToQuery(CWDBHelper.TABLE_NAME_RESULT_TYPE + "._id", listOfSelectedResTypes, whereStatement));
             if (!whereStatement) whereStatement = true;
         }
         if (searchCriteriaForDate != null && searchCriteriaForDate.size() != 0) {

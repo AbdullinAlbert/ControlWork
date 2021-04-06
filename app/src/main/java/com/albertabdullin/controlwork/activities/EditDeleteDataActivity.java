@@ -36,11 +36,6 @@ public class EditDeleteDataActivity extends AppCompatActivity implements Provide
     public static final int FAIL_ABOUT_LOAD_DATA_FROM_PRIMARY_TABLE = 2;
     public static final int FAIL_ABOUT_UPDATE_DATA_IN_RESULT_TABLE = 3;
 
-    Observer<Boolean> observerOfSuccessUpdateDataToast = aBoolean -> {
-        if (aBoolean) Toast.makeText(getApplicationContext(),
-                getResources().getString(R.string.data_has_been_updated), Toast.LENGTH_SHORT).show();
-    };
-
     public static Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -66,9 +61,6 @@ public class EditDeleteDataActivity extends AppCompatActivity implements Provide
         failLoadFromResultTable = getString(R.string.fail_attempt_about_load_data_from_result_table);
         failLoadFromPrimaryTable = getString(R.string.fail_attempt_about_load_data_from_primary_table);
         failUpdateInResultTable = getString(R.string.fail_attempt_about_update_data_in_result_table);
-        if (viewModel.getToastAboutSuccessUpdateDataLD().hasObservers())
-            viewModel.getToastAboutSuccessUpdateDataLD().removeObserver(observerOfSuccessUpdateDataToast);
-        viewModel.getToastAboutSuccessUpdateDataLD().observe(this, observerOfSuccessUpdateDataToast);
         DeleteDataFragment deleteDataFragment = (DeleteDataFragment)
                 getSupportFragmentManager().findFragmentByTag(getString(R.string.tag_for_delete_data_fragment));
         EditDataFragment editDataFragment = (EditDataFragment)

@@ -89,12 +89,7 @@ public class DeleteDataFragment extends Fragment implements BackPressListener{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (mQuery == null) {
-            if (savedInstanceState == null)
-                mQuery = requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY);
-            else
-                mQuery = savedInstanceState.getString(KEY_FOR_QUERY);
-        }
+        mQuery = requireActivity().getIntent().getStringExtra(SearchCriteriaFragment.KEY_FOR_QUERY);
         mViewModel.setQuery(mQuery);
         Toolbar toolbar = view.findViewById(R.id.toolbar_for_delete_data);
         inflateToolbarMenu(toolbar);
@@ -181,8 +176,7 @@ public class DeleteDataFragment extends Fragment implements BackPressListener{
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(KEY_FOR_QUERY, mQuery);
-        mTracker.onSaveInstanceState(outState);
+        if (mTracker != null) mTracker.onSaveInstanceState(outState);
         mViewModel.setNullToOldItemPosition();
     }
 

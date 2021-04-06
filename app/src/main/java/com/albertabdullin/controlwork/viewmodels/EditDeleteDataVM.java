@@ -48,12 +48,12 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private List<SimpleEntityForDB> listForWorkWithFirmTableItems;
     private List<SimpleEntityForDB> listForWorkWithPoWTableItems;
     private List<SimpleEntityForDB> listForWorkWithToWTableItems;
+    private List<SimpleEntityForDB> listForWorkWithResTypesTableItems;
     private List<SimpleEntityForDB> cacheForAdapterList;
     private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerViewForResultList;
     private MutableLiveData<Integer> visibleOfProgressBarForResultList;
     private MutableLiveData<Integer> visibleOfRecyclerView;
     private MutableLiveData<Boolean> visibleOfEditMenuItem;
-    private MutableLiveData<Boolean> toastAboutSuccessUpdateData;
     private MutableLiveData<Integer> visibleOfTextViewResultValue;
     private MutableLiveData<String> employeeEditTextForResultListLD;
     private MutableLiveData<String> firmEditTextForResultListLD;
@@ -65,6 +65,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private MutableLiveData<String> typeOfWorkEditTextForEditDataLD;
     private MutableLiveData<String> dateEditTextForEditDataLD;
     private MutableLiveData<String> resultEditTextForEditDataLD;
+    private MutableLiveData<String> resultTypeEditTextForEditDataLD;
     private MutableLiveData<String> noteEditTextForEditDataLD;
     private MutableLiveData<DeleteDataFragment.StateOfRecyclerView> stateOfRecyclerViewForPrimaryList;
     private MutableLiveData<Integer> visibleOfRecyclerViewForPrimaryList;
@@ -85,6 +86,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     private boolean mStateOfChangeToWEditText = false;
     private boolean mStateOfChangeDateEditText = false;
     private boolean mStateOfChangeResultEditText = false;
+    private boolean mStateOfChangeResultTypeEditText = false;
     private boolean mStateOfChangeNoteEditText = false;
     private boolean pressedBackButton = false;
     private boolean stateMenuItemSearchText = false;
@@ -130,7 +132,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                         eDB.setPOWDescription(cursor.getString(b++));
                         eDB.setDate(cursor.getString(b++));
                         eDB.setResult(cursor.getFloat(b++));
-                        eDB.setNote(cursor.getString(b));
+                        eDB.setNote(cursor.getString(b++));
+                        eDB.setResultTypeID(cursor.getInt(b++));
+                        eDB.setStringViewOfResultType(cursor.getString(b));
                         listForWorkWithResultTableItems.add(eDB);
                     } while (cursor.moveToNext());
                 }
@@ -325,7 +329,16 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         return resultEditTextForEditDataLD;
     }
 
-    public LiveData<String> getNoteEditTextForEditDataLD() {
+    public LiveData<String> getResultTypeEditTextForEditDataLD() {
+        if (resultTypeEditTextForEditDataLD == null) {
+            resultTypeEditTextForEditDataLD = new MutableLiveData<>();
+            resultTypeEditTextForEditDataLD
+                    .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getStringViewOfResultType());
+        }
+        return resultTypeEditTextForEditDataLD;
+    }
+
+   public LiveData<String> getNoteEditTextForEditDataLD() {
         if (noteEditTextForEditDataLD == null) noteEditTextForEditDataLD = new MutableLiveData<>();
         if (textForNoteEditText == null) noteEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getNote());
@@ -346,11 +359,6 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     public LiveData<Integer> getVisibleOfProgressBarForPrimaryTableListLD() {
         if (visibleOfProgressBarForPrimaryTableList == null) visibleOfProgressBarForPrimaryTableList = new MutableLiveData<>();
         return visibleOfProgressBarForPrimaryTableList;
-    }
-
-    public LiveData<Boolean> getToastAboutSuccessUpdateDataLD() {
-        if (toastAboutSuccessUpdateData == null) toastAboutSuccessUpdateData = new MutableLiveData<>();
-        return toastAboutSuccessUpdateData;
     }
 
     public LiveData<Boolean> getStateOfSaveChangedDataButtonLD() {
@@ -555,6 +563,16 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     initializeViewsFromListDBItemsFragment();
                     return;
                 }
+            case RESULT_TYPES:
+                if (listForWorkWithResTypesTableItems == null) {
+                    listForWorkWithResTypesTableItems = new ArrayList<>();
+                    loadItemsFromPrimaryTableThread = new LoadItemsFromPrimaryTableThread(
+                            CWDBHelper.TABLE_NAME_RESULT_TYPE, CWDBHelper.T_RESULT_TYPE_C_RESULT_TYPE, listForWorkWithResTypesTableItems);
+                    break;
+                } else {
+                    initializeViewsFromListDBItemsFragment();
+                    return;
+                }
         }
         loadItemsFromPrimaryTableThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
         mExecutor.execute(loadItemsFromPrimaryTableThread);
@@ -566,6 +584,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
             case FIRMS: return listForWorkWithFirmTableItems;
             case POW: return listForWorkWithPoWTableItems;
             case TOW: return listForWorkWithToWTableItems;
+            case RESULT_TYPES: return listForWorkWithResTypesTableItems;
             default:
                 throw new RuntimeException("Опечатка в enum-классе TableNameForList. selectedTable -" + selectedTable);
         }
@@ -607,6 +626,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         mStateOfChangePoWEditText = false;
         mStateOfChangeToWEditText = false;
         mStateOfChangeResultEditText = false;
+        mStateOfChangeResultTypeEditText = false;
         mStateOfChangeNoteEditText = false;
     }
 
@@ -666,6 +686,19 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
         }
     }
 
+    private void attemptToChangeValueOfResultTypeData() {
+        mStateOfChangeResultTypeEditText = mSelectedItemForChangeData.getID() !=
+                listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getResultTypeID();
+        resultTypeEditTextForEditDataLD.setValue(mSelectedItemForChangeData.getDescription());
+        if (mStateOfChangeResultTypeEditText) {
+            itemForChangeDataInDB.setResultTypeID(mSelectedItemForChangeData.getID());
+            itemForChangeDataInDB.setStringViewOfResultType(mSelectedItemForChangeData.getDescription());
+        } else {
+            itemForChangeDataInDB.setResultTypeID(0);
+            itemForChangeDataInDB.setStringViewOfResultType("");
+        }
+    }
+
     public void tryToChangeStateOfSaveChangedDataButton() {
         if (selectedTable != null && mSelectedItemForChangeData != null) {
             switch (selectedTable) {
@@ -680,6 +713,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     break;
                 case TOW:
                     attemptToChangeValueOfToWData();
+                    break;
+                case RESULT_TYPES:
+                    attemptToChangeValueOfResultTypeData();
                     break;
             }
             changeStateOfSaveChangedDataButton();
@@ -718,7 +754,7 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
 
     private void changeStateOfSaveChangedDataButton() {
         boolean valueForButton = (mStateOfChangeEmployerEditText | mStateOfChangeFirmEditText | mStateOfChangePoWEditText |
-                mStateOfChangeToWEditText | mStateOfChangeDateEditText | mStateOfChangeResultEditText | mStateOfChangeNoteEditText);
+                mStateOfChangeToWEditText | mStateOfChangeDateEditText | mStateOfChangeResultEditText | mStateOfChangeNoteEditText | mStateOfChangeResultTypeEditText);
         if (stateOfSaveChangedDataButton.getValue() == null || stateOfSaveChangedDataButton.getValue() != valueForButton)
             stateOfSaveChangedDataButton.setValue(valueForButton);
     }
@@ -745,6 +781,8 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                 cv.put(CWDBHelper.T_RESULT_C_DATE, itemForChangeDataInDB.getLongPresentationOfDate());
             if (!itemForChangeDataInDB.getResult().equals(""))
                 cv.put(CWDBHelper.T_RESULT_C_VALUE, Float.parseFloat(itemForChangeDataInDB.getResult()));
+            if (itemForChangeDataInDB.getResultTypeID() != 0)
+                cv.put(CWDBHelper.T_RESULT_C_RESULT_TYPE, itemForChangeDataInDB.getResultTypeID());
             if (itemForChangeDataInDB.getNote() != null)
                 cv.put(CWDBHelper.T_RESULT_C_NOTE, itemForChangeDataInDB.getNote());
             int idKey;
@@ -785,9 +823,15 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
                     shortLinkToObject.setDate(itemForChangeDataInDB.getDate());
                 if (!itemForChangeDataInDB.getResult().equals(""))
                     shortLinkToObject.setResult(itemForChangeDataInDB.getResult());
+                if (itemForChangeDataInDB.getResultTypeID() != 0) {
+                    shortLinkToObject.setResultTypeID(itemForChangeDataInDB.getResultTypeID());
+                    shortLinkToObject.setStringViewOfResultType(itemForChangeDataInDB.getStringViewOfResultType());
+                }
                 if (itemForChangeDataInDB.getNote() != null)
                     shortLinkToObject.setNote(itemForChangeDataInDB.getNote());
-                toastAboutSuccessUpdateData.postValue(true);
+                EditDeleteDataActivity.mHandler.post(() ->
+                    Toast.makeText(getApplication(), getApplication().getString(R.string.data_has_been_updated),
+                                Toast.LENGTH_SHORT).show());
             } else EditDeleteDataActivity.mHandler.post(() ->
                     Toast.makeText(getApplication(), getApplication().getString(R.string.fail_attempt_about_update_data_in_result_table),
                             Toast.LENGTH_SHORT).show());

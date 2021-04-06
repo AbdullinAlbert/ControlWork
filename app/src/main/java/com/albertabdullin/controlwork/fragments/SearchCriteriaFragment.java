@@ -35,6 +35,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     public static final int SELECT_FIRMS = 1;
     public static final int SELECT_TYPES = 2;
     public static final int SELECT_PLACES = 3;
+    public static final int SELECT_RESULT_TYPES = 7;
 
     public static final int NUMBERS_VALUE = 4;
     public static final int DATES_VALUE = 5;
@@ -55,13 +56,15 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
     private View[] viewsForNumbers;
     private View[] viewsForNotes;
 
-    View.OnClickListener callPickerEmployersDF = v -> openPickerItems(SELECT_EMPLOYEES);
+    private final View.OnClickListener callPickerEmployersDF = v -> openPickerItems(SELECT_EMPLOYEES);
 
-    View.OnClickListener callPickerFirmsDF = v -> openPickerItems(SELECT_FIRMS);
+    private final View.OnClickListener callPickerFirmsDF = v -> openPickerItems(SELECT_FIRMS);
 
-    View.OnClickListener callPickerTOWDF = v -> openPickerItems(SELECT_TYPES);
+    private final View.OnClickListener callPickerTOWDF = v -> openPickerItems(SELECT_TYPES);
 
-    View.OnClickListener callPickerPOWDF = v -> openPickerItems(SELECT_PLACES);
+    private final View.OnClickListener callPickerPOWDF = v -> openPickerItems(SELECT_PLACES);
+
+    private final View.OnClickListener callPickerResultTypesDF = v -> openPickerItems(SELECT_RESULT_TYPES);
 
     protected void openPickerItems(int selectedTable) {
         PickerItemsDF pickerItemsDF = new PickerItemsDF(selectedTable);
@@ -100,7 +103,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
         final EditText selectedEmployersET = view.findViewById(R.id.select_empl_editText);
         selectedEmployersET.setOnClickListener(callPickerEmployersDF);
-        Observer<String> editTextEmployeesObserver = s -> {
+        Observer<String> editTextEmployeesObserver =  s -> {
             selectedEmployersET.setText("");
             selectedEmployersET.setText(s);
         };
@@ -126,6 +129,13 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
             selectedPoWET.setText(s);
         };
         mViewModel.getPoWEditTextLD().observe(getViewLifecycleOwner(), editTextPoWObserver);
+        final EditText selectedResultTypes = view.findViewById(R.id.select_result_type_editText);
+        selectedResultTypes.setOnClickListener(callPickerResultTypesDF);
+        Observer<String> editTextResultType = s -> {
+            selectedResultTypes.setText("");
+            selectedResultTypes.setText(s);
+        };
+        mViewModel.getResultTypeEditTextLD().observe(getViewLifecycleOwner(), editTextResultType);
         selectedDateEditText = view.findViewById(R.id.add_criteria_for_data_editText);
         setDateSearchCriteria();
         selectedNumberEditText = view.findViewById(R.id.add_criteria_for_result_editText);
@@ -134,10 +144,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         setSearchCriteriaForValuesWithoutTable(selectedNoteEditText, callPickerSignForNoteDF, NOTES_VALUE);
         Button searchButton = view.findViewById(R.id.search_button);
         setTextToSearchButton(searchButton);
-        searchButton.setOnClickListener(v -> {
-            String query = mViewModel.createQuery();
-            startViewForResult(query);
-        });
+        searchButton.setOnClickListener(v -> startViewForResult(mViewModel.createQuery()));
     }
 
     protected void setTitleForToolBar(Toolbar toolbar) {

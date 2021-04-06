@@ -86,12 +86,13 @@
     <string name="tag_for_list_of_DB_items_fragment">listDBItemsFragment tag</string>
     <string name="cannot_convert_string_to_date">Не получается конвертировать строку в дату. Покажи ошибку разработчику</string>
     <string name="thread_for_search_has_been_interrupted">Поток для поиска был прерван. Покажи ошибку разработчику</string>
-    <string name="search_criteria_for_edit_delete_data">SELECT Result._id, Employer._id, Employer.fio, Firm._id, Firm.description, TypeOfWork._id, TypeOfWork.description, PlaceOfWork._id, PlaceOfWork.description, strftime(\"%d.%m.%Y\", Result.Date, \"unixepoch\") AS Date, Result.Value, Result.Note
+    <string name="search_criteria_for_edit_delete_data">SELECT Result._id, Employer._id, Employer.fio, Firm._id, Firm.description, TypeOfWork._id, TypeOfWork.description, PlaceOfWork._id, PlaceOfWork.description, strftime(\"%d.%m.%Y\", Result.Date, \"unixepoch\") AS Date, Result.Value, Result.Note, Result.idResultType, ResultType.ResultType
         FROM Result JOIN Employer
         ON Result.IDEmployer=Employer._id
         JOIN Firm ON Firm._id=Result.IDFirm
         JOIN TypeOfWork ON TypeOfWork._id=Result.IDToW
-        JOIN PlaceOfWork ON PlaceOfWork._id=Result.IDPoW</string>
+        JOIN PlaceOfWork ON PlaceOfWork._id=Result.IDPoW
+        LEFT JOIN ResultType ON ResultType._id=Result.idResultType</string>
     <string name = "order_by_for_report">ORDER BY Employer._id, TypeOfWork._id, Result.Date</string>
     <string name="search_criteria">Критерии поиска</string>
     <string name="search_criteria_for_report">Критерии поиска для отчёта</string>
