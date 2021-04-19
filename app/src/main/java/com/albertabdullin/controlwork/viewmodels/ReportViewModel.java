@@ -20,9 +20,12 @@ import com.albertabdullin.controlwork.db_of_app.CWDBHelper;
 import com.albertabdullin.controlwork.fragments.ReportPreViewFragment;
 import com.albertabdullin.controlwork.models.ComplexEntityForDB;
 import com.albertabdullin.controlwork.models.PairOfItemPositions;
+import com.albertabdullin.controlwork.models.ResultTypeInfo;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ReportViewModel extends AndroidViewModel {
 
@@ -43,6 +46,64 @@ public class ReportViewModel extends AndroidViewModel {
     }
 
     private class LoadItemsThreadFromResultTable extends Thread {
+
+        private int employeeID = -1;
+        private int typeOfWorkID = -1;
+        private int placeOfWorkID = -1;
+        private int resultTypeID = -1;
+        private String stringViewOfResultType = "";
+        private float resultSumOfToW = 0;
+        private final Map<ResultTypeInfo, Float> totalResultOfResultType = new LinkedHashMap<>();
+        private final Map<ResultTypeInfo, Float> commonResultOfResultType = new LinkedHashMap<>();
+        private final Map<ResultTypeInfo, Float> resultTypeOfPoW = new LinkedHashMap<>();
+        private final Map<ResultTypeInfo, Float> totalResultOfToW = new LinkedHashMap<>();
+
+        private void setID(ComplexEntityForDB entityForDB) {
+            employeeID = entityForDB.getEmployerID();
+            typeOfWorkID = entityForDB.getTypeOfWorkID();
+            placeOfWorkID = entityForDB.getPlaceOfWorkID();
+            resultTypeID = entityForDB.getResultTypeID();
+            stringViewOfResultType = entityForDB.getStringViewOfResultType();
+        }
+
+        private void addResultTypeToCommonResultOfResultType() {
+            commonResultOfResultType.put(new ResultTypeInfo(resultTypeID, stringViewOfResultType), resultSumOfToW);
+        }
+
+        private void addResultsOfTypesToTotalResultMap(Map<ResultTypeInfo, Float> fromTotalResultType, Map<ResultTypeInfo, Float> toTotalResultType) {
+            for (Map.Entry<ResultTypeInfo, Float> outerEntry: fromTotalResultType.entrySet()) {
+                boolean isNeedAdd = true;
+                for (Map.Entry<ResultTypeInfo, Float> innerEntry: toTotalResultType.entrySet()) {
+                    if (outerEntry.getKey().getResultTypeID() == innerEntry.getKey().getResultTypeID()) {
+                        float sum = outerEntry.getValue() + innerEntry.getValue();
+                        toTotalResultType.put(innerEntry.getKey(), sum);
+                        isNeedAdd = false;
+                    }
+                }
+                if (isNeedAdd) toTotalResultType.put(outerEntry.getKey(), outerEntry.getValue());
+            }
+            fromTotalResultType.clear();
+        }
+
+        private void addResRows(Map<ResultTypeInfo, Float> fromTotalResultType, String towDescription, String resDescription) {
+            for (Map.Entry<ResultTypeInfo, Float> outerEntry : fromTotalResultType.entrySet()) {
+                ComplexEntityForDB helperEntity = new ComplexEntityForDB();
+                helperEntity.setResultEntity(true);
+                helperEntity.setTOWDescription(towDescription);
+                helperEntity.setTypeResultSum(outerEntry.getValue());
+                helperEntity.setStringViewOfResultType(outerEntry.getKey().getStringViewOfRT());
+                helperEntity.setResultDescription(resDescription);
+                listForWorkWithResultTableItems.add(helperEntity);
+            }
+        }
+
+        private void addToWRow(ComplexEntityForDB eDB) {
+            ComplexEntityForDB helperEntity = new ComplexEntityForDB();
+            helperEntity.setTypeOfWorkEntity(true);
+            helperEntity.setTOWDescription(eDB.getTOWDescription());
+            listForWorkWithResultTableItems.add(helperEntity);
+        }
+
         @Override
         public void run() {
             if (listForWorkWithResultTableItems.size() != 0) listForWorkWithResultTableItems.clear();
@@ -50,12 +111,14 @@ public class ReportViewModel extends AndroidViewModel {
             try (SQLiteDatabase db = cwdbHelper.getReadableDatabase();
                  Cursor cursor = db.rawQuery(mQuery, null, null)) {
                 if(cursor.moveToFirst()) {
-                    int employeeID = -1;
-                    int typeOfWorkID = -1;
-                    float resultSumOfToW = 0;
+                    ComplexEntityForDB eDB;
+                    int countOfPoW = 0;
+                    int countOfToW = 0;
+                    boolean isNeedAdd;
+                    String towDescription;
                     do {
                         byte b = 0;
-                        ComplexEntityForDB eDB = new ComplexEntityForDB();
+                        eDB = new ComplexEntityForDB();
                         eDB.setID(cursor.getInt(b++));
                         eDB.setEmployerID(cursor.getInt(b++));
                         eDB.setEmployerDescription(cursor.getString(b++));
@@ -67,35 +130,76 @@ public class ReportViewModel extends AndroidViewModel {
                         eDB.setPOWDescription(cursor.getString(b++));
                         eDB.setDate(cursor.getString(b++));
                         eDB.setResult(cursor.getFloat(b++));
-                        eDB.setNote(cursor.getString(b));
-                         if (eDB.getEmployerID() == employeeID && eDB.getTypeOfWorkID() == typeOfWorkID || listForWorkWithResultTableItems.size() == 0) {
-                            listForWorkWithResultTableItems.add(eDB);
+                        eDB.setNote(cursor.getString(b++));
+                        eDB.setResultTypeID(cursor.getInt(b++));
+                        eDB.setStringViewOfResultType(cursor.getString(b));
+                        if (eDB.getEmployerID() == employeeID && eDB.getTypeOfWorkID() == typeOfWorkID
+                           && eDB.getPlaceOfWorkID() == placeOfWorkID && eDB.getResultTypeID() == resultTypeID || listForWorkWithResultTableItems.size() == 0) {
                             resultSumOfToW += cursor.getFloat(10);
-                            employeeID = eDB.getEmployerID();
-                            typeOfWorkID = eDB.getTypeOfWorkID();
+                        } else if (eDB.getEmployerID() == employeeID && eDB.getTypeOfWorkID() == typeOfWorkID && eDB.getPlaceOfWorkID() == placeOfWorkID) {
+                            addResultTypeToCommonResultOfResultType();
+                            resultSumOfToW = cursor.getFloat(10);
+                        } else if (eDB.getEmployerID() == employeeID && eDB.getTypeOfWorkID() == typeOfWorkID) {
+                            addResultTypeToCommonResultOfResultType();
+                            addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
+                            addResRows(resultTypeOfPoW, eDB.getTOWDescription(), getApplication().getString(R.string.common_sum_on_place_of_work));
+                            addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
+                            resultSumOfToW = cursor.getFloat(10);
+                            countOfPoW++;
+                        } else if (eDB.getEmployerID() == employeeID) {
+                            addResultTypeToCommonResultOfResultType();
+                            towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
+                            if (countOfPoW > 0) {
+                                addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
+                                addResRows(resultTypeOfPoW, towDescription, getApplication().getString(R.string.common_sum_on_place_of_work));
+                                addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
+                                addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
+                                countOfPoW = 0;
+                            } else {
+                                addResultsOfTypesToTotalResultMap(commonResultOfResultType, totalResultOfToW);
+                                addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
+                            }
+                            addResultsOfTypesToTotalResultMap(totalResultOfToW, totalResultOfResultType);
+                            addToWRow(eDB);
+                            resultSumOfToW = cursor.getFloat(10);
+                            countOfToW++;
+                        } else {
+                            towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
+                            addResultTypeToCommonResultOfResultType();
+                            if (countOfPoW > 0) {
+                                addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
+                                addResRows(resultTypeOfPoW, towDescription, getApplication().getString(R.string.common_sum_on_place_of_work));
+                                addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
+                            } else addResultsOfTypesToTotalResultMap(commonResultOfResultType, totalResultOfToW);
+                            if (countOfToW > 0) addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
+                            addResultsOfTypesToTotalResultMap(totalResultOfToW, totalResultOfResultType);
+                            addResRows(totalResultOfResultType, towDescription, getApplication().getString(R.string.total_sum_on_type_of_result));
+                            countOfPoW = 0;
+                            countOfToW = 0;
+                            totalResultOfResultType.clear();
+                            resultTypeOfPoW.clear();
+                            totalResultOfToW.clear();
+                            commonResultOfResultType.clear();
+                            resultSumOfToW = cursor.getFloat(10);
+                            addToWRow(eDB);
                         }
-                        else {
-              //              if (eDB.getEmployerID() == employeeID && eDB.getTypeOfWorkID() != typeOfWorkID) {
-                                ComplexEntityForDB helperEntity = new ComplexEntityForDB();
-                                helperEntity.setResultEntity(true);
-                                helperEntity.setTypeResultSum(resultSumOfToW);
-                                helperEntity.setTOWDescription(eDB.getTOWDescription());
-                                listForWorkWithResultTableItems.add(helperEntity);
-                                helperEntity = new ComplexEntityForDB();
-                                helperEntity.setTypeOfWorkEntity(true);
-                                helperEntity.setTOWDescription(eDB.getTOWDescription());
-                                listForWorkWithResultTableItems.add(helperEntity);
-                                listForWorkWithResultTableItems.add(eDB);
-                                resultSumOfToW = cursor.getFloat(10);
-                       //     }
-                            employeeID = eDB.getEmployerID();
-                            typeOfWorkID = eDB.getTypeOfWorkID();
-                        }
+                        listForWorkWithResultTableItems.add(eDB);
+                        setID(eDB);
                     } while (cursor.moveToNext());
-                    ComplexEntityForDB helperEntity = new ComplexEntityForDB();
-                    helperEntity.setResultEntity(true);
-                    helperEntity.setTypeResultSum(resultSumOfToW);
-                    listForWorkWithResultTableItems.add(helperEntity);
+                    isNeedAdd = true;
+                    for (Map.Entry<ResultTypeInfo, Float> totalResultEntry : commonResultOfResultType.entrySet()) {
+                        if (totalResultEntry.getKey().getResultTypeID() == resultTypeID) isNeedAdd = false;
+                    }
+                    if (isNeedAdd) addResultTypeToCommonResultOfResultType();
+                    towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
+                    if (countOfPoW > 0) {
+                        addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
+                        addResRows(resultTypeOfPoW, eDB.getTOWDescription(), getApplication().getString(R.string.common_sum_on_place_of_work));
+                        addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
+                    } else addResultsOfTypesToTotalResultMap(commonResultOfResultType, totalResultOfToW);
+                    if (countOfToW > 0) addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
+                    addResultsOfTypesToTotalResultMap(totalResultOfToW, totalResultOfResultType);
+                    addResRows(totalResultOfResultType, towDescription, getApplication().getString(R.string.total_sum_on_type_of_result));
                 }
             } catch (SQLiteException e) {
                 EditDeleteDataActivity.mHandler.post(() ->
@@ -206,6 +310,17 @@ public class ReportViewModel extends AndroidViewModel {
     public String getTypeOfWorkDescriptionAtPosition(int pos) {
         if (listForWorkWithResultTableItems.get(pos).isTypeOfWorkEntity()) return listForWorkWithResultTableItems.get(pos - 1).getTOWDescription();
         return listForWorkWithResultTableItems.get(pos).getTOWDescription();
+    }
+
+    public void resetInitializeOfLiveData() {
+        visibleOfProgressBarForResultList = null;
+        visibleOfRecyclerView = null;
+        employeeEditTextForResultListLD = null;
+        firmEditTextForResultListLD = null;
+        noteEditTextForResultListLD = null;
+        stateOfRecyclerViewForResultList = null;
+        changerColorOfViewHolderLD = null;
+        pairOfItemPositions = null;
     }
 
 }

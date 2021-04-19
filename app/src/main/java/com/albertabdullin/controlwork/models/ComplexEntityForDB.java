@@ -25,6 +25,7 @@ public class ComplexEntityForDB implements Parcelable {
     private boolean mTypeResultEntity = false;
     private Float mTypeResultSum;
     private boolean mTypeOfWorkEntity = false;
+    private String mResultDescription;
 
     public ComplexEntityForDB() {}
 
@@ -192,6 +193,14 @@ public class ComplexEntityForDB implements Parcelable {
     public boolean isTypeOfWorkEntity() { return mTypeOfWorkEntity; }
 
     public void setTypeOfWorkEntity(boolean type) { mTypeOfWorkEntity = type; }
+
+    public String getResultDescription() {
+        return mResultDescription;
+    }
+
+    public void setResultDescription(String mResultDescription) {
+        this.mResultDescription = mResultDescription;
+    }
 
     @Override
     public int describeContents() {

@@ -47,7 +47,7 @@ public class ReportPreViewFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.report_preview_in_app, container, false);
+        return inflater.inflate(R.layout.fragment_report_preview_in_app, container, false);
     }
 
     @Override
@@ -69,7 +69,10 @@ public class ReportPreViewFragment extends Fragment {
         });
         toolbar.setTitle(R.string.search_result);
         toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
-        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
+        toolbar.setNavigationOnClickListener(v -> {
+            requireActivity().onBackPressed();
+            mViewModel.resetInitializeOfLiveData();
+        });
         final EditText employeeEditText = view.findViewById(R.id.editText_for_employer);
         final EditText firmEditText = view.findViewById(R.id.editText_for_firm);
         final EditText noteEditText = view.findViewById(R.id.editText_for_note);

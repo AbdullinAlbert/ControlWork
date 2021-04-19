@@ -92,8 +92,8 @@
         JOIN Firm ON Firm._id=Result.IDFirm
         JOIN TypeOfWork ON TypeOfWork._id=Result.IDToW
         JOIN PlaceOfWork ON PlaceOfWork._id=Result.IDPoW
-        LEFT JOIN ResultType ON ResultType._id=Result.idResultType</string>
-    <string name = "order_by_for_report">ORDER BY Employer._id, TypeOfWork._id, Result.Date</string>
+        LEFT JOIN ResultType ON Result.idResultType=ResultType._id</string>
+    <string name = "order_by_for_report">ORDER BY Employer._id, TypeOfWork._id, PlaceOfWork._id, ResultType._id, Result.Date</string>
     <string name="search_criteria">Критерии поиска</string>
     <string name="search_criteria_for_report">Критерии поиска для отчёта</string>
     <string name="current_month">за текущий месяц</string>
@@ -108,4 +108,7 @@
     <string name="correct_data_check">Проверка корректности данных</string>
     <string name="incorrect_data_in_result_row">Некорректные данные в строке Результат</string>
     <string name="thread_for_check_data_was_interrupted">Поток на проверку данных был прерван. Покажи ошибку разработчику</string>
+    <string name="common_sum_on_place_of_work">Общая сумма по месту работы:</string>
+    <string name="common_sum_on_type_of_work">Общая сумма по типу работы:</string>
+    <string name="total_sum_on_type_of_result">Итоговая сумма по типу рез-та:</string>
 </resources>

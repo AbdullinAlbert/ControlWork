@@ -277,47 +277,37 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     public LiveData<String> getEmployeeEditTextForEditDataLD() {
-        if (employeeEditTextForEditDataLD == null) {
-            employeeEditTextForEditDataLD = new MutableLiveData<>();
-            employeeEditTextForEditDataLD
+        if (employeeEditTextForEditDataLD == null) employeeEditTextForEditDataLD = new MutableLiveData<>();
+        employeeEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getEmployerDescription());
-        }
         return employeeEditTextForEditDataLD;
     }
 
     public LiveData<String> getFirmEditTextForEditDataLD() {
-        if (firmEditTextForEditDataLD == null) {
-            firmEditTextForEditDataLD = new MutableLiveData<>();
-            firmEditTextForEditDataLD
+        if (firmEditTextForEditDataLD == null) firmEditTextForEditDataLD = new MutableLiveData<>();
+        firmEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getFirmDescription());
-        }
         return firmEditTextForEditDataLD;
     }
 
     public LiveData<String> getPlaceOfWorkEditTextForEditDataLD() {
-        if (placeOfWorkEditTextForEditDataLD == null) {
-            placeOfWorkEditTextForEditDataLD = new MutableLiveData<>();
-            placeOfWorkEditTextForEditDataLD
+        if (placeOfWorkEditTextForEditDataLD == null) placeOfWorkEditTextForEditDataLD = new MutableLiveData<>();
+        placeOfWorkEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getPOWDescription());
-        }
         return placeOfWorkEditTextForEditDataLD;
     }
 
     public LiveData<String> getTypeOfWorkEditTextForEditDataLD() {
-        if (typeOfWorkEditTextForEditDataLD == null) {
-            typeOfWorkEditTextForEditDataLD = new MutableLiveData<>();
-            typeOfWorkEditTextForEditDataLD
+        if (typeOfWorkEditTextForEditDataLD == null) typeOfWorkEditTextForEditDataLD = new MutableLiveData<>();
+        typeOfWorkEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getTOWDescription());
-        }
         return typeOfWorkEditTextForEditDataLD;
     }
 
     public LiveData<String> getDateEditTextForEditDataLD() {
-        if (dateEditTextForEditDataLD == null) {
-            dateEditTextForEditDataLD = new MutableLiveData<>();
-            dateEditTextForEditDataLD
+        if (dateEditTextForEditDataLD == null) dateEditTextForEditDataLD = new MutableLiveData<>();
+        dateEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getDate());
-        }
         return dateEditTextForEditDataLD;
     }
 
@@ -330,11 +320,9 @@ public class EditDeleteDataVM extends AndroidViewModel implements DialogFragment
     }
 
     public LiveData<String> getResultTypeEditTextForEditDataLD() {
-        if (resultTypeEditTextForEditDataLD == null) {
-            resultTypeEditTextForEditDataLD = new MutableLiveData<>();
-            resultTypeEditTextForEditDataLD
+        if (resultTypeEditTextForEditDataLD == null) resultTypeEditTextForEditDataLD = new MutableLiveData<>();
+        resultTypeEditTextForEditDataLD
                     .setValue(listForWorkWithResultTableItems.get(pairOfItemPositions.getNewPos()).getStringViewOfResultType());
-        }
         return resultTypeEditTextForEditDataLD;
     }
 
