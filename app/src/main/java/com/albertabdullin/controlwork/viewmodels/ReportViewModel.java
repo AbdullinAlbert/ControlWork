@@ -70,7 +70,13 @@ public class ReportViewModel extends AndroidViewModel {
             commonResultOfResultType.put(new ResultTypeInfo(resultTypeID, stringViewOfResultType), resultSumOfToW);
         }
 
-        private void addResultsOfTypesToTotalResultMap(Map<ResultTypeInfo, Float> fromTotalResultType, Map<ResultTypeInfo, Float> toTotalResultType) {
+        private void transferDataFromPoWResultTypeToToWResultType(String towDescription) {
+            transferDataToCommonResultType(commonResultOfResultType, resultTypeOfPoW);
+            addResRows(resultTypeOfPoW, towDescription, getApplication().getString(R.string.common_sum_on_place_of_work));
+            transferDataToCommonResultType(resultTypeOfPoW, totalResultOfToW);
+        }
+
+        private void transferDataToCommonResultType(Map<ResultTypeInfo, Float> fromTotalResultType, Map<ResultTypeInfo, Float> toTotalResultType) {
             for (Map.Entry<ResultTypeInfo, Float> outerEntry: fromTotalResultType.entrySet()) {
                 boolean isNeedAdd = true;
                 for (Map.Entry<ResultTypeInfo, Float> innerEntry: toTotalResultType.entrySet()) {
@@ -141,39 +147,31 @@ public class ReportViewModel extends AndroidViewModel {
                             resultSumOfToW = cursor.getFloat(10);
                         } else if (eDB.getEmployerID() == employeeID && eDB.getTypeOfWorkID() == typeOfWorkID) {
                             addResultTypeToCommonResultOfResultType();
-                            addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
+                            transferDataToCommonResultType(commonResultOfResultType, resultTypeOfPoW);
                             addResRows(resultTypeOfPoW, eDB.getTOWDescription(), getApplication().getString(R.string.common_sum_on_place_of_work));
-                            addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
+                            transferDataToCommonResultType(resultTypeOfPoW, totalResultOfToW);
                             resultSumOfToW = cursor.getFloat(10);
                             countOfPoW++;
                         } else if (eDB.getEmployerID() == employeeID) {
                             addResultTypeToCommonResultOfResultType();
                             towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
                             if (countOfPoW > 0) {
-                                addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
-                                addResRows(resultTypeOfPoW, towDescription, getApplication().getString(R.string.common_sum_on_place_of_work));
-                                addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
-                                addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
+                                transferDataFromPoWResultTypeToToWResultType(towDescription);
                                 countOfPoW = 0;
-                            } else {
-                                addResultsOfTypesToTotalResultMap(commonResultOfResultType, totalResultOfToW);
-                                addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
-                            }
-                            addResultsOfTypesToTotalResultMap(totalResultOfToW, totalResultOfResultType);
+                            } else transferDataToCommonResultType(commonResultOfResultType, totalResultOfToW);
+                            addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
+                            transferDataToCommonResultType(totalResultOfToW, totalResultOfResultType);
                             addToWRow(eDB);
                             resultSumOfToW = cursor.getFloat(10);
                             countOfToW++;
                         } else {
-                            towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
                             addResultTypeToCommonResultOfResultType();
-                            if (countOfPoW > 0) {
-                                addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
-                                addResRows(resultTypeOfPoW, towDescription, getApplication().getString(R.string.common_sum_on_place_of_work));
-                                addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
-                            } else addResultsOfTypesToTotalResultMap(commonResultOfResultType, totalResultOfToW);
+                            towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
+                            if (countOfPoW > 0) transferDataFromPoWResultTypeToToWResultType(towDescription);
+                            else transferDataToCommonResultType(commonResultOfResultType, totalResultOfToW);
                             if (countOfToW > 0) addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
-                            addResultsOfTypesToTotalResultMap(totalResultOfToW, totalResultOfResultType);
-                            addResRows(totalResultOfResultType, towDescription, getApplication().getString(R.string.total_sum_on_type_of_result));
+                            transferDataToCommonResultType(totalResultOfToW, totalResultOfResultType);
+                            addResRows(totalResultOfResultType, towDescription, getApplication().getString(R.string.total_sum_on_type_of_result_short));
                             countOfPoW = 0;
                             countOfToW = 0;
                             totalResultOfResultType.clear();
@@ -192,14 +190,11 @@ public class ReportViewModel extends AndroidViewModel {
                     }
                     if (isNeedAdd) addResultTypeToCommonResultOfResultType();
                     towDescription = listForWorkWithResultTableItems.get(listForWorkWithResultTableItems.size() - 1).getTOWDescription();
-                    if (countOfPoW > 0) {
-                        addResultsOfTypesToTotalResultMap(commonResultOfResultType, resultTypeOfPoW);
-                        addResRows(resultTypeOfPoW, eDB.getTOWDescription(), getApplication().getString(R.string.common_sum_on_place_of_work));
-                        addResultsOfTypesToTotalResultMap(resultTypeOfPoW, totalResultOfToW);
-                    } else addResultsOfTypesToTotalResultMap(commonResultOfResultType, totalResultOfToW);
+                    if (countOfPoW > 0) transferDataFromPoWResultTypeToToWResultType(towDescription);
+                    else transferDataToCommonResultType(commonResultOfResultType, totalResultOfToW);
                     if (countOfToW > 0) addResRows(totalResultOfToW, towDescription, getApplication().getString(R.string.common_sum_on_type_of_work));
-                    addResultsOfTypesToTotalResultMap(totalResultOfToW, totalResultOfResultType);
-                    addResRows(totalResultOfResultType, towDescription, getApplication().getString(R.string.total_sum_on_type_of_result));
+                    transferDataToCommonResultType(totalResultOfToW, totalResultOfResultType);
+                    addResRows(totalResultOfResultType, towDescription, getApplication().getString(R.string.total_sum_on_type_of_result_short));
                 }
             } catch (SQLiteException e) {
                 EditDeleteDataActivity.mHandler.post(() ->

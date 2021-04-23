@@ -110,5 +110,6 @@
     <string name="thread_for_check_data_was_interrupted">Поток на проверку данных был прерван. Покажи ошибку разработчику</string>
     <string name="common_sum_on_place_of_work">Общая сумма по месту работы:</string>
     <string name="common_sum_on_type_of_work">Общая сумма по типу работы:</string>
-    <string name="total_sum_on_type_of_result">Итоговая сумма по типу рез-та:</string>
+    <string name="total_sum_on_type_of_result_short">Итоговая сумма по типу рез-та:</string>
+    <string name="total_sum_on_type_of_result_full">Итоговая сумма по типу результата:</string>
 </resources>
