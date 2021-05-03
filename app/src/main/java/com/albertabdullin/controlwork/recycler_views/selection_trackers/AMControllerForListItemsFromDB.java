@@ -88,6 +88,7 @@ public class AMControllerForListItemsFromDB implements ActionMode.Callback {
                 return true;
             case (R.id.action_rename_item):
                 CommonAddDataDF commonAddDataDF = new CommonAddDataDF()
+                        .setDialogFragmentAsEdit()
                         .setHint(activity.getHintForDialogFragment())
                         .setInputType(CommonAddDataDF.EditTextInputType.TEXT_PERSON_NAME)
                         .setLengthOfText(activity.getCurrentTable() == FillNewData_Activity.TABLE_OF_RESULT_TYPE

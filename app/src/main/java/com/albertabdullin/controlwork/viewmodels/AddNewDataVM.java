@@ -34,6 +34,8 @@ public class AddNewDataVM extends AndroidViewModel {
     private MutableLiveData<String> placeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfWorkEditTextLD;
     private MutableLiveData<String> typeOfResultEditTextLD;
+    private MutableLiveData<String> resultValueEditTextLD;
+    private MutableLiveData<String> noteValueEditTextLD;
     private MutableLiveData<Boolean> warningEditTextForEmployeeLD;
     private MutableLiveData<Boolean> warningTextViewForEmployeeLD;
     private MutableLiveData<Boolean> warningEditTextForFirmLD;
@@ -46,8 +48,7 @@ public class AddNewDataVM extends AndroidViewModel {
     private MutableLiveData<Boolean> warningTextViewForResultLD;
     private MutableLiveData<Boolean> warningEditTextForResultTypeLD;
     private MutableLiveData<Boolean> warningTextViewForResultTypeLD;
-    private MutableLiveData<Boolean> prepareAddButtonLD;
-    private MutableLiveData<String> changeTextAddButtonLD;
+    private MutableLiveData<Integer> prepareAddButtonLD;
     private volatile boolean correctEmployerData;
     private int employerId = -1;
     private volatile boolean correctFirmData;
@@ -59,7 +60,7 @@ public class AddNewDataVM extends AndroidViewModel {
     private volatile boolean correctResultTypeData;
     private int resultTypeId = -1;
 
-    private volatile boolean correctResultValueData;
+    private volatile boolean correctResultValueData = true;
     private Long dateForSql;
     private Float resultValueFloat;
     private String resultValueString = "";
@@ -116,14 +117,16 @@ public class AddNewDataVM extends AndroidViewModel {
                 cv.put(CWDBHelper.T_RESULT_C_RESULT_TYPE, resultTypeId);
                 resultOfInsert = db.insert(CWDBHelper.TABLE_NAME_RESULT, null, cv);
             } catch (SQLiteException e) {
-                FillNewData_Activity.handler.post(() -> Toast.makeText(getApplication(), R.string.fail_attempt_about_write_data_to_table, Toast.LENGTH_SHORT).show());
+                FillNewData_Activity.handler.post(() -> Toast.makeText(getApplication(),
+                        R.string.fail_attempt_about_write_data_to_table + ": " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
                 return;
+            } finally {
+                prepareAddButtonLD.postValue(FillNewData_Activity.ENABLED_STATE);
             }
             if (resultOfInsert != -1) {
-                prepareAddButtonLD.postValue(true);
-                placeOfWorkEditTextLD.postValue("");
-                typeOfWorkEditTextLD.postValue("");
-                typeOfResultEditTextLD.postValue("");
+                noteValueEditTextLD.postValue("");
+                resultValueEditTextLD.postValue("");
             }
             int message = resultOfInsert != -1 ? R.string.data_has_been_added : R.string.fail_attempt_about_write_data_to_table;
             FillNewData_Activity.handler.post(() ->
@@ -145,6 +148,7 @@ public class AddNewDataVM extends AndroidViewModel {
                     new String[]{Integer.toString(id)}, null, null, null)) {
                 if (cursor.moveToFirst()) ok = true;
             } catch (SQLiteException e) {
+                prepareAddButtonLD.postValue(FillNewData_Activity.ENABLED_STATE);
                 FillNewData_Activity.handler.post(() ->
                         Toast.makeText(getApplication(), R.string.fail_attempt_about_get_data_from_table + " " + tableName, Toast.LENGTH_SHORT).show());
                 ok = false;
@@ -188,7 +192,7 @@ public class AddNewDataVM extends AndroidViewModel {
         private void readResultOfCheck() {
             if (correctEmployerData && correctFirmData && correctToWData
                     && correctPoWData && correctResultValueData && correctResultTypeData) {
-                changeTextAddButtonLD.postValue(getApplication().getString(R.string.adding_data_process_is_active));
+                prepareAddButtonLD.postValue(FillNewData_Activity.DATA_ADDING_STATE);
                 AddResultDataThread addResultDataThread = new AddResultDataThread();
                 addResultDataThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 executor.execute(addResultDataThread);
@@ -218,7 +222,7 @@ public class AddNewDataVM extends AndroidViewModel {
                     warningEditTextForResultTypeLD.postValue(true);
                     warningTextViewForResultTypeLD.postValue(true);
                 }
-                prepareAddButtonLD.postValue(false);
+                prepareAddButtonLD.postValue(FillNewData_Activity.ENABLED_STATE);
                 FillNewData_Activity.handler.post(() ->
                     Toast.makeText(getApplication(), R.string.error_check_data_for_correct, Toast.LENGTH_SHORT));
             }
@@ -227,6 +231,7 @@ public class AddNewDataVM extends AndroidViewModel {
 
         @Override
         public void run() {
+            prepareAddButtonLD.postValue(FillNewData_Activity.DISABLED_STATE);
             CheckExistDataFromTableThread t1 =
                     new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_EMP, employerId);
             t1.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -244,8 +249,8 @@ public class AddNewDataVM extends AndroidViewModel {
             t4.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
             executor.execute(t4);
             CheckExistDataFromTableThread t5 =
-                    new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_RESULT_TYPE, powId);
-            t4.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    new CheckExistDataFromTableThread(latch, CWDBHelper.TABLE_NAME_RESULT_TYPE, resultTypeId);
+            t5.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
             executor.execute(t5);
             try {
                 resultValueFloat = Float.parseFloat(resultValueString);
@@ -256,6 +261,7 @@ public class AddNewDataVM extends AndroidViewModel {
             try {
                 latch.await();
             } catch (InterruptedException e) {
+                prepareAddButtonLD.postValue(FillNewData_Activity.ENABLED_STATE);
                 FillNewData_Activity.handler.post(() ->
                         Toast.makeText(getApplication(), R.string.thread_for_check_data_was_interrupted, Toast.LENGTH_SHORT).show());
                 return;
@@ -291,6 +297,16 @@ public class AddNewDataVM extends AndroidViewModel {
     public LiveData<String> getLiveDataResultTypeText() {
         if (typeOfResultEditTextLD == null) typeOfResultEditTextLD = new MutableLiveData<>();
         return typeOfResultEditTextLD;
+    }
+
+    public LiveData<String> getResultValueEditText() {
+        if (resultValueEditTextLD == null) resultValueEditTextLD = new MutableLiveData<>();
+        return resultValueEditTextLD;
+    }
+
+    public LiveData<String> getNoteValueEditText() {
+        if (noteValueEditTextLD == null) noteValueEditTextLD = new MutableLiveData<>();
+        return noteValueEditTextLD;
     }
 
     public LiveData<Boolean> getWarningEmployerETLD() {
@@ -353,14 +369,9 @@ public class AddNewDataVM extends AndroidViewModel {
         return warningTextViewForResultTypeLD;
     }
 
-    public LiveData<Boolean> getPrepareAddButton() {
+    public LiveData<Integer> getPrepareAddButton() {
         if (prepareAddButtonLD == null) prepareAddButtonLD = new MutableLiveData<>();
         return prepareAddButtonLD;
-    }
-
-    public LiveData<String> getChangeTextAddButton() {
-        if (changeTextAddButtonLD == null) changeTextAddButtonLD = new MutableLiveData<>();
-        return changeTextAddButtonLD;
     }
 
     public void getFirstItemsFromDBTables() {

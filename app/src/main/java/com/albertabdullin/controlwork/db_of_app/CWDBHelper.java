@@ -69,7 +69,8 @@ public class CWDBHelper extends SQLiteOpenHelper {
                     T_RESULT_C_ID_TOW + " INTEGER, " +
                     T_RESULT_C_DATE + " INTEGER, " +
                     T_RESULT_C_VALUE + " REAL, " +
-                    T_RESULT_C_NOTE + " TEXT);";
+                    T_RESULT_C_NOTE + " TEXT, " +
+                    T_RESULT_C_RESULT_TYPE + " INTEGER);";
     private static final String SQL_DELETE_RESULT_TABLE =
             "DROP TABLE IF EXISTS " + TABLE_NAME_RESULT + ";";
 
@@ -89,7 +90,6 @@ public class CWDBHelper extends SQLiteOpenHelper {
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion == 1) {
-            db.execSQL(SQL_CREATE_RESULT_TYPE_TABLE);
             db.execSQL("ALTER TABLE " + TABLE_NAME_RESULT + " ADD COLUMN " + T_RESULT_C_RESULT_TYPE + " INTEGER;" );
         }
     }

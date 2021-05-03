@@ -34,6 +34,7 @@ public class CommonAddDataDF extends DialogFragment {
     private TextView mEditTextAddNewData;
     private String mHint;
     private String mTextOfEditText;
+    private boolean isEditDialogFragment = false;
     private int mLengthOfText;
     private EditTextInputType mCurrentInputType;
     private InsertDataButtonClickExecutor mExecutor;
@@ -44,8 +45,7 @@ public class CommonAddDataDF extends DialogFragment {
     private final String KEY_FOR_CURRENT_INPUT_TYPE = "key for current input type";
 
     public enum EditTextInputType  {
-        TEXT_PERSON_NAME, NUMBER_DECIMAL;
-
+        TEXT_PERSON_NAME, NUMBER_DECIMAL
     }
 
     View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
@@ -130,6 +130,7 @@ public class CommonAddDataDF extends DialogFragment {
             mHelperTextView.setText(counter);
         }
         Button bAdd = view.findViewById(R.id.add_df_button);
+        if (isEditDialogFragment) bAdd.setText(getString(R.string.change));
         Button bCancel = view.findViewById(R.id.cancel_df_button);
         bAdd.setOnClickListener(v -> {
             mExecutor.executeYesButtonClick(((AppCompatActivity)requireActivity()),
@@ -197,6 +198,11 @@ public class CommonAddDataDF extends DialogFragment {
 
     public CommonAddDataDF setTextForEditText(String text) {
         mTextOfEditText = text;
+        return this;
+    }
+
+    public CommonAddDataDF setDialogFragmentAsEdit() {
+        isEditDialogFragment = true;
         return this;
     }
 

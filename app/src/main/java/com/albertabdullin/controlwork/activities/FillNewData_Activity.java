@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -20,10 +18,9 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.albertabdullin.controlwork.R;
@@ -53,6 +50,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     public static final int TABLE_OF_TYPES_OF_WORK = 2;
     public static final int TABLE_OF_PLACES_OF_WORK = 3;
     public static final int TABLE_OF_RESULT_TYPE = 4;
+    public static final int DISABLED_STATE = 0;
+    public static final int ENABLED_STATE = 1;
+    public static final int DATA_ADDING_STATE = 2;
 
     public static Handler handler = new Handler(Looper.getMainLooper());
 
@@ -111,10 +111,8 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final View.OnClickListener addDataListener = (v) -> {
+        hideKeyBoard();
         mViewModel.startToCheckCorrectData();
-        addButton.setText(getString(R.string.correct_data_check));
-        addButton.setClickable(false);
-        addButton.setForeground(null);
     };
 
     private final TextWatcher twResultValue = new TextWatcher() {
@@ -126,8 +124,7 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
             if (!mViewModel.isCorrectResultValueData()) {
                 resultValue.setBackgroundTintList(null);
                 resultValue.setTextColor(getResources().getColor(R.color.standardBlack, null));
-                TextView tv = findViewById(R.id.incorrectResultValueFocus);
-                tv.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+                findViewById(R.id.incorrectResultValueFocus).setVisibility(View.GONE);
                 mViewModel.setCorrectResultValueDataTrue();
             }
             mViewModel.setResultValueString(s.toString());
@@ -156,8 +153,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectEmployeeTV = b -> {
-        if (b) emphasizeTextView(findViewById(R.id.incorrectEmployerFocus));
-        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectEmployerFocus));
+        TextView tv = findViewById(R.id.incorrectEmployerFocus);
+        if (b) tv.setVisibility(View.VISIBLE);
+        else tv.setVisibility(View.GONE);
     };
 
     private final Observer<Boolean> observerIncorrectFirmET = (b) -> {
@@ -166,8 +164,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectFirmTV = b -> {
-        if (b) emphasizeTextView(findViewById(R.id.incorrectFirmFocus));
-        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectFirmFocus));
+        TextView tv = findViewById(R.id.incorrectFirmFocus);
+        if (b) tv.setVisibility(View.VISIBLE);
+        else tv.setVisibility(View.GONE);
     };
 
     private final Observer<Boolean> observerIncorrectToWET = (b) -> {
@@ -177,8 +176,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectToWTV = b -> {
-        if (b) emphasizeTextView(findViewById(R.id.incorrectToWFocus));
-        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectToWFocus));
+        TextView tv = findViewById(R.id.incorrectToWFocus);
+        if (b) tv.setVisibility(View.VISIBLE);
+        else tv.setVisibility(View.GONE);
     };
 
     private final Observer<Boolean> observerIncorrectPoWET = (b) -> {
@@ -187,8 +187,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectPoWTV = b -> {
-        if (b) emphasizeTextView(findViewById(R.id.incorrectPoWFocus));
-        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectPoWFocus));
+        TextView tv = findViewById(R.id.incorrectPoWFocus);
+        if (b) tv.setVisibility(View.VISIBLE);
+        else tv.setVisibility(View.GONE);
     };
 
     private final Observer<Boolean> observerIncorrectResultET = (b) -> {
@@ -197,8 +198,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectResultTV = b -> {
-        if (b) emphasizeTextView(findViewById(R.id.incorrectResultValueFocus));
-        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectResultValueFocus));
+        TextView tv = findViewById(R.id.incorrectResultValueFocus);
+        if (b) tv.setVisibility(View.VISIBLE);
+        else tv.setVisibility(View.GONE);
     };
 
     private final Observer<Boolean> observerIncorrectResultTypeET = (b) -> {
@@ -207,8 +209,9 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
     };
 
     private final Observer<Boolean> observerIncorrectResultTypeTV = b -> {
-        if (b) emphasizeTextView(findViewById(R.id.incorrectResultTypeFocus));
-        else deleteEmphasizeFromTextView(findViewById(R.id.incorrectResultTypeFocus));
+        TextView tv = findViewById(R.id.incorrectResultTypeFocus);
+        if (b) tv.setVisibility(View.VISIBLE);
+        else tv.setVisibility(View.GONE);
     };
 
     private void deleteEmphasizeFromEditText(EditText editText) {
@@ -216,36 +219,26 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         editText.setTextColor(getResources().getColor(R.color.standardBlack, null));
     }
 
-    private void deleteEmphasizeFromTextView(TextView textView) {
-        textView.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-    }
-
     private void emphasizeEditText(EditText editText) {
         editText.setBackgroundTintList(getColorStateList(R.color.highlightBorder));
         editText.setTextColor(getResources().getColor(R.color.highlightBorder, null));
     }
 
-    private void emphasizeTextView(TextView tv) {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMarginStart(12);
-        tv.setLayoutParams(lp);
-    }
-
-    Observer<Boolean> observerAddButtonForPrepare = (b) -> {
+    Observer<Integer> observerAddButtonForPrepare = (i) -> {
+        if (i == DISABLED_STATE) {
+            addButton.setText(getString(R.string.correct_data_check));
+            addButton.setEnabled(false);
+        } else if (i == ENABLED_STATE) {
             addButton.setClickable(true);
             addButton.setText("Добавить");
-            int[] attr = new int[] {android.R.attr.selectableItemBackground};
-            TypedArray typedArray = obtainStyledAttributes(attr);
-            Drawable drawableAttr = typedArray.getDrawable(0);
-            typedArray.recycle();
-            addButton.setForeground(drawableAttr);
-            if (b) {
-                resultValue.setText("");
-                note.setText("");
-            }
+            addButton.setEnabled(true);
+        } else if (i == DATA_ADDING_STATE)
+            addButton.setText(getString(R.string.adding_data_process_is_active));
     };
 
-    Observer<String> observerAddButtonChangeText = (s) -> addButton.setText(s);
+    Observer<String> resultValueEditTextObserver = (s) -> resultValue.setText(s);
+
+    Observer<String> noteValueEditTextObserver = (s) -> note.setText(s);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -257,32 +250,32 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         if (ab != null) ab.setDisplayHomeAsUpEnabled(true);
         else throw new RuntimeException("Support ActionBar равен Null");
         mViewModel = new ViewModelProvider(this, new ViewModelFactoryAddNewData(this.getApplication())).get(AddNewDataVM.class);
-        TextView tvEmp = findViewById(R.id.incorrectEmployerFocus);
-        tvEmp.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-        TextView tvFirm = findViewById(R.id.incorrectFirmFocus);
-        tvFirm.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-        TextView tvToW = findViewById(R.id.incorrectToWFocus);
-        tvToW.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-        TextView tvPoW = findViewById(R.id.incorrectPoWFocus);
-        tvPoW.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-        TextView tvRes = findViewById(R.id.incorrectResultValueFocus);
-        tvRes.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-        TextView tvResType = findViewById(R.id.incorrectResultTypeFocus);
-        tvResType.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
         addEmpl = findViewById(R.id.add_empl_editText);
-        addEmpl.setOnClickListener(v -> launchActivityForResult(TABLE_OF_EMPLOYERS));
+        addEmpl.setOnClickListener(v -> {
+            hideKeyBoard();
+            launchActivityForResult(TABLE_OF_EMPLOYERS);
+        });
         Observer<String> employerEditTextObserver = s -> addEmpl.setText(s);
         mViewModel.getLiveDataEmployerText().observe(this, employerEditTextObserver);
         addFirm = findViewById(R.id.add_firm_editText);
-        addFirm.setOnClickListener(v -> launchActivityForResult(TABLE_OF_FIRMS));
+        addFirm.setOnClickListener(v -> {
+            hideKeyBoard();
+            launchActivityForResult(TABLE_OF_FIRMS);
+        });
         Observer<String> firmEditTextObserver = s -> addFirm.setText(s);
         mViewModel.getLiveDataFirmText().observe(this, firmEditTextObserver);
         addPlaceOfWork = findViewById(R.id.add_placeOfWork_editText);
-        addPlaceOfWork.setOnClickListener(v -> launchActivityForResult(TABLE_OF_PLACES_OF_WORK));
+        addPlaceOfWork.setOnClickListener(v -> {
+            hideKeyBoard();
+            launchActivityForResult(TABLE_OF_PLACES_OF_WORK);
+        });
         Observer<String> pOWEditTextObserver = s -> addPlaceOfWork.setText(s);
         mViewModel.getLiveDataPoWText().observe(this, pOWEditTextObserver);
         addTypeOfWork = findViewById(R.id.add_typeOfWork_editText);
-        addTypeOfWork.setOnClickListener(v -> launchActivityForResult(TABLE_OF_TYPES_OF_WORK));
+        addTypeOfWork.setOnClickListener(v -> {
+            hideKeyBoard();
+            launchActivityForResult(TABLE_OF_TYPES_OF_WORK);
+        });
         Observer<String> tOWEditTextObserver = s -> addTypeOfWork.setText(s);
         mViewModel.getLiveDataToWText().observe(this, tOWEditTextObserver);
         date = findViewById(R.id.add_date_editText);
@@ -290,7 +283,10 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         resultValue = findViewById(R.id.add_result_editText);
         resultValue.addTextChangedListener(twResultValue);
         addTypeOfResult = findViewById(R.id.result_type_editText);
-        addTypeOfResult.setOnClickListener(v -> launchActivityForResult(TABLE_OF_RESULT_TYPE));
+        addTypeOfResult.setOnClickListener(v -> {
+            hideKeyBoard();
+            launchActivityForResult(TABLE_OF_RESULT_TYPE);
+        });
         Observer<String> resultTypeObserver = addTypeOfResult::setText;
         mViewModel.getLiveDataResultTypeText().observe(this, resultTypeObserver);
         note = findViewById(R.id.add_note_editText);
@@ -307,10 +303,11 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         mViewModel.getWarningPlaceOfWorkTVLD().observe(this, observerIncorrectPoWTV);
         mViewModel.getWarningResultETLD().observe(this, observerIncorrectResultET);
         mViewModel.getWarningResultTVLD().observe(this, observerIncorrectResultTV);
+        mViewModel.getResultValueEditText().observe(this, resultValueEditTextObserver);
+        mViewModel.getNoteValueEditText().observe(this, noteValueEditTextObserver);
         mViewModel.getWarningResultTypeETLD().observe(this, observerIncorrectResultTypeET);
         mViewModel.getWarningResultTypeTVLD().observe(this,  observerIncorrectResultTypeTV);
         mViewModel.getPrepareAddButton().observe(this, observerAddButtonForPrepare);
-        mViewModel.getChangeTextAddButton().observe(this, observerAddButtonChangeText);
         if (mViewModel.isFirstLaunch()) {
             date.setText(DateConverter.getStringViewOfDate(Calendar.getInstance()));
             mViewModel.setDateForSql(Calendar.getInstance().getTimeInMillis());
@@ -323,6 +320,16 @@ public class FillNewData_Activity extends AppCompatActivity implements ActivityR
         Intent intent = new Intent(FillNewData_Activity.this, ListOfDBItemsActivity.class);
         intent.putExtra(LAUNCH_DEFINITELY_DB_TABLE, i);
         launcherActivityForDB.launch(intent);
+    }
+
+    private void hideKeyBoard() {
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
+        View view = getCurrentFocus();
+        if (view != null) {
+            if (imm.isAcceptingText()) imm.hideSoftInputFromWindow(view.getWindowToken(),0);
+        } else {
+            if (imm.isActive()) imm.toggleSoftInput(0,0);
+        }
     }
 
 }
