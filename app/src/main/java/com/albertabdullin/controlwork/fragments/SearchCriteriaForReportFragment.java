@@ -57,23 +57,16 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
         }
 
         long getLongDateBegin() {
-            long date;
-            try {
-               date = DateConverter.convertStringDateToLong(mStringDateBegin);
-            } catch (ParseException parseException) {
-                throw new RuntimeException(getString(R.string.cannot_convert_string_to_date) + ": " + parseException.getMessage());
-            }
-            return date;
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(DAY_OF_MONTH, 1);
+            long fractionalPart = (calendar.getTimeInMillis()) % (86400000L);
+            return (calendar.getTimeInMillis() - fractionalPart);
         }
 
         long getLongDateEnd() {
-            long date;
-            try {
-                date = DateConverter.convertStringDateToLong(mStringDateEnd);
-            } catch (ParseException parseException) {
-                throw new RuntimeException(getString(R.string.cannot_convert_string_to_date) + ": " + parseException.getMessage());
-            }
-            return date;
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(DAY_OF_MONTH, calendar.getActualMaximum(DAY_OF_MONTH));
+            return calendar.getTimeInMillis();
         }
     }
 
