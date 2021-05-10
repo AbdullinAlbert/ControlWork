@@ -7,7 +7,8 @@
 На данный момент оно не дописано, так как в процессе разработки были придуманы новые функциональные возможности, однако содержит базовый функционал, ради которого это приложение и создавалось – а именно, на основе имеющихся данных создавать PDF-отчёты о проделанной работе.
 На первом экране представлена функция добавления общих данных: сотрудник, который выполнил работу, фирма для которой он выполнял эту работу, тип и место работы, дата, результат, тип результата и примечание.
 
-При нажатии на соответствующую строку откроется новое окно – Activity, которое покажет список всех доступных записей из соответствующей таблицы БД: сотрудник, фирма, место работы, тип работы, тип результата:
+При нажатии на соответствующую строку откроется новое окно, которое покажет список всех доступных записей из соответствующей таблицы БД: сотрудник, фирма, место работы, тип работы, тип результата:
+
 ![first gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/1.gif)
 
 На экране добавления результатов реализована ещё одна особенность: при его открытии поля сотрудник, фирма и даты автоматически заполняются значениями по умолчанию. Для строк сотрудник и фирма берутся первые значения из соответствующих таблиц БД (позже я хотел добавить настройки выбора через Shared Preference), а для строки даты – текущая дата.
@@ -18,39 +19,72 @@
 
 ![second gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/2.gif)
 
-Реализация Selection Tracker с добавлением Contextual action bar (Выбор всех элементов, переименовать или удалить запись):
+Реализация Selection Tracker с добавлением Contextual Action Bar (Выбор всех элементов, переименовать или удалить запись):
 
 ![third gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/3.gif)![fith gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/5.gif)
+
 Реализация поиска по элементам RecyclerView. Снова необязательная функция и снова технический вызов самому себе. Для этого я даже основательно изучал регулярные выражения:
-Вставить картинку 4
+
+![fourth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/4.gif)
+
 При нажатии на строку для даты открывается Material Design’s DatePicker:
-Вставить картинку 6
-Как уже писал выше, результат должен выражаться в числах, поэтому для строки результат установлен числовой ввод данных: 
-Вставить картинку 7
+
+![sixth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/6.gif)
+
+Как уже писал выше, результат должен выражаться в числах, поэтому для строки результат установлен числовой ввод данных:
+
+![seventh gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/7.gif)
+
 Перед добавлением данных в таблицу результата программа проверяет существование выбранных записей в первичных таблицах. Если выбранные записи не существуют, программа не даст записать данные в таблицу с результатами и покажет в каких строках есть несоответствие:
-Вставить картинку 8
+
+![eighth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/8.gif)
+
 Пример успешного добавления данных. Строки с результатом и примечанием очищаются:
-Вставить картинку 9
+
+![ninth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/9.gif)
+
 Далее демонстрируется раздел редактирования/удаления данных из БД. Для того, чтобы пользователю было удобно искать какие-то конкретные записи, я постарался реализовать максимально гибкую систему составления запросов. Эту же систему я использовал и для выборки данных при составлении отчётов. Пример выбора записей в «первичных» таблицах:
- Вставить картинку 10
+
+![tenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/10.gif)
+ 
 Естественно, возможность поиска среди записей я также оставил:
-Вставить картинку 11
+
+![eleventh gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/11.gif)
+
 Возможность гибкой настройки поиска среди дат, результатов и примечаний я придумывал долго. И, в конце концов, реализовал идею через динамическое добавление View-элементов. Благо в LinearLayout это несложно:
-Вставить картинку 12
+
+![twelvth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/12.gif)
+
 Забавный факт, о котором я не знал: если динамически добавленному виджету, в моем случае – EditText, не присвоить id, то при смене конфигурации он не сохраняет введенный текст. Для меня это было большим удивлением и полным непониманием почему так происходит.
+
 Пример редактирования критериев поиска:
-Вставить картинку 13 и 14
+
+![thirteenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/13.gif)![fourteenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/14.gif)
+
 Та же самая идея реализована и для результата:
-Вставить картинку 15
+
+![fifteenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/15.gif)
+
 Пример того, как программа сообщает о некорректном вводе данных для поиска:
-Вставить картинку 16
+
+![sixteenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/16.gif)
+
 Пример результата поиска по запросам для редактирования или удаления данных из таблицы результатов. Пытался сделать таблицу из RecyclerView:
-Вставить картинку 17
-Пример удаления и редактирования данных:
-Вставить картинку 18 и 21
+
+![seventeenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/17.gif)
+
+Пример удаления и редактирования данных. Все те же Selection Tracker и Contextual Action Bar :
+
+![eightteenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/18.gif)![twenty first gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/21.gif)
+
 Перед составлением PDF-отчёта удобно предварительно посмотреть полученные данные в приложении. Вот так они выглядят на данный момент:
-Вставить картинку 19
+
+![nineteenth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/19.gif)
+
 А вот так выглядит сам PDF-отчёт. Для этого я учился рисовать в Canvas. Можно сказать, что опыт создания custom-view имеется. Выборка данных, их обработка, создания PDF-документа, рисование в нем и сохранение его на внутренний диск осуществляются с помощью WorkManager:
-21
+
+![twentieth gif](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/20.gif)
+
+[сам файл](https://github.com/AbdullinAlbert/ControlWork/blob/develop/description/1620634767418.pdf)
 
 
