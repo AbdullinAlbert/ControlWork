@@ -90,12 +90,12 @@ public class CommonAddPairOfNumbersValueDF extends DialogFragment {
                 floatOfFirstNumber = Float.parseFloat(stringOfFirstNumber);
                 floatOfSecondNumber = Float.parseFloat(stringOfSecondNumber);
             } catch (NumberFormatException e) {
-                Toast toast = Toast.makeText(getContext(), "Некорректный формат чисел", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getContext(), getString(R.string.incorrect_number_format), Toast.LENGTH_SHORT);
                 toast.show();
                 return;
             }
             if (floatOfFirstNumber >= floatOfSecondNumber) {
-                Toast.makeText(getContext(), "Первое значение не меньше второго", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.second_value_must_be_over_than_first_one), Toast.LENGTH_SHORT).show();
                 return;
             }
             mExecutor.executeYesButtonClick(floatOfFirstNumber, floatOfSecondNumber);

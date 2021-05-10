@@ -148,7 +148,7 @@ public class AdapterForResultListFromQuery extends RecyclerView.Adapter<AdapterF
             if (holder.getBindingAdapterPosition() == mViewModel.getPosOfSelectedItem() || mViewModel.getPosOfSelectedItem() == -1)
                 changeColorOfItems();
         }
-        if (mSelectionTracker != null && mViewModel.getItemsCountOfST() != -1) {
+        if (mSelectionTracker != null || mViewModel.getItemsCountOfST() != -1) {
             holder.setActivatedState(mSelectionTracker.isSelected(mListOfRecyclerView.get(position)));
         } else {
             if (position == mViewModel.getPosOfSelectedItem())
