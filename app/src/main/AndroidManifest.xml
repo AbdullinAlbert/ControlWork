@@ -33,7 +33,7 @@
             />
         <activity
             android:name=".activities.ReportActivity"
-            android:label="@string/search_criteria_for_report"
+            android:label="@string/search_criteria"
             android:theme="@style/SecondAppTheme"
             android:parentActivityName=".activities.MainActivity"
             />

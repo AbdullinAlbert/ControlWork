@@ -97,13 +97,10 @@ public class PickerSignsDF extends DialogFragment implements DFPickerObservable 
         DividerItemDecoration divider = new DividerItemDecoration(rv.getContext(), DividerItemDecoration.VERTICAL);
         rv.addItemDecoration(divider);
         Button cancelButton = view.findViewById(R.id.cancel_select_items_for_search);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.clearSelectedEqualSign();
-                Dialog dialog = getDialog();
-                if (dialog != null) dialog.dismiss();
-            }
+        cancelButton.setOnClickListener(v -> {
+            mViewModel.clearSelectedEqualSign();
+            Dialog dialog = getDialog();
+            if (dialog != null) dialog.dismiss();
         });
         Button agreeButton = view.findViewById(R.id.agree_button_for_selected_items);
         agreeButton.setOnClickListener(v -> {

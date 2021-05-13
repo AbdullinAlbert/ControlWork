@@ -11,69 +11,20 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.albertabdullin.controlwork.R;
-import com.albertabdullin.controlwork.models.DateConverter;
 import com.albertabdullin.controlwork.viewmodels.MakerSearchCriteriaReportVM;
 
-import java.text.ParseException;
-import java.util.Calendar;
-
-import static java.util.Calendar.DAY_OF_MONTH;
-
-
 public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
-
-    public enum DateRange {
-        MONTH, YEAR, CERTAIN_PERIOD;
-    }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         ((MakerSearchCriteriaReportVM) mViewModel).setHasAppPermission(isGranted);
         ((MakerSearchCriteriaReportVM) mViewModel).launchCreatingReport();
     });
 
-    private class DateProvider {
-
-        String mStringDateBegin;
-        String mStringDateEnd;
-
-        DateProvider(DateRange dateRange) {
-            Calendar calendar = Calendar.getInstance();
-            switch (dateRange) {
-                case MONTH:
-                    mStringDateBegin = calendar.getActualMinimum(DAY_OF_MONTH) + ".";
-                    if (mStringDateBegin.length() == 2) mStringDateBegin = "0" + mStringDateBegin;
-                    mStringDateEnd = calendar.getActualMaximum(DAY_OF_MONTH) + ".";
-                    String monthAndYear = (calendar.get(Calendar.MONTH) + 1) + ".";
-                    if (monthAndYear.length() == 2) monthAndYear = "0" + monthAndYear;
-                    monthAndYear += calendar.get(Calendar.YEAR);
-                    mStringDateBegin += monthAndYear;
-                    mStringDateEnd += monthAndYear;
-                    break;
-                case YEAR:
-                    mStringDateBegin = "01.01." + calendar.get(Calendar.YEAR);
-                    mStringDateEnd = "31.12." + calendar.get(Calendar.YEAR);
-                    break;
-            }
-        }
-
-        long getLongDateBegin() {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(DAY_OF_MONTH, 1);
-            long fractionalPart = (calendar.getTimeInMillis()) % (86400000L);
-            return (calendar.getTimeInMillis() - fractionalPart);
-        }
-
-        long getLongDateEnd() {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(DAY_OF_MONTH, calendar.getActualMaximum(DAY_OF_MONTH));
-            return calendar.getTimeInMillis();
-        }
-    }
 
     @Override
     protected void setTitleForToolBar(Toolbar toolbar) {
-        toolbar.setTitle(R.string.search_criteria_for_report);
-        toolbar.setSubtitle(getSubTitleText());
+        toolbar.setTitle(getString(R.string.search_criteria));
+        toolbar.setSubtitle(getString(R.string.for_report));
         toolbar.inflateMenu(R.menu.show_report_preview_menu);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.show_report_preview) {
@@ -88,39 +39,6 @@ public class SearchCriteriaForReportFragment extends SearchCriteriaFragment {
         });
     }
 
-    private String getSubTitleText() {
-        switch (((MakerSearchCriteriaReportVM)mViewModel).getSelectedPeriod()) {
-            case MONTH: return getString(R.string.current_month);
-            case YEAR: return getString(R.string.current_year);
-            default: return getString(R.string.certain_period);
-        }
-    }
-
-    @Override
-    protected void setDateSearchCriteria() {
-        switch (((MakerSearchCriteriaReportVM)mViewModel).getSelectedPeriod()) {
-            case MONTH:
-                setDateSearchCriteriaForDefaultPeriod(DateRange.MONTH);
-                break;
-            case YEAR:
-                setDateSearchCriteriaForDefaultPeriod(DateRange.YEAR);
-                break;
-            case CERTAIN_PERIOD:
-                super.setDateSearchCriteria();
-        }
-
-    }
-
-    private void setDateSearchCriteriaForDefaultPeriod(DateRange dateRange) {
-        selectedDateEditText.setClickable(false);
-        selectedDateEditText.setFocusable(false);
-        if (mViewModel.isSearchCriteriaForDateNull()) {
-            DateProvider dateProvider = new DateProvider(dateRange);
-            mViewModel.addSearchCriteria(DATES_VALUE, null ,dateProvider.getLongDateBegin(), dateProvider.getLongDateEnd());
-            mViewModel.addItemToDateList(("\u2a7e" + " " + "\u2a7d"), dateProvider.mStringDateBegin, dateProvider.mStringDateEnd);
-        }
-        selectedDateEditText.setText(mViewModel.createStringViewOfDate("\u2a7e" + " " + "\u2a7d"));
-    }
 
     @Override
     protected void setTextToSearchButton(Button button) {

@@ -67,32 +67,23 @@ public class AdapterForPickIneqaulEqualSign extends RecyclerView.Adapter<Adapter
     public void onBindViewHolder(@NonNull final AdapterForPickIneqaulEqualSign.MyViewHolder holder, final int position) {
         TextView description = holder.getDescription();
         description.setText(mSigns.get(position).getSign());
-        description.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RadioButton rb = holder.getRadioButton();
-                rb.toggle();
-                if (!mPickerSignsDF.haveSelectedItem()) mPickerSignsDF.setSelectedItem();
-                if (rb.isChecked()) mVM.setSelectedEqualSign(mSelectedTypeOfValue, mSigns.get(position).getSign(), position);
-            }
+        description.setOnClickListener(v -> {
+            RadioButton rb = holder.getRadioButton();
+            rb.toggle();
+            if (!mPickerSignsDF.haveSelectedItem()) mPickerSignsDF.setSelectedItem();
+            if (rb.isChecked()) mVM.setSelectedEqualSign(mSelectedTypeOfValue, mSigns.get(position).getSign(), position);
         });
         final RadioButton rb = holder.getRadioButton();
-        rb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RadioButton rb = (RadioButton) v;
-                if (!mPickerSignsDF.haveSelectedItem()) mPickerSignsDF.setSelectedItem();
-                if (rb.isChecked()) mVM.setSelectedEqualSign(mSelectedTypeOfValue, mSigns.get(position).getSign(), position);
-            }
+        rb.setOnClickListener(v -> {
+            RadioButton rb1 = (RadioButton) v;
+            if (!mPickerSignsDF.haveSelectedItem()) mPickerSignsDF.setSelectedItem();
+            if (rb1.isChecked()) mVM.setSelectedEqualSign(mSelectedTypeOfValue, mSigns.get(position).getSign(), position);
         });
-        Observer<Integer> rbObserver = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                if (position != integer && rb.isChecked()) rb.setChecked(false);
-                else if (position == integer) {
-                    mPickerSignsDF.setSelectedItem();
-                    rb.setChecked(true);
-                }
+        Observer<Integer> rbObserver = integer -> {
+            if (position != integer && rb.isChecked()) rb.setChecked(false);
+            else if (position == integer) {
+                mPickerSignsDF.setSelectedItem();
+                rb.setChecked(true);
             }
         };
         mVM.getSelectedEqualSignLD().observe(mLifeCycleOwner, rbObserver);

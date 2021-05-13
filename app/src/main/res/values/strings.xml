@@ -95,11 +95,8 @@
         LEFT JOIN ResultType ON Result.idResultType=ResultType._id</string>
     <string name = "order_by_for_report">ORDER BY Employer._id, TypeOfWork._id, PlaceOfWork._id, ResultType._id, Result.Date</string>
     <string name="search_criteria">Критерии поиска</string>
-    <string name="search_criteria_for_report">Критерии поиска для отчёта</string>
-    <string name="current_month">за текущий месяц</string>
     <string name="report_preview">Предпросмотр отчёта</string>
-    <string name="current_year">за текущий год</string>
-    <string name="certain_period">за указанный период</string>
+    <string name="for_report">для отчёта</string>
     <string name="create_report">Создать отчёт</string>
     <string name="creating_file_error">Не получилось создать PDF-файл. Покажи ошибку разработчику:</string>
     <string name="writing_file_error">Не получилось записать данные в PDF-файл. Покажи ошибку разработчику:</string>

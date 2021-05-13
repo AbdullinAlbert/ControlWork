@@ -90,7 +90,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     protected MutableLiveData<String> stringViewOfDateLessSignLD;
     private MutableLiveData<String> stringViewOfDateEqualitySignLD;
     private MutableLiveData<String> stringViewOfDateInequalitySignLD;
-    private MutableLiveData<String> stringViewOfDateMoreAndLessSignsLD;
+    protected MutableLiveData<String> stringViewOfDateMoreAndLessSignsLD;
     private MutableLiveData<String> stringViewOfNumberEqualitySignLD;
     private MutableLiveData<String> stringViewOfNumberInequalitySignLD;
     private MutableLiveData<String> stringViewOfNumberMoreAndLessSignsLD;
@@ -115,7 +115,7 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     protected Map<String, List<Long>> searchCriteriaForDate;
     private Map<String, List<Float>> searchCriteriaForNumber;
     private Map<String, List<String>> searchCriteriaForNote;
-    private String selectedEqualSignForDate;
+    protected String selectedEqualSignForDate;
     private String selectedEqualSignForNumber;
     private String selectedEqualSignForNote;
     private String mCommonSelectedSign;
@@ -198,92 +198,92 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
     }
 
     public LiveData<Boolean> getSelectedCheckBoxesLD() {
-        if(selectedCheckBoxesLD == null) selectedCheckBoxesLD = new MutableLiveData<>();
+        if (selectedCheckBoxesLD == null) selectedCheckBoxesLD = new MutableLiveData<>();
         return selectedCheckBoxesLD;
     }
 
     public LiveData<Integer> getSelectedEqualSignLD() {
-        if(selectedEqualSignRadioButtonLD == null) selectedEqualSignRadioButtonLD = new MutableLiveData<>();
+        if (selectedEqualSignRadioButtonLD == null) selectedEqualSignRadioButtonLD = new MutableLiveData<>();
         return selectedEqualSignRadioButtonLD;
     }
 
     public LiveData<String> getStringViewOfDateMoreSignLD() {
-        if(stringViewOfDateMoreSignLD == null) stringViewOfDateMoreSignLD = new MutableLiveData<>();
+        if (stringViewOfDateMoreSignLD == null) stringViewOfDateMoreSignLD = new MutableLiveData<>();
         return stringViewOfDateMoreSignLD;
     }
 
     public LiveData<String> getStringViewOfDateLessSignLD() {
-        if(stringViewOfDateLessSignLD == null) stringViewOfDateLessSignLD = new MutableLiveData<>();
+        if (stringViewOfDateLessSignLD == null) stringViewOfDateLessSignLD = new MutableLiveData<>();
         return stringViewOfDateLessSignLD;
     }
 
     public LiveData<String> getStringViewOfDateEqualitySignLD() {
-        if(stringViewOfDateEqualitySignLD == null) stringViewOfDateEqualitySignLD = new MutableLiveData<>();
+        if (stringViewOfDateEqualitySignLD == null) stringViewOfDateEqualitySignLD = new MutableLiveData<>();
         return stringViewOfDateEqualitySignLD;
     }
 
     public LiveData<String> getStringViewOfDateInequalitySignLD() {
-        if(stringViewOfDateInequalitySignLD == null) stringViewOfDateInequalitySignLD = new MutableLiveData<>();
+        if (stringViewOfDateInequalitySignLD == null) stringViewOfDateInequalitySignLD = new MutableLiveData<>();
         return stringViewOfDateInequalitySignLD;
     }
 
     public LiveData<String> getStringViewOfDateMoreAndLessSignsLD() {
-        if(stringViewOfDateMoreAndLessSignsLD == null) stringViewOfDateMoreAndLessSignsLD = new MutableLiveData<>();
+        if (stringViewOfDateMoreAndLessSignsLD == null) stringViewOfDateMoreAndLessSignsLD = new MutableLiveData<>();
         return stringViewOfDateMoreAndLessSignsLD;
     }
 
     public LiveData<String> getStringViewOfNumberEqualitySignLD() {
-        if(stringViewOfNumberEqualitySignLD == null) stringViewOfNumberEqualitySignLD = new MutableLiveData<>();
+        if (stringViewOfNumberEqualitySignLD == null) stringViewOfNumberEqualitySignLD = new MutableLiveData<>();
         return stringViewOfNumberEqualitySignLD;
     }
 
     public LiveData<String> getStringViewOfNumberInequalitySignLD() {
-        if(stringViewOfNumberInequalitySignLD == null) stringViewOfNumberInequalitySignLD = new MutableLiveData<>();
+        if (stringViewOfNumberInequalitySignLD == null) stringViewOfNumberInequalitySignLD = new MutableLiveData<>();
         return stringViewOfNumberInequalitySignLD;
     }
 
     public LiveData<String> getStringViewOfNumberMoreAndLessSignsLD() {
-        if(stringViewOfNumberMoreAndLessSignsLD == null) stringViewOfNumberMoreAndLessSignsLD = new MutableLiveData<>();
+        if (stringViewOfNumberMoreAndLessSignsLD == null) stringViewOfNumberMoreAndLessSignsLD = new MutableLiveData<>();
         return stringViewOfNumberMoreAndLessSignsLD;
     }
 
     public LiveData<String> getStringViewOfNoteEqualitySignLD() {
-        if(stringViewOfNoteEqualitySignLD == null) stringViewOfNoteEqualitySignLD = new MutableLiveData<>();
+        if (stringViewOfNoteEqualitySignLD == null) stringViewOfNoteEqualitySignLD = new MutableLiveData<>();
         return stringViewOfNoteEqualitySignLD;
     }
 
     public LiveData<String> getStringViewOfNoteInequalitySignLD() {
-        if(stringViewOfNoteInequalitySignLD == null) stringViewOfNoteInequalitySignLD = new MutableLiveData<>();
+        if (stringViewOfNoteInequalitySignLD == null) stringViewOfNoteInequalitySignLD = new MutableLiveData<>();
         return stringViewOfNoteInequalitySignLD;
     }
 
     public LiveData<Integer> getAdapterListOfOneDateForEqualitySignLD() {
-        if(adapterListOfOneDateForEqualitySignLD == null) adapterListOfOneDateForEqualitySignLD = new MutableLiveData<>();
+        if (adapterListOfOneDateForEqualitySignLD == null) adapterListOfOneDateForEqualitySignLD = new MutableLiveData<>();
         return adapterListOfOneDateForEqualitySignLD;
     }
 
     public LiveData<Integer> getAdapterListOfOneDateForInequalitySignLD() {
-        if(adapterListOfOneDateForInequalitySignLD == null) adapterListOfOneDateForInequalitySignLD = new MutableLiveData<>();
+        if (adapterListOfOneDateForInequalitySignLD == null) adapterListOfOneDateForInequalitySignLD = new MutableLiveData<>();
         return adapterListOfOneDateForInequalitySignLD;
     }
 
     public LiveData<Integer> getAdapterListOfRangeOfDatesForMoreAndLessSignsLD() {
-        if(adapterListOfRangeOfDatesForMoreAndLessSignsLD == null) adapterListOfRangeOfDatesForMoreAndLessSignsLD = new MutableLiveData<>();
+        if (adapterListOfRangeOfDatesForMoreAndLessSignsLD == null) adapterListOfRangeOfDatesForMoreAndLessSignsLD = new MutableLiveData<>();
         return adapterListOfRangeOfDatesForMoreAndLessSignsLD;
     }
 
     public LiveData<Integer> getAdapterListOfOneNumberForEqualitySignLD() {
-        if(adapterListOfOneNumberForEqualitySignLD == null) adapterListOfOneNumberForEqualitySignLD = new MutableLiveData<>();
+        if (adapterListOfOneNumberForEqualitySignLD == null) adapterListOfOneNumberForEqualitySignLD = new MutableLiveData<>();
         return adapterListOfOneNumberForEqualitySignLD;
     }
 
     public LiveData<Integer> getAdapterListOfOneNumberForInequalitySignLD() {
-        if(adapterListOfOneNumberForInequalitySignLD == null) adapterListOfOneNumberForInequalitySignLD = new MutableLiveData<>();
+        if (adapterListOfOneNumberForInequalitySignLD == null) adapterListOfOneNumberForInequalitySignLD = new MutableLiveData<>();
         return adapterListOfOneNumberForInequalitySignLD;
     }
 
     public LiveData<Integer> getAdapterListOfRangeOfNumbersForMoreAndLessSignsLD() {
-        if(adapterListOfRangeOfNumbersForMoreAndLessSignsLD == null) adapterListOfRangeOfNumbersForMoreAndLessSignsLD = new MutableLiveData<>();
+        if (adapterListOfRangeOfNumbersForMoreAndLessSignsLD == null) adapterListOfRangeOfNumbersForMoreAndLessSignsLD = new MutableLiveData<>();
         return adapterListOfRangeOfNumbersForMoreAndLessSignsLD;
     }
 
@@ -991,7 +991,8 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
         switch (selectedTypeOfValue) {
             case SearchCriteriaFragment.DATES_VALUE:
                 if (selectedEqualSignsListForDate == null) selectedEqualSignsListForDate = new ArrayList<>();
-                selectedEqualSignsListForDate.add(availableOrderedEqualSignsListForDate.remove(selectedEqualSignForDate));
+                selectedEqualSignsListForDate.add(getAvailableOrderedEqualSignsListForDate(selectedTypeOfValue)
+                        .remove(selectedEqualSignForDate));
                 break;
             case SearchCriteriaFragment.NUMBERS_VALUE:
                 if (selectedEqualSignsListForNumber == null) selectedEqualSignsListForNumber = new ArrayList<>();
@@ -1289,10 +1290,6 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
             store.remove(key);
     }
 
-    public boolean isSearchCriteriaForDateNull() {
-       return searchCriteriaForDate == null;
-    }
-
     public <T> void addSearchCriteria(int selectedTypeOfValue, Integer selectedPositionOfSign, T value1, T value2) {
         String key;
         switch(selectedTypeOfValue) {
@@ -1424,6 +1421,9 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 stringViewOfDateInequalitySignLD.setValue(value);
                 break;
             case ("\u2a7e" + " " + "\u2a7d"):
+                if (stringViewOfDateMoreAndLessSignsLD == null) {
+                    stringViewOfDateMoreAndLessSignsLD = new MutableLiveData<>();
+                }
                 stringViewOfDateMoreAndLessSignsLD.setValue(value);
                 break;
             default:
@@ -1556,8 +1556,10 @@ public class MakerSearchCriteriaVM extends AndroidViewModel implements DialogFra
                 break;
             case ("\u2a7e" + " " + "\u2a7d"):
                 getAdapterListOfCurrentSignForDate(sign).add(date1 + " - " + date2);
-                if (adapterListOfRangeOfDatesForMoreAndLessSignsLD != null)
-                    adapterListOfRangeOfDatesForMoreAndLessSignsLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
+                if (adapterListOfRangeOfDatesForMoreAndLessSignsLD == null) {
+                    adapterListOfRangeOfDatesForMoreAndLessSignsLD = new MutableLiveData<>();
+                }
+                adapterListOfRangeOfDatesForMoreAndLessSignsLD.setValue(AddItemOfTypeOfValuesToListDF.ADD_ITEM_TO_LIST);
                 break;
             default:
                 throw new RuntimeException("Опечатка в константах. Метод addItemToDateList(String sign, String date1, String date2). sign -" + sign);

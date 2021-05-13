@@ -43,8 +43,6 @@ public class ReportActivity extends AppCompatActivity implements ProviderOfHolde
         setContentView(R.layout.activity_monthly_report);
         mViewModel = new ViewModelProvider(this,
                 new ViewModelFactoryMakerSearchCriteriaReport(this.getApplication())).get(MakerSearchCriteriaReportVM.class);
-        ((MakerSearchCriteriaReportVM)mViewModel).setSelectedPeriod(
-                (SearchCriteriaForReportFragment.DateRange) getIntent().getSerializableExtra(MainActivity.KEY_FOR_REPORT_PERIOD));
         ReportPreViewFragment reportPreViewFragment = (ReportPreViewFragment) getSupportFragmentManager()
                 .findFragmentByTag(getString(R.string.tag_report_preview_fragment));
         mSearchCriteriaForReportFragment = (SearchCriteriaForReportFragment) getSupportFragmentManager()

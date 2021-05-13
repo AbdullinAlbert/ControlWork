@@ -137,7 +137,7 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
         };
         mViewModel.getResultTypeEditTextLD().observe(getViewLifecycleOwner(), editTextResultType);
         selectedDateEditText = view.findViewById(R.id.add_criteria_for_data_editText);
-        setDateSearchCriteria();
+        setSearchCriteriaForValuesWithoutTable(selectedDateEditText, callPickerSignForDateDF, DATES_VALUE);
         selectedNumberEditText = view.findViewById(R.id.add_criteria_for_result_editText);
         setSearchCriteriaForValuesWithoutTable(selectedNumberEditText, callPickerSignForNumberDF, NUMBERS_VALUE);
         selectedNoteEditText = view.findViewById(R.id.add_criteria_for_note_edit_text);
@@ -149,10 +149,6 @@ public class SearchCriteriaFragment extends Fragment implements DFPickerObserver
 
     protected void setTitleForToolBar(Toolbar toolbar) {
         toolbar.setTitle(R.string.search_criteria);
-    }
-    
-    protected void setDateSearchCriteria() {
-        setSearchCriteriaForValuesWithoutTable(selectedDateEditText, callPickerSignForDateDF, DATES_VALUE);
     }
 
     protected void startViewForResult(String query) {

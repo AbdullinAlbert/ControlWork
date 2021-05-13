@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
